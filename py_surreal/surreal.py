@@ -1,9 +1,7 @@
-import json
-from datetime import datetime
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, Union
 
-from py_surreal.http_client import HttpClient
 from py_surreal.const import ENCODING, to_db_result, DbResult, AuthResult, to_auth_result, get_uuid
+from py_surreal.http_client import HttpClient
 
 
 class Surreal:
@@ -51,16 +49,53 @@ class Surreal:
         ns = namespace or self.namespace
         db = database or self.database
         body = {"ns": ns, "db": db, "user": user, "pass": password}
-        _, text = self._check(self._simple_post("signin", body))
+        _, text = self._check(self._simple_request("POST", "signin", body))
         return to_auth_result(text)
 
-    def new_record_at(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> DbResult:
-        body = data if not record_id else {"id": get_uuid(), **data}
-        _, text = self._check(self._simple_post(f"key/{table_name}", body))
+    def new_record_at(self, table_name: str, data: Dict, record_id: Optional[str] = None,
+                      db_generated_id: bool = False) -> DbResult:
+        if record_id is None:
+            if db_generated_id:
+                url = f"key/{table_name}"
+            else:
+                _id = get_uuid()
+                url = f"key/{table_name}/{_id}"
+        else:
+            url = f"key/{table_name}/{record_id}"
+        _, text = self._check(self._simple_request("POST", url, data))
         return to_db_result(text)
 
     def change_all_at(self, table_name: str, data: Dict) -> DbResult:
-        _, text = self._check(self._simple_put(f"key/{table_name}", data))
+        _, text = self._check(self._simple_request("PUT", f"key/{table_name}", data))
+        return to_db_result(text)
+
+    def change_record_at(self, table_name: str, data: Dict, record_id: str) -> DbResult:
+        _, text = self._check(self._simple_request("PUT", f"key/{table_name}/{record_id}", data))
+        return to_db_result(text)
+
+    def delete_all_at(self, table_name: str) -> DbResult:
+        _, text = self._check(self._simple_request("DELETE", f"key/{table_name}", {}))
+        return to_db_result(text)
+
+    def delete_record_at(self, table_name: str, record_id: str) -> DbResult:
+        _, text = self._check(self._simple_request("DELETE", f"key/{table_name}/{record_id}", {}))
+        return to_db_result(text)
+
+    def patch_all_at(self, table_name: str, data: Dict) -> DbResult:
+        _, text = self._check(self._simple_request("PATCH", f"key/{table_name}", data))
+        return to_db_result(text)
+
+    def patch_record_at(self, table_name: str, data: Dict, record_id: str) -> DbResult:
+        _, text = self._check(self._simple_request("PATCH", f"key/{table_name}/{record_id}", data))
+        return to_db_result(text)
+
+    def query(self, query: str) -> DbResult:
+        _, text = self._check(self._simple_request("POST", "sql", query, not_json=True))
+        return to_db_result(text)
+
+    def import_data(self, path) -> DbResult:
+        file = open(path, 'rb')
+        _, text = self._check(self._simple_request("POST", "import", file.read().decode(ENCODING), not_json=True))
         return to_db_result(text)
 
     def _simple_get(self, endpoint: str) -> Tuple[int, str]:
@@ -68,13 +103,8 @@ class Surreal:
             status, text = resp.status, resp.read().decode(ENCODING)
             return status, text
 
-    def _simple_post(self, endpoint: str, data: Dict) -> Tuple[int, str]:
-        with self.http_client.post(data, endpoint) as resp:
-            status, text = resp.status, resp.read().decode(ENCODING)
-            return status, text
-
-    def _simple_put(self, endpoint: str, data: Dict) -> Tuple[int, str]:
-        with self.http_client.put(data, endpoint) as resp:
+    def _simple_request(self, method, endpoint: str, data: Union[Dict, str], not_json: bool = False) -> Tuple[int, str]:
+        with self.http_client.request(method, data, endpoint, not_json) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
             return status, text
 
@@ -92,14 +122,19 @@ if __name__ == '__main__':
     print(sur.health())
     print(sur.version())
     print(sur.all_records_at("article"))
-    print(sur.record_by_id("article2", "fbk43xn5vdb026hdscnz"))
-    print(sur.signin("root", "root"))
-    dt = {'created_at': str(datetime.now()),
-          'author': 'author:john',
-          'title': 'Lorem ipsum dolor13',
-          'text': 'Donec eleifend, nunc vitae commodo accumsan, mauris est fringilla.'}
-    print(sur.new_record_at("article", dt))
-    dt = {'created_at': str(datetime.now()),
-          'author': 'author:john',
-          'title': 'New title', }
-    print(sur.change_all_at("article", dt))
+    print(sur.import_data("test.surql"))
+    # print(sur.record_by_id("article", "8bd7423c-921a-4ff1-a6a2-b8bfe098db39"))
+    # print(sur.signin("root", "root"))
+    # dt = {'created_at': str(datetime.now()),
+    #       'author': 'author:john',
+    #       'title': 'Lorem ipsum doloqwewqer13',
+    #       'text': 'Donec eleifend, nunc vitae commodo accumsan, mauris est fringilla.'}
+    # print(sur.new_record_at("article", dt))
+    # dt = {'created_at': str(datetime.now()),
+    #       'author': 'author:john',
+    #       'title': 'New title', }
+    # print(sur.change_record_at("article", dt, "8bd7423c-921a-4ff1-a6a2-b8bfe098db39"))
+    # dt = {'new_field': 'New title', }
+    # print(sur.patch_record_at("article", dt, '8bd7423c-921a-4ff1-a6a2-b8bfe098db39'))
+    # print(sur.delete_record_at("article", '8bd7423c-921a-4ff1-a6a2-b8bfe098db39'))
+    # print(sur.query("select * from article;"))

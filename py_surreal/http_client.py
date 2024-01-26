@@ -3,10 +3,10 @@ import json
 import urllib.parse
 import urllib.request
 from http.client import HTTPResponse
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-ENCODING = "UTF-8"
+from .const import ENCODING
 
 
 class HttpClient:
@@ -23,22 +23,28 @@ class HttpClient:
             self._headers["Authorization"] = f"Basic {base64string.decode(ENCODING)}"
 
     def get(self, path: str = '') -> HTTPResponse:
-        return self._req("GET", None, path)
+        return self.request("GET", None, path)
 
-    def post(self, data: Dict, path: str = '', ) -> HTTPResponse:
-        return self._req("POST", data, path)
+    def post(self, data: Dict, path: str = '') -> HTTPResponse:
+        return self.request("POST", data, path)
 
-    def put(self, data: Dict, path: str = '', ) -> HTTPResponse:
-        return self._req("PUT", data, path)
+    def put(self, data: Dict, path: str = '') -> HTTPResponse:
+        return self.request("PUT", data, path)
 
-    def _req(self, method: str, data: Optional[Dict], path: str = '') -> HTTPResponse:
+    def patch(self, data: Dict, path: str = '') -> HTTPResponse:
+        return self.request("PATCH", data, path)
+
+    def request(self, method: str, data: Optional[Union[Dict, str]], path: str = '',
+                not_json: bool = False) -> HTTPResponse:
         response = None
         url = f'{self._base_url}{path}'
         try:
             if method == "GET":
                 req = urllib.request.Request(url, headers=self._headers)
+            elif method == "DELETE":
+                req = urllib.request.Request(url, method=method, headers=self._headers)
             else:
-                js = json.dumps(data).encode(ENCODING)
+                js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
                 req = urllib.request.Request(url, method=method, headers=self._headers, data=js)
             response = urllib.request.urlopen(req, timeout=self.timeout)
             return response
@@ -48,14 +54,3 @@ class HttpClient:
             if response:
                 response.close()
             raise ValueError(f"Error on connecting to '{url}'")
-
-
-if __name__ == '__main__':
-    client = HttpClient("http://127.0.0.1:8000/",
-                        headers={"NS": "test", "DB": "test"},
-                        credentials=('root', 'root'))
-    resp = client.post({"ns": "test", "db": "test", "user": "root", "pass": "root"}, 'signin')
-    print(resp.getcode())
-    print(resp.length)
-    print(resp.read().decode(ENCODING))
-    resp.close()
