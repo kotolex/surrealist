@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
 from .const import ENCODING
+from .errors import HttpClientError
 
 
 class HttpClient:
@@ -38,14 +39,12 @@ class HttpClient:
                 not_json: bool = False) -> HTTPResponse:
         response = None
         url = f'{self._base_url}{path}'
+        options = {'method': method, 'headers': self._headers}
+        if method not in ("GET", "DELETE"):
+            js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
+            options['data'] = js
         try:
-            if method == "GET":
-                req = urllib.request.Request(url, headers=self._headers)
-            elif method == "DELETE":
-                req = urllib.request.Request(url, method=method, headers=self._headers)
-            else:
-                js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
-                req = urllib.request.Request(url, method=method, headers=self._headers, data=js)
+            req = urllib.request.Request(url, **options)
             response = urllib.request.urlopen(req, timeout=self.timeout)
             return response
         except HTTPError as e:
@@ -53,4 +52,4 @@ class HttpClient:
         except URLError:
             if response:
                 response.close()
-            raise ValueError(f"Error on connecting to '{url}'")
+            raise HttpClientError(f"Error on connecting to '{url}'")
