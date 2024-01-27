@@ -6,7 +6,7 @@ from typing import Optional, Tuple, Dict
 import websocket
 from collections import deque
 
-from py_surreal.const import DbError, ws_message_to_result, Result
+from py_surreal.utils import ws_message_to_result, Result
 
 
 def wait_until(predicate, timeout, period=0.25):
@@ -18,9 +18,9 @@ def wait_until(predicate, timeout, period=0.25):
     return False
 
 
-def raise_on_wait(predicate, timeout):
+def raise_on_wait(predicate, timeout, error_text):
     if not wait_until(predicate, timeout):
-        raise ValueError(f"Not connected during timeout {timeout} seconds")
+        raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
 
 
 class WebSocketClient:
@@ -40,7 +40,7 @@ class WebSocketClient:
         self.database = None
         thread = threading.Thread(target=self.run, daemon=True)
         thread.start()
-        raise_on_wait(lambda: self.connected is True, timeout=timeout)
+        raise_on_wait(lambda: self.connected is True, timeout=timeout, error_text=f"Not connected to {self._base_url}")
         self.queue = deque()
         self.num = 1
         if headers:
@@ -112,7 +112,7 @@ class WebSocketClient:
         return ws_message_to_result(res)
 
     def _get_by_id(self, id_):
-        raise_on_wait(lambda: len(self.queue) > 0, timeout=self.timeout)
+        raise_on_wait(lambda: len(self.queue) > 0, timeout=self.timeout, error_text="No messages received")
         a_list = [json.loads(e) for e in list(self.queue)]
         self.queue.clear()
         found = [e for e in a_list if e["id"] == id_]

@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 from py_surreal.surreal import Surreal
 from py_surreal.errors import SurrealConnectionError
-from py_surreal.const import (to_auth_result, to_db_result, ws_message_to_result, DbResult, AuthResult, DbError,
+from py_surreal.utils import (to_auth_result, to_db_result, ws_message_to_result, DbResult, AuthResult, DbError,
                               DbSimpleResult)
 
 

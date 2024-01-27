@@ -6,7 +6,7 @@ from http.client import HTTPResponse
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from .const import ENCODING
+from .utils import ENCODING
 from .errors import HttpClientError
 
 
@@ -48,8 +48,11 @@ class HttpClient:
             response = urllib.request.urlopen(req, timeout=self.timeout)
             return response
         except HTTPError as e:
-            return e.fp
+            if response:
+                response.close()
+            return e
         except URLError:
             if response:
                 response.close()
             raise HttpClientError(f"Error on connecting to '{url}'")
+

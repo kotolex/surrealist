@@ -1,0 +1,125 @@
+-- ------------------------------
+-- OPTION
+-- ------------------------------
+
+OPTION IMPORT;
+
+-- ------------------------------
+-- USERS
+-- ------------------------------
+
+DEFINE USER user_db ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$r0WZbChRcgQfo7al04w4/A$5M269E59tSqYkHWJJVZT9ebXTFejFiHtgRvs9SggYtc' ROLES VIEWER COMMENT 'test user';
+
+-- ------------------------------
+-- SCOPES
+-- ------------------------------
+
+DEFINE SCOPE user_scope SESSION 1d SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));
+
+-- ------------------------------
+-- TABLE: article
+-- ------------------------------
+
+DEFINE TABLE article SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: artist
+-- ------------------------------
+
+DEFINE TABLE artist SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: author
+-- ------------------------------
+
+DEFINE TABLE author SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: create
+-- ------------------------------
+
+DEFINE TABLE create SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: person
+-- ------------------------------
+
+DEFINE TABLE person SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: product
+-- ------------------------------
+
+DEFINE TABLE product SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: temperature
+-- ------------------------------
+
+DEFINE TABLE temperature SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: violet
+-- ------------------------------
+
+DEFINE TABLE violet SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TRANSACTION
+-- ------------------------------
+
+BEGIN TRANSACTION;
+
+-- ------------------------------
+-- TABLE DATA: article
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: artist
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: author
+-- ------------------------------
+
+UPDATE author:john CONTENT { admin: true, age: 29, id: author:john, name: { first: 'John', full: 'John Adams', last: 'Adams' }, signup_at: '2024-01-24T10:17:45.235134Z' };
+UPDATE author:lex CONTENT { admin: true, age: 42, id: author:lex, name: { first: 'Lex', full: 'Lex Draven', last: 'Draven' }, signup_at: '2024-01-24T10:48:16.218534Z' };
+
+-- ------------------------------
+-- TABLE DATA: create
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: person
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: product
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: temperature
+-- ------------------------------
+
+UPDATE temperature:⟨018d46d7-9eff-72fc-9df0-96ac142b1459⟩ CONTENT { celsius: 37.5f, id: temperature:⟨018d46d7-9eff-72fc-9df0-96ac142b1459⟩, time: '2024-01-26T17:35:52.575768Z' };
+UPDATE temperature:01HN3DF7QZNJYP899DQH2YAXWZ CONTENT { celsius: 37.5f, id: temperature:01HN3DF7QZNJYP899DQH2YAXWZ, time: '2024-01-26T17:35:52.575578Z' };
+UPDATE temperature:xqy0bwas6xvi5s2ee6j2 CONTENT { celsius: 37.5f, id: temperature:xqy0bwas6xvi5s2ee6j2, time: '2024-01-26T17:35:52.572435Z' };
+
+-- ------------------------------
+-- TABLE DATA: violet
+-- ------------------------------
+
+UPDATE violet:79ume790etn3ibt22933 CONTENT { accessed_date: <future> { time::now() }, id: violet:79ume790etn3ibt22933 };
+UPDATE violet:bsrx1nzm3053jlr3hxvs CONTENT { id: violet:bsrx1nzm3053jlr3hxvs };
+
+-- ------------------------------
+-- TRANSACTION
+-- ------------------------------
+
+COMMIT TRANSACTION;
+

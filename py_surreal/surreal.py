@@ -23,14 +23,3 @@ class Surreal:
     def close(self):
         self.connection.close()
         del self.connection
-
-
-if __name__ == '__main__':
-    sur = Surreal("http://127.0.0.1:8000/", "test", "test", credentials=('root', 'root'), use_http=True)
-    sur = sur.connect()
-    print(sur.is_ready())
-    print(sur.status())
-    print(sur.health())
-    print(sur.version())
-    print(sur.select("article", "fbk43xn5vdb026hdscnz"))
-    print(sur.select("article"))

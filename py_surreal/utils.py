@@ -1,9 +1,13 @@
 import dataclasses
 import json
 import uuid
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Tuple
+
+from py_surreal.errors import HttpConnectionError
 
 ENCODING = "UTF-8"
+OK = "OK"
+DEFAULT_TIMEOUT = 5
 
 
 @dataclasses.dataclass
@@ -57,5 +61,8 @@ def ws_message_to_result(message: Dict) -> Result:
     return DbSimpleResult(message['id'], message['result'])
 
 
-def get_uuid():
-    return str(uuid.uuid4())
+def raise_if_not_http_ok(result: Tuple[int, str]):
+    status, text = result
+    if status != 200:
+        raise HttpConnectionError(f"Status code is {status}, check your data! Info:\n{text}")
+    return result
