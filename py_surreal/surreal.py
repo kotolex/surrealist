@@ -6,13 +6,13 @@ from py_surreal.http_client import HttpClient
 
 class Surreal:
     def __init__(self, url: str, namespace: str, database: str, credentials: Tuple[str, str] = None,
-                 use_http: bool = True):
+                 use_http: bool = True, timeout: int = 5):
         client = HttpClient if use_http else list  # ws_client here
         self.namespace = namespace
         self.database = database
         hs = {"NS": namespace, "DB": database}
-        self.client = client(url, headers=hs, credentials=credentials)
-        self.http_client = HttpClient(url, headers=hs, credentials=credentials)
+        self.client = client(url, headers=hs, credentials=credentials, timeout=timeout)
+        self.http_client = HttpClient(url, headers=hs, credentials=credentials, timeout=timeout)
 
     def is_ready(self) -> bool:
         return self.status() == "OK"
@@ -116,25 +116,8 @@ class Surreal:
 
 
 if __name__ == '__main__':
-    sur = Surreal("http://127.0.0.1:8000/", "test", "test", credentials=('root', 'root'))
+    sur = Surreal("http://127.0.0.1:8000/", "test", "test", credentials=('root', 'root'), use_http=False)
     print(sur.is_ready())
     print(sur.status())
     print(sur.health())
     print(sur.version())
-    print(sur.all_records_at("article"))
-    print(sur.import_data("test.surql"))
-    # print(sur.record_by_id("article", "8bd7423c-921a-4ff1-a6a2-b8bfe098db39"))
-    # print(sur.signin("root", "root"))
-    # dt = {'created_at': str(datetime.now()),
-    #       'author': 'author:john',
-    #       'title': 'Lorem ipsum doloqwewqer13',
-    #       'text': 'Donec eleifend, nunc vitae commodo accumsan, mauris est fringilla.'}
-    # print(sur.new_record_at("article", dt))
-    # dt = {'created_at': str(datetime.now()),
-    #       'author': 'author:john',
-    #       'title': 'New title', }
-    # print(sur.change_record_at("article", dt, "8bd7423c-921a-4ff1-a6a2-b8bfe098db39"))
-    # dt = {'new_field': 'New title', }
-    # print(sur.patch_record_at("article", dt, '8bd7423c-921a-4ff1-a6a2-b8bfe098db39'))
-    # print(sur.delete_record_at("article", '8bd7423c-921a-4ff1-a6a2-b8bfe098db39'))
-    # print(sur.query("select * from article;"))
