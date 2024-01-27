@@ -7,12 +7,10 @@ from py_surreal.http_client import HttpClient
 
 
 class HttpConnection:
-    def __init__(self, url: str, namespace: str, database: str, credentials: Tuple[str, str] = None,
+    def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Tuple[str, str] = None,
                  timeout: int = DEFAULT_TIMEOUT):
-        self.namespace = namespace
-        self.database = database
-        hs = {"NS": namespace, "DB": database}
-        self.http_client = HttpClient(url, headers=hs, credentials=credentials, timeout=timeout)
+        self.db_params = db_params
+        self.http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
         try:
             is_ready = self.is_ready()
         except HttpClientError:
@@ -53,11 +51,15 @@ class HttpConnection:
         return text
 
     def signin(self, user: str, password: str, namespace: Optional[str] = None,
-               database: Optional[str] = None) -> AuthResult:
-        ns = namespace or self.namespace
-        db = database or self.database
-        body = {"ns": ns, "db": db, "user": user, "pass": password}
-        _, text = raise_if_not_http_ok(self._simple_request("POST", "signin", body))
+               database: Optional[str] = None, scope: Optional[str] = None) -> AuthResult:
+        opts = {"user": user, "pass": password}
+        if namespace:
+            opts['ns'] = namespace
+        if database:
+            opts['db'] = database
+        if scope:
+            opts['scope'] = scope
+        _, text = raise_if_not_http_ok(self._simple_request("POST", "signin", opts))
         return to_auth_result(text)
 
     def signup(self, user: str, password: str, namespace: str, database: str, scope: str) -> AuthResult:
@@ -92,6 +94,12 @@ class HttpConnection:
     def import_data(self, path) -> DbResult:
         with open(path, 'rb') as file:
             _, text = raise_if_not_http_ok(self._simple_request("POST", "import", file.read().decode(ENCODING),
+                                                                not_json=True))
+        return to_db_result(text)
+
+    def ml_import(self, path) -> DbResult:
+        with open(path, 'rb') as file:
+            _, text = raise_if_not_http_ok(self._simple_request("POST", "ml/import", file.read().decode(ENCODING),
                                                                 not_json=True))
         return to_db_result(text)
 

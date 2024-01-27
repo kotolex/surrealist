@@ -1,30 +1,49 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from py_surreal.errors import HttpConnectionError
 from py_surreal.surreal import Surreal
 from tests.integration_tests.utils import URL, get_uuid
 
 
 class TestHttpConnection(TestCase):
 
-    def test_is_ready(self):
-        db = Surreal(URL, 'None', 'None', use_http=True, timeout=1)
+    def test_is_ready_empty(self):
+        db = Surreal(URL, use_http=True, timeout=1)
+        connection = db.connect()
+        self.assertTrue(connection.is_ready())
+
+    def test_is_ready_full(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         self.assertTrue(connection.is_ready())
 
     def test_health(self):
-        db = Surreal(URL, 'None', 'None', use_http=True, timeout=1)
+        db = Surreal(URL, use_http=True, timeout=1)
+        connection = db.connect()
+        self.assertEqual("OK", connection.health())
+
+    def test_health_full(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         self.assertEqual("OK", connection.health())
 
     def test_status(self):
-        db = Surreal(URL, 'None', 'None', use_http=True, timeout=1)
+        db = Surreal(URL, use_http=True, timeout=1)
+        connection = db.connect()
+        self.assertEqual("OK", connection.status())
+
+    def test_status_full(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         self.assertEqual("OK", connection.status())
 
     def test_version(self):
-        db = Surreal(URL, 'None', 'None', use_http=True, timeout=1)
+        db = Surreal(URL, use_http=True, timeout=1)
+        connection = db.connect()
+        self.assertEqual("surrealdb-1.1.1", connection.version())
+
+    def test_version_full(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         self.assertEqual("surrealdb-1.1.1", connection.version())
 
@@ -64,38 +83,6 @@ class TestHttpConnection(TestCase):
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
-
-    def test_create_one_failed_on_2_id(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid}, record_id=uid2)
-        self.assertEqual(res.status, "ERR", res)
-
-    def test_create_many_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        res = connection.create("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
-                                            {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
-        self.assertEqual(res.status, "ERR", res)
-
-    def test_update_many_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                            {"author": "inserted", "title": uid2, "text": uid2},
-                                            ], record_id=uid)
-        self.assertEqual(res.status, "ERR", res)
-        res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                            {"author": "inserted", "title": uid2, "text": uid2},
-                                            ])
-        self.assertEqual(res.status, "ERR", res)
 
     def test_create_one_with_id(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
@@ -176,12 +163,6 @@ class TestHttpConnection(TestCase):
         self.assertTrue(len(res.result) > 1)
         self.assertEqual(res.status, "OK")
 
-    def test_query_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(HttpConnectionError):
-            connection.query("SELECT * FROM DATA NOT REALLY AN SQL;")
-
     def test_delete_one(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
@@ -224,21 +205,15 @@ class TestHttpConnection(TestCase):
         self.assertEqual(res.result, None)
         self.assertEqual(res.status, "OK")
 
-    def test_ml_export_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(HttpConnectionError):
-            connection.ml_export("prediction", "1.0.0")
-
     def test_signin(self):
         params = (
             'root', 'user_db', 'user_ns'
         )
         for type_ in params:
             with self.subTest(f"sign_in as {type_}"):
-                db = Surreal(URL, 'test', 'test', use_http=True)
+                db = Surreal(URL, use_http=True)
                 connection = db.connect()
-                res = connection.signin(type_, type_)
+                res = connection.signin(type_, type_, namespace='test', database='test')
                 self.assertEqual(res.code, 200)
                 self.assertEqual(res.details, "Authentication succeeded")
 

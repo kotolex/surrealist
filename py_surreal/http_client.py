@@ -2,7 +2,7 @@ import base64
 import json
 import urllib.parse
 import urllib.request
-from http.client import HTTPResponse
+from http.client import HTTPResponse, RemoteDisconnected
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
@@ -51,7 +51,7 @@ class HttpClient:
             if response:
                 response.close()
             return e
-        except URLError:
+        except (URLError, RemoteDisconnected):
             if response:
                 response.close()
             raise HttpClientError(f"Error on connecting to '{url}'")
