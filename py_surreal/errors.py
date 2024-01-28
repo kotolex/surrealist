@@ -8,3 +8,13 @@ class HttpClientError(Exception):
 
 class HttpConnectionError(Exception):
     pass
+
+
+class WebSocketConnectionError(Exception):
+    pass
+
+class WebSocketConnectionClosed(Exception):
+    pass
+
+class ConnectionParametersError(Exception):
+    pass

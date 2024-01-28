@@ -1,14 +1,15 @@
 from typing import Tuple, Optional
 
 from py_surreal.http_connection import HttpConnection
-from py_surreal.ws_client import WebSocketClient
+from py_surreal.utils import DEFAULT_TIMEOUT
+from py_surreal.ws_connection import WebSocketConnection
 
 
 class Surreal:
-    def __init__(self, url: str, namespace: Optional[str]=None, database: Optional[str]=None,
+    def __init__(self, url: str, namespace: Optional[str] = None, database: Optional[str] = None,
                  credentials: Tuple[str, str] = None,
-                 use_http: bool = True, timeout: int = 5):
-        self.client = HttpConnection if use_http else WebSocketClient
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
+        self.client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
         if namespace:
             self.db_params["NS"] = namespace
@@ -27,5 +28,5 @@ class Surreal:
         return self.connection
 
     def close(self):
-        self.connection.close()
-        del self.connection
+        if self.connection:
+            self.connection.close()

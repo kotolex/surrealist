@@ -1,118 +1,59 @@
 import json
 import threading
 import time
-import urllib.parse
-from typing import Optional, Tuple, Dict
+import warnings
+from typing import Dict
+
 import websocket
 from collections import deque
 
-from py_surreal.utils import ws_message_to_result, Result
-
-
-def wait_until(predicate, timeout, period=0.25):
-    mustend = time.time() + timeout
-    while time.time() < mustend:
-        if predicate():
-            return True
-        time.sleep(period)
-    return False
-
-
-def raise_on_wait(predicate, timeout, error_text):
-    if not wait_until(predicate, timeout):
-        raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
+from py_surreal.errors import WebSocketConnectionClosed
+from py_surreal.utils import to_result, SurrealResult, DEFAULT_TIMEOUT
 
 
 class WebSocketClient:
-    def __init__(self, base_url: str, headers: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
-                 timeout: int = 5):
+    def __init__(self, base_url: str, timeout: int = DEFAULT_TIMEOUT):
         # websocket.enableTrace(True)
-        base_url = urllib.parse.urlparse(base_url.lower())
-        self.connected = False
+        self.ws = None
+        self.connected = None
         self.timeout = timeout
-        if base_url.scheme in ("ws", "wss"):
-            self._base_url = base_url
-        if base_url.scheme in ("http", "https"):
-            self._base_url = f"{base_url.scheme.replace('http', 'ws')}://{base_url.netloc}/rpc"
-        self.credentials = credentials
-        self._user, self._pass = (None, None)
-        self.namespace = None
-        self.database = None
+        self.base_url = base_url
         thread = threading.Thread(target=self.run, daemon=True)
         thread.start()
-        raise_on_wait(lambda: self.connected is True, timeout=timeout, error_text=f"Not connected to {self._base_url}")
+        self.raise_on_wait(lambda: self.connected is True, timeout=timeout,
+                           error_text=f"Not connected to {self.base_url}")
         self.queue = deque()
         self.num = 1
-        if headers:
-            self.namespace = headers.get("NS")
-            self.database = headers.get("DB")
-            if credentials:
-                self._user, self._pass = self.credentials
-                signin_result = self.signin(self._user, self._pass, (self.namespace, self.database))
-                if signin_result.is_error():
-                    raise ValueError(f"Error on connecting to '{self._base_url}'. \nInfo: {signin_result}")
-                print(signin_result)
-            else:
-                use_result = self.use(self.namespace, self.database)
-                if use_result.is_error():
-                    raise ValueError(f"Error on use '{(self.namespace, self.database)}'. \nInfo: {use_result}")
-                print(use_result)
-        else:
-            if credentials:
-                self._user, self._pass = self.credentials
-                signin_result = self.signin(self._user, self._pass)
-                if signin_result.is_error():
-                    raise ValueError(f"Error on connecting to '{self._base_url}'. \nInfo: {signin_result}")
-                print(signin_result)
 
-    def on_message(self, _wsapp, message):
-        print(message)
+    def on_message(self, _ws, message):
         self.queue.append(message)
 
-    def on_error(self, ws, err):
-        print(err)
+    def on_error(self, _ws, err):
+        warnings.warn(f"Websocket connection gets an error:{err}")
 
     def on_open(self, _ws):
         self.connected = True
 
-    def on_close(self, _ws, close_status_code, close_msg):
-        print(close_status_code, close_msg)
-        print(">>>>>>CLOSED")
+    def on_close(self, _ws, _close_status_code, _close_msg):
+        self.connected = False
 
     def run(self):
-        self.ws = websocket.WebSocketApp(self._base_url, on_open=self.on_open, on_message=self.on_message,
+        self.ws = websocket.WebSocketApp(self.base_url, on_open=self.on_open, on_message=self.on_message,
                                          on_error=self.on_error, on_close=self.on_close)
         self.ws.run_forever(ping_interval=5)
 
-    def use(self, ns, db):
-        self.namespace = ns
-        self.database = db
-        data = {"id": self.num, "method": "use", "params": [ns, db]}
+    def send(self, data: Dict) -> SurrealResult:
+        data = {"id": self.num, **data}
         return self._run(data)
 
-    def info(self):
-        data = {"id": self.num,  "method": "info"}
-        return self._run(data)
-
-    def signin(self, user: str, password: str, ns_db: Optional[Tuple[str, str]] = None):
-        data = {"id": self.num, "method": "signin", "params": [{"user": user, "pass": password}]}
-        if ns_db:
-            ns, db = ns_db
-            data['params'][0] = {"NS": ns, "DB": db, **data['params'][0]}
-        return self._run(data)
-
-    def all_records_at(self, name: str):
-        data = {"id": self.num, "method": "select", "params": [name]}
-        return self._run(data)
-
-    def _run(self, data) -> Result:
+    def _run(self, data) -> SurrealResult:
         self.ws.send(json.dumps(data))
         res = self._get_by_id(self.num)
         self.num += 1
-        return ws_message_to_result(res)
+        return to_result(res)
 
     def _get_by_id(self, id_):
-        raise_on_wait(lambda: len(self.queue) > 0, timeout=self.timeout, error_text="No messages received")
+        self.raise_on_wait(lambda: len(self.queue) > 0, timeout=self.timeout, error_text="No messages received")
         a_list = [json.loads(e) for e in list(self.queue)]
         self.queue.clear()
         found = [e for e in a_list if e["id"] == id_]
@@ -123,13 +64,25 @@ class WebSocketClient:
                 self.queue.append(e)
         return found[0]
 
+    def _wait_until(self, predicate, timeout, period=0.25):
+        mustend = time.time() + timeout
+        while time.time() < mustend:
+            if self.connected is False:
+                return False, "CLOSED"
+            if predicate():
+                return True, None
+            time.sleep(period)
+        return False, "TIME"
 
-if __name__ == '__main__':
-    cl = WebSocketClient("http://127.0.0.1:8000/", {"NS": "test", "DB": "test"}, credentials=('root', 'root'))
-    # cl = WebSocketClient("http://127.0.0.1:8000/", {"NS": "test", "DB": "test"})
-    print(cl.connected)
-    # cl.use("test", "test")
-    time.sleep(3)
-    print(cl.info())
-    print(cl.all_records_at("article"))
-    time.sleep(3)
+    def raise_on_wait(self, predicate, timeout, error_text):
+        result = self._wait_until(predicate, timeout)
+        if result == (False, "TIME"):
+            raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
+        elif result == (False, "CLOSED"):
+            raise WebSocketConnectionClosed(f"Connection closed")
+
+    def close(self):
+        self.connected = False
+        self.ws.close()
+        del self.ws
+        self.queue.clear()

@@ -1,8 +1,7 @@
 from unittest import TestCase, main
 from py_surreal.surreal import Surreal
 from py_surreal.errors import SurrealConnectionError
-from py_surreal.utils import (to_auth_result, to_db_result, ws_message_to_result, DbResult, AuthResult, DbError,
-                              DbSimpleResult)
+from py_surreal.utils import to_result, SurrealResult
 
 
 class TestConnections(TestCase):
@@ -15,22 +14,30 @@ class TestConnections(TestCase):
 
 class TestConst(TestCase):
 
+    def test_default_result(self):
+        res = SurrealResult()
+        self.assertEqual(res.result, None)
+        self.assertEqual(res.code, None)
+        self.assertEqual(res.token, None)
+        self.assertEqual(res.status, 'OK')
+        self.assertEqual(res.time, '')
+
     def test_to_db_result(self):
-        res = to_db_result('[{"result":{}, "status":"ready","time":"0"}]')
-        self.assertEqual(DbResult({}, "ready", "0"), res)
+        res = to_result('[{"result":{}, "status":"ready","time":"0"}]')
+        self.assertEqual(SurrealResult(result={}, status="ready", time="0"), res)
 
     def test_to_auth_result(self):
-        res = to_auth_result('{"code":32000, "details":"ready","token":"token"}')
-        self.assertEqual(AuthResult(32000, "ready", "token"), res)
+        res = to_result('{"code":32000, "details":"ready","token":"token"}')
+        self.assertEqual(SurrealResult(code=32000, result="ready", token="token"), res)
 
     def test_ws_message_to_result_error(self):
-        res = ws_message_to_result({'id': 100, 'error': {1: 1}})
-        self.assertEqual(DbError(100, {1: 1}), res)
+        res = to_result({'id': 100, 'error': {1: 1}})
+        self.assertEqual(SurrealResult(id=100, error={1: 1}), res)
         self.assertTrue(res.is_error())
 
     def test_ws_message_to_result(self):
-        res = ws_message_to_result({'id': 100, 'result': "result"})
-        self.assertEqual(DbSimpleResult(100, "result"), res)
+        res = to_result({'id': 100, 'result': "result"})
+        self.assertEqual(SurrealResult(id=100, result="result"), res)
         self.assertFalse(res.is_error())
 
 

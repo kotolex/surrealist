@@ -1,9 +1,8 @@
 import dataclasses
 import json
-import uuid
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, Optional
 
-from py_surreal.errors import HttpConnectionError
+from py_surreal.errors import HttpConnectionError, WebSocketConnectionError
 
 ENCODING = "UTF-8"
 OK = "OK"
@@ -11,58 +10,33 @@ DEFAULT_TIMEOUT = 5
 
 
 @dataclasses.dataclass
-class DbResult:
-    result: Union[List, Dict]
-    status: str
-    time: str
-
-
-@dataclasses.dataclass
-class AuthResult:
-    code: int
-    details: str
-    token: str
-
-
-@dataclasses.dataclass
-class Result:
-    id_: Union[int, str]
+class SurrealResult:
+    id: Optional[Union[int, str]] = None
+    error: Optional[Dict] = None
+    result: Optional[Union[str, Dict, List]] = None
+    code: Optional[int] = None
+    token: Optional[str] = None
+    status: Optional[str] = OK
+    time: str = ''
 
     def is_error(self):
-        return False
+        return self.error is not None
 
 
-@dataclasses.dataclass
-class DbError(Result):
-    error: Dict
-
-    def is_error(self):
-        return True
-
-
-@dataclasses.dataclass
-class DbSimpleResult(Result):
-    result: str
-
-
-def to_db_result(content: str) -> DbResult:
-    result = json.loads(content)[0]
-    return DbResult(result['result'], result['status'], result['time'])
-
-
-def to_auth_result(content: str) -> AuthResult:
-    result = json.loads(content)
-    return AuthResult(result['code'], result['details'], result['token'])
-
-
-def ws_message_to_result(message: Dict) -> Result:
-    if 'error' in message:
-        return DbError(message['id'], message['error'])
-    return DbSimpleResult(message['id'], message['result'])
+def to_result(content: Union[str, Dict]) -> SurrealResult:
+    if isinstance(content, str):
+        content = json.loads(content)
+    if isinstance(content, List):
+        content = content[0]
+    if 'details' in content:
+        content['result'] = content['details']
+        del content['details']
+    return SurrealResult(**content)
 
 
 def raise_if_not_http_ok(result: Tuple[int, str]):
     status, text = result
+    text = text.replace(',', ',\n')
     if status != 200:
         raise HttpConnectionError(f"Status code is {status}, check your data! Info:\n{text}")
     return result

@@ -9,8 +9,8 @@ class TestHttpConnection(TestCase):
 
     def test_is_ready_empty(self):
         db = Surreal(URL, use_http=True, timeout=1)
-        connection = db.connect()
-        self.assertTrue(connection.is_ready())
+        with db.connect() as connection:
+            self.assertTrue(connection.is_ready())
 
     def test_is_ready_full(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
@@ -56,6 +56,15 @@ class TestHttpConnection(TestCase):
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], "article:exists", res)
+
+    def test_select_all(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        uid = get_uuid()
+        connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid})
+        res = connection.select("article")
+        self.assertTrue(len(res.result) > 1)
+        self.assertEqual(res.status, "OK")
 
     def test_select_one_non_existent(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
@@ -215,14 +224,14 @@ class TestHttpConnection(TestCase):
                 connection = db.connect()
                 res = connection.signin(type_, type_, namespace='test', database='test')
                 self.assertEqual(res.code, 200)
-                self.assertEqual(res.details, "Authentication succeeded")
+                self.assertEqual(res.result, "Authentication succeeded")
 
     def test_signup(self):
         db = Surreal(URL, 'test', 'test', use_http=True)
         connection = db.connect()
         res = connection.signup('john:doe', '123456', 'test', 'test', 'user_scope')
         self.assertEqual(res.code, 200)
-        self.assertEqual(res.details, "Authentication succeeded")
+        self.assertEqual(res.result, "Authentication succeeded")
 
 
 if __name__ == '__main__':
