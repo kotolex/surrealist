@@ -20,13 +20,6 @@ class Surreal:
         self.url = url
         self.credentials = credentials
         self.timeout = timeout
-        self.connection = None
 
     def connect(self):
-        self.connection = self.client(self.url, db_params=self.db_params, credentials=self.credentials,
-                                      timeout=self.timeout)
-        return self.connection
-
-    def close(self):
-        if self.connection:
-            self.connection.close()
+        return self.client(self.url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)

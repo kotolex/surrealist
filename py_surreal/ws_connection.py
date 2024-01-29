@@ -1,17 +1,18 @@
 import urllib.parse
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, Union, List
 
 from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosed)
 from py_surreal.ws_client import WebSocketClient
 from py_surreal.utils import DEFAULT_TIMEOUT, SurrealResult
+from py_surreal.connection import Connection, connected
 
 
-class WebSocketConnection:
-    def __init__(self, base_url: str, db_params: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
+class WebSocketConnection(Connection):
+    def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
                  timeout: int = DEFAULT_TIMEOUT):
-        base_url = urllib.parse.urlparse(base_url.lower())
-        self.credentials = credentials
+        super().__init__(db_params, credentials, timeout)
+        base_url = urllib.parse.urlparse(url.lower())
         self.params = {}
         if db_params:
             if "NS" in db_params:
@@ -35,16 +36,17 @@ class WebSocketConnection:
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
         self._use_or_sign_on_params(credentials)
+        self.connected = True
 
     def _use_or_sign_on_params(self, credentials):
         if self.params:
             if credentials:
                 self._user, self._pass = self.credentials
-                signin_result = self.signin(self._user, self._pass, self.params)
+                signin_result = self.signin(self._user, self._pass, *list(self.params.values()))
                 if signin_result.is_error():
                     raise WebSocketConnectionError(f"Error on connecting to '{self._base_url}'.\nInfo: {signin_result}")
             else:
-                use_result = self.use(self.params)
+                use_result = self.use(*list(self.params.values()))
                 if use_result.is_error():
                     raise WebSocketConnectionError(f"Error on use '{self.params}'.\nInfo: {use_result}")
         else:
@@ -54,41 +56,124 @@ class WebSocketConnection:
                 if signin_result.is_error():
                     raise WebSocketConnectionError(f"Error on connecting to '{self._base_url}'.\nInfo: {signin_result}")
 
+    @connected
     def use(self, namespace: str, database: str) -> SurrealResult:
         data = {"method": "use", "params": [namespace, database]}
         return self._run(data)
 
+    @connected
     def info(self) -> SurrealResult:
         data = {"method": "info"}
         return self._run(data)
 
-    def signin(self, user: str, password: str, params: Optional[Dict] = None) -> SurrealResult:
-        data = {"method": "signin", "params": [{"user": user, "pass": password}]}
-        if params:
-            result = {}
-            if "NS" in params:
-                result = {"NS": params["NS"]}
-            if "DB" in params:
-                result["DB"] = params["DB"]
-            data['params'][0] = {**result, **data['params'][0]}
+    @connected
+    def signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
+               scope: Optional[str] = None) -> SurrealResult:
+        params = {"user": user, "pass": password}
+        if namespace is not None:
+            params["NS"] = namespace
+        if database is not None:
+            params["DB"] = database
+        if scope is not None:
+            params["SC"] = scope
+        data = {"method": "signin", "params": [params]}
         return self._run(data)
 
-    def all_records_at(self, name: str):
-        data = {"method": "select", "params": [name]}
+    @connected
+    def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
+        params = params or {}
+        params = {"NS": namespace, "DB": database, "SC": scope, **params}
+        data = {"method": "signup", "params": [params]}
+        return self._run(data)
+
+    @connected
+    def authenticate(self, token: str) -> SurrealResult:
+        data = {"method": "authenticate", "params": [token]}
+        return self._run(data)
+
+    @connected
+    def invalidate(self) -> SurrealResult:
+        data = {"method": "invalidate"}
+        return self._run(data)
+
+
+    @connected
+    def let(self, name: str, value) -> SurrealResult:
+        data = {"method": "let", "params": [name, value]}
+        return self._run(data)
+
+    @connected
+    def unset(self, name: str) -> SurrealResult:
+        data = {"method": "unset", "params": [name]}
+        return self._run(data)
+
+    @connected
+    def kill(self, live_query_id: str) -> SurrealResult:
+        data = {"method": "kill", "params": [live_query_id]}
+        return self._run(data)
+
+    @connected
+    def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
+        params = [query]
+        if variables is not None:
+            params.append(variables)
+        data = {"method": "query", "params": params}
+        return self._run(data)
+
+    @connected
+    def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        data = {"method": "select", "params": [table_name]}
+        return self._run(data)
+
+    @connected
+    def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        if record_id is not None:
+            data["id"] = record_id
+        data = {"method": "create", "params": [table_name, data]}
+        return self._run(data)
+
+    @connected
+    def insert(self, table_name: str, data: Dict) -> SurrealResult:
+        data = {"method": "insert", "params": [table_name, data]}
+        return self._run(data)
+
+    @connected
+    def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        data = {"method": "update", "params": [table_name, data]}
+        return self._run(data)
+
+    @connected
+    def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        data = {"method": "merge", "params": [table_name, data]}
+        return self._run(data)
+
+    @connected
+    def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
+              return_diff: bool = False) -> SurrealResult:
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        params = [table_name, data]
+        if return_diff:
+            params.append(return_diff)
+        data = {"method": "patch", "params": params}
+        return self._run(data)
+
+    @connected
+    def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        data = {"method": "delete", "params": [table_name]}
         return self._run(data)
 
     def close(self):
-        if self.client and self.client.connected:
-            self.client.close()
+        if self.connected or self.is_connected():
+            super().close()
+            if self.client and self.client.connected:
+                self.client.close()
 
     def is_connected(self) -> bool:
         return self.client.connected
 
     def _run(self, data):
         return self.client.send(data)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc_details):
-        self.close()

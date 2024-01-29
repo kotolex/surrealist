@@ -6,13 +6,13 @@ from http.client import HTTPResponse, RemoteDisconnected
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from .utils import ENCODING
+from .utils import ENCODING, DEFAULT_TIMEOUT
 from .errors import HttpClientError
 
 
 class HttpClient:
     def __init__(self, base_url: str, headers: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
-                 timeout: int = 5):
+                 timeout: int = DEFAULT_TIMEOUT):
         self._base_url = base_url
         self.credentials = credentials
         self.timeout = timeout

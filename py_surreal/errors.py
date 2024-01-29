@@ -13,8 +13,18 @@ class HttpConnectionError(Exception):
 class WebSocketConnectionError(Exception):
     pass
 
+
 class WebSocketConnectionClosed(Exception):
     pass
 
+
 class ConnectionParametersError(Exception):
+    pass
+
+
+class OperationOnClosedConnectionError(Exception):
+    pass
+
+
+class CompatibilityError(Exception):
     pass

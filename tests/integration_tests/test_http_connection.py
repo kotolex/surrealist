@@ -229,7 +229,8 @@ class TestHttpConnection(TestCase):
     def test_signup(self):
         db = Surreal(URL, 'test', 'test', use_http=True)
         connection = db.connect()
-        res = connection.signup('john:doe', '123456', 'test', 'test', 'user_scope')
+        res = connection.signup(namespace='test', database='test', scope='user_scope',
+                                params={'user': 'john:doe', 'pass':'123456'})
         self.assertEqual(res.code, 200)
         self.assertEqual(res.result, "Authentication succeeded")
 
