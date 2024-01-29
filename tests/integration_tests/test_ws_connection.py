@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 from py_surreal.surreal import Surreal
-from tests.integration_tests.utils import URL, get_uuid, get_random_series
+from tests.integration_tests.utils import URL, get_random_series
 
 
 class TestWebSocketConnection(TestCase):
@@ -144,7 +144,7 @@ class TestWebSocketConnection(TestCase):
             uid = get_random_series(21)
             uid2 = get_random_series(33)
             res = connection.insert("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
-                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}, ])
+                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             self.assertTrue(len(res.result) == 2)

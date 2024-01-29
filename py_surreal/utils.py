@@ -1,12 +1,17 @@
 import dataclasses
 import json
+import uuid
 from typing import Union, List, Dict, Tuple, Optional
 
-from py_surreal.errors import HttpConnectionError, WebSocketConnectionError
+from py_surreal.errors import HttpConnectionError
 
 ENCODING = "UTF-8"
 OK = "OK"
 DEFAULT_TIMEOUT = 5
+
+
+def get_uuid():
+    return str(uuid.uuid4())
 
 
 @dataclasses.dataclass

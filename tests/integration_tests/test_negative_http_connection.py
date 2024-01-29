@@ -1,9 +1,10 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from py_surreal.errors import HttpConnectionError, SurrealConnectionError, HttpClientError
+from py_surreal.errors import HttpConnectionError, SurrealConnectionError
 from py_surreal.surreal import Surreal
-from tests.integration_tests.utils import URL, get_uuid
+from py_surreal.utils import get_uuid
+from tests.integration_tests.utils import URL
 
 PARAMS = (
     ('Specify a namespace to use', {'credentials': ('root', 'root'), }),
@@ -156,7 +157,7 @@ class TestHttpConnectionNegative(TestCase):
         for expected, opts in PARAMS:
             with self.subTest(f"import failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                file_path = Path(__file__).parent / "import.srql"
+                file_path = Path(__file__).parent / "import.surql"
                 connection = db.connect()
                 with self.assertRaises(HttpConnectionError) as e:
                     connection.import_data(file_path)
@@ -166,7 +167,7 @@ class TestHttpConnectionNegative(TestCase):
         for expected, opts in PARAMS:
             with self.subTest(f"ml import failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                file_path = Path(__file__).parent / "import.srql"
+                file_path = Path(__file__).parent / "empty.surql"
                 connection = db.connect()
                 with self.assertRaises(HttpConnectionError) as e:
                     connection.ml_import(file_path)
@@ -206,8 +207,8 @@ class TestHttpConnectionNegative(TestCase):
 
     def test_import_empty(self):
         params = (
-            ("Specify some SQL code to execute", "empty.srql"),
-            ("Failed to parse query", "wrong.srql")
+            ("Specify some SQL code to execute", "empty.surql"),
+            ("Failed to parse query", "wrong.surql")
         )
         for expected, file in params:
             with self.subTest(f"Import {file}"):
@@ -218,6 +219,7 @@ class TestHttpConnectionNegative(TestCase):
                     connection.import_data(file_path)
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
+    # TODO uncomment after bugfix
     # def test_ml_import_failed_wrong_file(self):
     #     db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
     #     file_path = Path(__file__).parent / "import.srql"

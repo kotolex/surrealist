@@ -2,7 +2,8 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from py_surreal.surreal import Surreal
-from tests.integration_tests.utils import URL, get_uuid
+from py_surreal.utils import get_uuid
+from tests.integration_tests.utils import URL
 
 
 class TestHttpConnection(TestCase):
@@ -201,13 +202,13 @@ class TestHttpConnection(TestCase):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         res = connection.export()
-        # with open("import.srql", "wt") as file:
+        # with open("import.surql", "wt", encoding="UTF-8") as file:
         #     file.write(res)
         self.assertTrue("article" in res)
         self.assertTrue("OPTION IMPORT;" in res)
 
     def test_import(self):
-        file_path = Path(__file__).parent / "import.srql"
+        file_path = Path(__file__).parent / "import.surql"
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         res = connection.import_data(file_path)

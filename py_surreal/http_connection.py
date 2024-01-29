@@ -1,9 +1,9 @@
 from typing import Tuple, Dict, Optional, Union
 
-from py_surreal.utils import (ENCODING, to_result, SurrealResult, raise_if_not_http_ok, OK, DEFAULT_TIMEOUT)
+from py_surreal.connection import Connection, connected
 from py_surreal.errors import SurrealConnectionError, HttpClientError, CompatibilityError
 from py_surreal.http_client import HttpClient
-from py_surreal.connection import Connection, connected
+from py_surreal.utils import (ENCODING, to_result, SurrealResult, raise_if_not_http_ok, OK, DEFAULT_TIMEOUT)
 
 
 class HttpConnection(Connection):

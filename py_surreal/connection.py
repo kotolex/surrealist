@@ -1,7 +1,7 @@
 from typing import Tuple, Dict, Optional, Union, List
 
-from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
 from py_surreal.errors import OperationOnClosedConnectionError
+from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
 
 
 def connected(func):
@@ -85,7 +85,7 @@ class Connection:
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         return NotImplemented
 
-    def insert(self, table_name: str, data: Dict) -> SurrealResult:
+    def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
         return NotImplemented
 
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:

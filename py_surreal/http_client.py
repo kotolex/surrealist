@@ -6,8 +6,8 @@ from http.client import HTTPResponse, RemoteDisconnected
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from .utils import ENCODING, DEFAULT_TIMEOUT
 from .errors import HttpClientError
+from .utils import ENCODING, DEFAULT_TIMEOUT
 
 
 class HttpClient:
@@ -17,7 +17,7 @@ class HttpClient:
         self.credentials = credentials
         self.timeout = timeout
         headers = headers or {}
-        self._headers = {"Accept": "application/json", **headers}
+        self._headers = {"Accept": "application/json", "User-Agent": "py_surreal http-client", **headers}
         if credentials:
             self._user, self._pass = credentials
             base64string = base64.encodebytes(f'{self._user}:{self._pass}'.encode(ENCODING))[:-1]
@@ -51,8 +51,7 @@ class HttpClient:
             if response:
                 response.close()
             return e
-        except (URLError, RemoteDisconnected):
+        except (URLError, RemoteDisconnected, ConnectionResetError):
             if response:
                 response.close()
             raise HttpClientError(f"Error on connecting to '{url}'")
-

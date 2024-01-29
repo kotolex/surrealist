@@ -1,11 +1,11 @@
 import urllib.parse
 from typing import Optional, Tuple, Dict, Union, List
 
+from py_surreal.connection import Connection, connected
 from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosed)
-from py_surreal.ws_client import WebSocketClient
 from py_surreal.utils import DEFAULT_TIMEOUT, SurrealResult
-from py_surreal.connection import Connection, connected
+from py_surreal.ws_client import WebSocketClient
 
 
 class WebSocketConnection(Connection):
@@ -96,7 +96,6 @@ class WebSocketConnection(Connection):
         data = {"method": "invalidate"}
         return self._run(data)
 
-
     @connected
     def let(self, name: str, value) -> SurrealResult:
         data = {"method": "let", "params": [name, value]}
@@ -167,10 +166,9 @@ class WebSocketConnection(Connection):
         return self._run(data)
 
     def close(self):
-        if self.connected or self.is_connected():
-            super().close()
-            if self.client and self.client.connected:
-                self.client.close()
+        super().close()
+        if self.is_connected():
+            self.client.close()
 
     def is_connected(self) -> bool:
         return self.client.connected

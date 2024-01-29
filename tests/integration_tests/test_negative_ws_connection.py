@@ -1,9 +1,8 @@
-from pathlib import Path
 from unittest import TestCase, main
 
-from py_surreal.errors import WebSocketConnectionClosed, SurrealConnectionError, WebSocketConnectionError
+from py_surreal.errors import SurrealConnectionError, WebSocketConnectionError
 from py_surreal.surreal import Surreal
-from tests.integration_tests.utils import URL, get_uuid
+from tests.integration_tests.utils import URL
 
 
 class TestNegativeWebSocketConnection(TestCase):
