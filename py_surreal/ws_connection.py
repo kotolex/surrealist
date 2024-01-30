@@ -1,5 +1,5 @@
 import urllib.parse
-from typing import Optional, Tuple, Dict, Union, List
+from typing import Optional, Tuple, Dict, Union, List, Callable, Any
 
 from py_surreal.connection import Connection, connected
 from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
@@ -106,6 +106,13 @@ class WebSocketConnection(Connection):
         data = {"method": "unset", "params": [name]}
         return self._run(data)
 
+    def live(self, table_name: str, callback: Callable[[Dict], Any], need_diff: bool = False) -> SurrealResult:
+        params = [table_name]
+        if need_diff:
+            params.append(True)
+        data = {"method": "live", "params": params}
+        return self._run(data, callback)
+
     @connected
     def kill(self, live_query_id: str) -> SurrealResult:
         data = {"method": "kill", "params": [live_query_id]}
@@ -173,5 +180,5 @@ class WebSocketConnection(Connection):
     def is_connected(self) -> bool:
         return self.client.connected
 
-    def _run(self, data):
-        return self.client.send(data)
+    def _run(self, data, callback: Callable = None):
+        return self.client.send(data, callback)

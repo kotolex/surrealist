@@ -232,6 +232,62 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.result, [])
 
+    def test_live(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.live("ws_article", callback=function)
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            uid = get_random_series(27)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            self.assertEqual(a_list[0]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
+
+    def test_live_and_kill(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.live("ws_article", callback=lambda x:None)
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            token = res.result
+            res = connection.kill(token)
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNone(res.result)
+
+    def test_live_with_diff(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.live("ws_article", callback=function, need_diff=True)
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            uid = get_random_series(14)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            a_dict = {**opts, "id": f"ws_article:{uid}"}
+            self.assertEqual(a_list[0]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '/', 'value': a_dict}])
+
+    def test_live_two_queries(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.live("ws_article", callback=function)
+            connection.live("ws_article2", callback=function)
+            uid = get_random_series(27)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            connection.create("ws_article2", opts)
+            self.assertEqual(a_list[0]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[1]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
+            self.assertEqual(a_list[1]['result']['result'], {**opts, "id": f"ws_article2:{uid}"})
+
 
 if __name__ == '__main__':
     main()

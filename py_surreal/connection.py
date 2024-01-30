@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Optional, Union, List
+from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from py_surreal.errors import OperationOnClosedConnectionError
 from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
@@ -74,6 +74,9 @@ class Connection:
         return NotImplemented
 
     def unset(self, name: str) -> SurrealResult:
+        return NotImplemented
+
+    def live(self, table_name: str, callback: Callable[[Dict], Any], need_diff:bool = False) -> SurrealResult:
         return NotImplemented
 
     def kill(self, live_query_id: str) -> SurrealResult:
