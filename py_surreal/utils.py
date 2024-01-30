@@ -16,6 +16,9 @@ def get_uuid():
 
 @dataclasses.dataclass
 class SurrealResult:
+    """
+    Represent common object for all possible responses of SurrealDB
+    """
     id: Optional[Union[int, str]] = None
     error: Optional[Dict] = None
     result: Optional[Union[str, Dict, List]] = None
@@ -25,6 +28,11 @@ class SurrealResult:
     time: str = ''
 
     def is_error(self):
+        """
+        Method to know the error was returned
+
+        :return: True if response contains error, False otherwise
+        """
         return self.error is not None
 
 

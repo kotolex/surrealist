@@ -5,6 +5,12 @@ from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
 
 
 def connected(func):
+    """
+    Decorator for methods to make sure underlying connection is alive (connected to DB)
+    :param func: method to decorate
+    :raise OperationOnClosedConnectionError if connection is already closed
+    """
+
     def wrapped(*args, **kwargs):
         if not args[0].is_connected():
             raise OperationOnClosedConnectionError("Your connection already closed")
@@ -14,14 +20,27 @@ def connected(func):
 
 
 class Connection:
+    """
+    Parent for connection objects, contains all public methods to work with API
+    """
+
     def __init__(self, db_params: Optional[Dict] = None, credentials: Tuple[str, str] = None,
                  timeout: int = DEFAULT_TIMEOUT):
+        """
+        Init any connection to use
+        :param db_params: optional parameter, if it is not None, should be like {"NS": "test", "DB": "test"}
+        :param credentials: optional pair of user and pass for auth, like ("root", "root")
+        :param timeout: timeout in second to wait connection results and responses
+        """
         self.db_params = db_params
         self.credentials = credentials
         self.connected = False
         self.timeout = timeout
 
     def close(self):
+        """
+        Closes the connection. You can not and should not use connection object after that
+        """
         self.connected = False
 
     def __enter__(self):
@@ -31,6 +50,10 @@ class Connection:
         self.close()
 
     def is_connected(self) -> bool:
+        """
+        Returns if the connection is still alive and usable
+        :return: True if connection is usable, False otherwise
+        """
         return self.connected
 
     def use(self, namespace: str, database: str) -> SurrealResult:
@@ -76,7 +99,7 @@ class Connection:
     def unset(self, name: str) -> SurrealResult:
         return NotImplemented
 
-    def live(self, table_name: str, callback: Callable[[Dict], Any], need_diff:bool = False) -> SurrealResult:
+    def live(self, table_name: str, callback: Callable[[Dict], Any], need_diff: bool = False) -> SurrealResult:
         return NotImplemented
 
     def kill(self, live_query_id: str) -> SurrealResult:

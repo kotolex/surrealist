@@ -249,7 +249,7 @@ class TestWebSocketConnection(TestCase):
     def test_live_and_kill(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
         with surreal.connect() as connection:
-            res = connection.live("ws_article", callback=lambda x:None)
+            res = connection.live("ws_article", callback=lambda x: None)
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             token = res.result

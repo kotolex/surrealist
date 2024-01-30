@@ -11,6 +11,9 @@ from .utils import ENCODING, DEFAULT_TIMEOUT
 
 
 class HttpClient:
+    """
+    Http-client for working with http endpoints and abilities of SurrealDB
+    """
     def __init__(self, base_url: str, headers: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         self._base_url = base_url

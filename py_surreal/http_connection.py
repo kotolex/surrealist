@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Optional, Union
+from typing import Tuple, Dict, Optional, Union, Callable, Any
 
 from py_surreal.connection import Connection, connected
 from py_surreal.errors import SurrealConnectionError, HttpClientError, CompatibilityError
@@ -117,6 +117,14 @@ class HttpConnection(Connection):
             _, text = raise_if_not_http_ok(self._simple_request("POST", "ml/import", file.read().decode(ENCODING),
                                                                 not_json=True))
         return to_result(text)
+
+    def live(self, table_name, callback, need_diff: bool = False) -> SurrealResult:
+        # TODO link here
+        raise CompatibilityError("Http-client cant use live queries, more on that: url")
+
+    def kill(self, live_query_id: str) -> SurrealResult:
+        # TODO link here
+        raise CompatibilityError("Http-client cant kill queries, more on that: url")
 
     def _simple_get(self, endpoint: str) -> Tuple[int, str]:
         with self.http_client.get(endpoint) as resp:

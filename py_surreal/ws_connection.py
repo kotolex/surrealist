@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Dict, Union, List, Callable, Any
 
 from py_surreal.connection import Connection, connected
 from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
-                               WebSocketConnectionClosed)
+                               WebSocketConnectionClosedError)
 from py_surreal.utils import DEFAULT_TIMEOUT, SurrealResult
 from py_surreal.ws_client import WebSocketClient
 
@@ -31,7 +31,7 @@ class WebSocketConnection(Connection):
             raise SurrealConnectionError(f"Cant connect to {self._base_url} in {timeout} seconds.\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
-        except WebSocketConnectionClosed:
+        except WebSocketConnectionClosedError:
             raise SurrealConnectionError(f"Cant connect to {self._base_url}, connection refused.\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
