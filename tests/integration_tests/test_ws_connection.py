@@ -1,6 +1,7 @@
 from unittest import TestCase, main
 
 from py_surreal.surreal import Surreal
+from py_surreal.utils import get_uuid
 from tests.integration_tests.utils import URL, get_random_series
 
 
@@ -101,6 +102,19 @@ class TestWebSocketConnection(TestCase):
             res = connection.select("author", "john")
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
+
+    def test_select_with_uuid_id(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_uuid()
+            data = {"author": "Вася Ëлкин", "title": "øºRusr", "text": "text"}
+            res = connection.create("article", {"id": uid, **data})
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            self.assertFalse(res.result == [])
+            res = connection.select(f"article:⟨{uid}⟩")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result, {"id": f"article:⟨{uid}⟩", **data})
 
     def test_create_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))

@@ -78,7 +78,7 @@ class WebSocketClient:
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
-        self.ws.send(json.dumps(data))
+        self.ws.send(json.dumps(data, ensure_ascii=False))
         res = self._get_by_id(id_)
         if data['method'] in ('live', 'kill'):
             if 'error' not in res:
