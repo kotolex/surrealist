@@ -1,7 +1,9 @@
 from unittest import TestCase, main
 from py_surreal.surreal import Surreal
 from py_surreal.errors import SurrealConnectionError
-from py_surreal.utils import to_result, SurrealResult
+from py_surreal.utils import to_result, SurrealResult, crop_data, mask_pass
+from py_surreal.clients.http_client import mask_opts
+from tests.integration_tests.utils import URL
 
 
 class TestConnections(TestCase):
@@ -10,6 +12,10 @@ class TestConnections(TestCase):
         db = Surreal("http://127.0.0.1:9999/", 'None', 'None', use_http=True, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             db.connect()
+
+    def test_raise_on_wrong_level(self):
+        with self.assertRaises(ValueError):
+            Surreal(URL, log_level="WARN")
 
 
 class TestConst(TestCase):
@@ -39,6 +45,24 @@ class TestConst(TestCase):
         res = to_result({'id': 100, 'result': "result"})
         self.assertEqual(SurrealResult(id=100, result="result"), res)
         self.assertFalse(res.is_error())
+
+    def test_crop_same(self):
+        self.assertEqual(crop_data("one"), "one")
+
+    def test_crop_data(self):
+        self.assertEqual(crop_data("*" * 400), "*" * 300 + "...")
+
+    def test_mask_pass(self):
+        self.assertEqual(mask_pass(
+            "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}"),
+                         "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}")
+        self.assertEqual(mask_pass('{"user":"user", "pass": "123123"}'), '{"user":"user", "pass": "******"}')
+
+    def test_masked_opts(self):
+        res = mask_opts({"headers": {"Authorization": "Basic 123456"}, "data": b'0' * 350, "method": "GET"})
+        self.assertEqual(res,
+                         {"headers": {"Authorization": "Basic ******"}, "data": "b'" + "0" * 298 + "...",
+                          "method": "GET"})
 
 
 if __name__ == '__main__':

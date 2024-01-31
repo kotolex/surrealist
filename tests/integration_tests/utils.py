@@ -1,7 +1,7 @@
 import random
 from string import ascii_lowercase
 
-from py_surreal.http_client import HttpClient
+from py_surreal.clients.http_client import HttpClient
 
 URL = "http://127.0.0.1:8000/"
 

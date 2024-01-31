@@ -1,15 +1,17 @@
 import json
 import threading
 import time
-import warnings
 from json import JSONDecodeError
+from logging import getLogger
 from threading import Lock
 from typing import Dict, Callable, Optional
 
 import websocket
 
 from py_surreal.errors import WebSocketConnectionClosedError
-from py_surreal.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid
+from py_surreal.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
+
+logger = getLogger("websocket_client")
 
 
 class WebSocketClient:
@@ -30,12 +32,15 @@ class WebSocketClient:
         self.lock = Lock()
         self.callbacks = {}
         self.messages = {}
+        logger.debug("Connected to %s, timeout is %s seconds", base_url, timeout)
 
     def on_message(self, _ws, message):
+        logger.debug("Get message %s", crop_data(message))
         try:
             mess = json.loads(message)
         except JSONDecodeError:
             # Should never happen, all messages via json
+            logger.error("Got non-json response %s", crop_data(message), exc_info=True)
             raise ValueError(f"Got non-json response! {message}")
         if "id" in mess:
             id_ = mess["id"]
@@ -46,20 +51,20 @@ class WebSocketClient:
                 live_id = mess['result']['id']
                 callback = self.callbacks.get(live_id)
                 if callback:
+                    logger.debug("Use callback for %s", live_id)
                     callback(mess)
             else:
-                warnings.warn(f"Got unexpected message without id and result: {mess}")
+                logger.warning(f"Got unexpected message without id and result:  %s", mess)
 
     def on_error(self, _ws, err):
-        # print(type(err))
-        # print(f"_{err}_")
-        warnings.warn(f"Websocket connection gets an error: {err}")
+        logger.error("Websocket connection gets an error %s", err)
 
     def on_open(self, _ws):
         self.connected = True
 
     def on_close(self, *_ignore):
         self.connected = False
+        logger.debug("Close connection to %s", self.base_url)
 
     def run(self):
         self.ws = websocket.WebSocketApp(self.base_url, on_open=self.on_open, on_message=self.on_message,
@@ -78,7 +83,9 @@ class WebSocketClient:
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
-        self.ws.send(json.dumps(data, ensure_ascii=False))
+        data_string = json.dumps(data, ensure_ascii=False)
+        logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
+        self.ws.send(data_string)
         res = self._get_by_id(id_)
         if data['method'] in ('live', 'kill'):
             if 'error' not in res:
@@ -88,8 +95,10 @@ class WebSocketClient:
 
     def _on_success(self, data: Dict, callback: Callable, result: Dict):
         if data['method'] == 'kill':
+            logger.debug("Delete callback for %s", data['params'][0])
             self.callbacks[data['params'][0]] = None
         if data['method'] == 'live':
+            logger.debug("Set callback for %s", result['result'])
             self.callbacks[result['result']] = callback
 
     def _get_by_id(self, id_) -> Dict:
@@ -99,6 +108,7 @@ class WebSocketClient:
             result = self.messages.pop(id_, None)
         if result is None:
             # Should never happen!
+            logger.error("Dict returns None on thread-safe pop, id %s, messages %s", id_, self.messages)
             raise ValueError(f"Dict returns None on thread-safe pop, {id_=}, {self.messages=}")
         return result
 
@@ -125,9 +135,11 @@ class WebSocketClient:
         """
         result = self._wait_until(predicate, timeout)
         if result == (False, "TIME"):
+            logger.error("Time exceeded: %s seconds. Error:", timeout, error_text)
             raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
         elif result == (False, "CLOSED"):
-            raise WebSocketConnectionClosedError("Connection closed")
+            logger.error("Connection closed while client waits on it")
+            raise WebSocketConnectionClosedError("Connection closed while client waits on it")
 
     def close(self):
         self.connected = False
@@ -135,3 +147,4 @@ class WebSocketClient:
         del self.ws
         self.messages.clear()
         self.callbacks.clear()
+        logger.debug("Client is closed connection to %s", self.base_url)

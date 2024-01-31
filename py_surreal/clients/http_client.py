@@ -3,17 +3,21 @@ import json
 import urllib.parse
 import urllib.request
 from http.client import HTTPResponse, RemoteDisconnected
+from logging import getLogger
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from .errors import HttpClientError
-from .utils import ENCODING, DEFAULT_TIMEOUT
+from py_surreal.errors import HttpClientError
+from py_surreal.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
+
+logger = getLogger("http_client")
 
 
 class HttpClient:
     """
     Http-client for working with http endpoints and abilities of SurrealDB
     """
+
     def __init__(self, base_url: str, headers: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         self._base_url = base_url
@@ -48,13 +52,28 @@ class HttpClient:
             options['data'] = js
         try:
             req = urllib.request.Request(url, **options)
+            logger.debug("Request to %s, options: %s, timeout: %d", url, mask_opts(options), self.timeout)
             response = urllib.request.urlopen(req, timeout=self.timeout)
             return response
         except HTTPError as e:
+            logger.error("Http error on request %s, info: %s", url, e)
             if response:
                 response.close()
             return e
-        except (URLError, RemoteDisconnected, ConnectionResetError):
+        except (URLError, RemoteDisconnected, ConnectionResetError) as e:
             if response:
                 response.close()
+            logger.error("Error on connecting to %s, info: %s", url, e)
             raise HttpClientError(f"Error on connecting to '{url}'")
+
+
+
+def mask_opts(options: Dict) -> Dict:
+    masked_opts = {}
+    for key, value in options.items():
+        if key == "headers" and "Authorization" in value:
+            value = {**value, "Authorization": "Basic ******"}
+        elif key == "data":
+            value = crop_data(mask_pass(str(value)))
+        masked_opts[key] = value
+    return masked_opts

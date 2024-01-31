@@ -1,19 +1,25 @@
+from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from py_surreal.errors import OperationOnClosedConnectionError
 from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
 
+logger = getLogger("connection")
+
 
 def connected(func):
     """
     Decorator for methods to make sure underlying connection is alive (connected to DB)
+
     :param func: method to decorate
     :raise OperationOnClosedConnectionError if connection is already closed
     """
 
     def wrapped(*args, **kwargs):
         if not args[0].is_connected():
-            raise OperationOnClosedConnectionError("Your connection already closed")
+            message = "Your connection already closed"
+            logger.error(message, exc_info=False)
+            raise OperationOnClosedConnectionError(message)
         return func(*args, **kwargs)
 
     return wrapped
@@ -41,6 +47,7 @@ class Connection:
         """
         Closes the connection. You can not and should not use connection object after that
         """
+        logger.info("Connection was closed")
         self.connected = False
 
     def __enter__(self):

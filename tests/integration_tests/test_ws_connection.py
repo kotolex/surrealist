@@ -303,5 +303,20 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(a_list[1]['result']['result'], {**opts, "id": f"ws_article2:{uid}"})
 
 
+# TODO uncomment after bugfix
+# def test_nesting_1000(self):
+#     num = 0
+#     prev = {"name":"first", "age":num, "inner":[]}
+#     for _ in range(12):
+#         num+=1
+#         prev = {"name":get_random_series(10), "level":num, "inner":[prev]}
+#
+#     print(prev)
+#     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+#     with surreal.connect() as connection:
+#         res = connection.create("ws_article", prev)
+#         self.assertFalse(res.is_error())
+
+
 if __name__ == '__main__':
     main()
