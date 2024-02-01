@@ -95,7 +95,7 @@ class Connection:
     def unset(self, name: str) -> SurrealResult:
         return NotImplemented
 
-    def live(self, table_name: str, callback: Callable[[Dict], Any], need_diff: bool = False) -> SurrealResult:
+    def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         return NotImplemented
 
     def kill(self, live_query_id: str) -> SurrealResult:

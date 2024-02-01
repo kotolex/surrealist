@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from py_surreal.errors import SurrealConnectionError, WebSocketConnectionError
+from py_surreal.errors import SurrealConnectionError, WebSocketConnectionError, CompatibilityError
 from py_surreal.surreal import Surreal
 from tests.integration_tests.utils import URL
 
@@ -55,7 +55,29 @@ class TestNegativeWebSocketConnection(TestCase):
                              "There was a problem with the database: Can not execute KILL statement using id '$id'")
             self.assertEqual(res.error['code'], -32000)
 
+    def test_export_failed(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.export()
 
+    def test_ml_export_failed(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.ml_export(None, None)
+
+    def test_import_failed(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.import_data(None)
+
+    def test_ml_import_failed(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.ml_import(None)
 
 
 if __name__ == '__main__':
