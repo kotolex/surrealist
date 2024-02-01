@@ -3,8 +3,10 @@ from py_surreal.surreal import Surreal
 from py_surreal.errors import SurrealConnectionError, HttpClientError
 from py_surreal.utils import to_result, SurrealResult, crop_data, mask_pass
 from py_surreal.clients.http_client import mask_opts
-from tests.integration_tests.utils import URL
+
 WRONG_URL = "http://127.0.0.1:9999/"
+URL = "http://127.0.0.1:8000"
+
 
 class TestConnections(TestCase):
 
@@ -75,7 +77,7 @@ class TestConst(TestCase):
     def test_mask_pass(self):
         self.assertEqual(mask_pass(
             "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}"),
-                         "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}")
+            "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}")
         self.assertEqual(mask_pass('{"user":"user", "pass": "123123"}'), '{"user":"user", "pass": "******"}')
 
     def test_masked_opts(self):
