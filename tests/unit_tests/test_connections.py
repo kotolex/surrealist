@@ -1,21 +1,41 @@
 from unittest import TestCase, main
 from py_surreal.surreal import Surreal
-from py_surreal.errors import SurrealConnectionError
+from py_surreal.errors import SurrealConnectionError, HttpClientError
 from py_surreal.utils import to_result, SurrealResult, crop_data, mask_pass
 from py_surreal.clients.http_client import mask_opts
 from tests.integration_tests.utils import URL
-
+WRONG_URL = "http://127.0.0.1:9999/"
 
 class TestConnections(TestCase):
 
     def test_raise_on_wrong_url(self):
-        db = Surreal("http://127.0.0.1:9999/", 'None', 'None', use_http=True, timeout=1)
+        db = Surreal(WRONG_URL, 'None', 'None', use_http=True, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             db.connect()
 
     def test_raise_on_wrong_level(self):
         with self.assertRaises(ValueError):
             Surreal(URL, log_level="WARN")
+
+    def test_health(self):
+        surreal = Surreal(WRONG_URL)
+        with self.assertRaises(HttpClientError):
+            surreal.health()
+
+    def test_status(self):
+        surreal = Surreal(WRONG_URL)
+        with self.assertRaises(HttpClientError):
+            surreal.status()
+
+    def test_is_ready(self):
+        surreal = Surreal(WRONG_URL)
+        with self.assertRaises(HttpClientError):
+            surreal.is_ready()
+
+    def test_version(self):
+        surreal = Surreal(WRONG_URL)
+        with self.assertRaises(HttpClientError):
+            surreal.version()
 
 
 class TestConst(TestCase):

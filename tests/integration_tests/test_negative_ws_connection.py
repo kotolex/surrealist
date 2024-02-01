@@ -56,5 +56,7 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertEqual(res.error['code'], -32000)
 
 
+
+
 if __name__ == '__main__':
     main()

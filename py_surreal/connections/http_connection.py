@@ -16,7 +16,7 @@ class HttpConnection(Connection):
         super().__init__(db_params, credentials, timeout)
         self.http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
         try:
-            is_ready = self.is_ready()
+            is_ready = self._is_ready()
         except HttpClientError:
             is_ready = False
         if not is_ready:
@@ -28,19 +28,8 @@ class HttpConnection(Connection):
         masked_creds = None if not credentials else (credentials[0], "******")
         logger.info("Connected to %s, params: %s, credentials: %s, timeout: %s", url, db_params, masked_creds, timeout)
 
-    def is_ready(self) -> bool:
-        return self.status() == OK and self.health() == OK
-
-    def status(self) -> str:
-        code, text = self._simple_get("status")
-        return OK if code == 200 else text
-
-    def health(self) -> str:
-        code, text = self._simple_get("health")
-        return OK if code == 200 else text
-
-    def version(self) -> str:
-        return self._simple_get("version")[1]
+    def _is_ready(self) -> bool:
+        return self._simple_get("status")[0] == 200 and self._simple_get("health")[0] == 200
 
     @connected
     def export(self) -> str:

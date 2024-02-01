@@ -58,7 +58,8 @@ class Connection:
 
     def is_connected(self) -> bool:
         """
-        Returns if the connection is still alive and usable
+        Checks the connection is still alive and usable
+
         :return: True if connection is usable, False otherwise
         """
         return self.connected
@@ -67,18 +68,6 @@ class Connection:
         return NotImplemented
 
     def info(self) -> SurrealResult:
-        return NotImplemented
-
-    def is_ready(self) -> bool:
-        return NotImplemented
-
-    def status(self) -> str:
-        return NotImplemented
-
-    def health(self) -> str:
-        return NotImplemented
-
-    def version(self) -> str:
         return NotImplemented
 
     def export(self) -> str:

@@ -6,47 +6,36 @@ from py_surreal.utils import get_uuid
 from tests.integration_tests.utils import URL
 
 
+class TestSurreal(TestCase):
+    def test_health(self):
+        surreal = Surreal(URL)
+        self.assertEqual("OK", surreal.health())
+
+    def test_status(self):
+        surreal = Surreal(URL)
+        self.assertEqual("OK", surreal.status())
+
+    def test_is_ready(self):
+        surreal = Surreal(URL)
+        self.assertEqual(True, surreal.is_ready())
+
+    def test_version(self):
+        surreal = Surreal(URL)
+        result = surreal.version()
+        self.assertTrue("surrealdb-1." in result, result)
+
+
 class TestHttpConnection(TestCase):
 
     def test_is_ready_empty(self):
         db = Surreal(URL, use_http=True, timeout=1)
         with db.connect() as connection:
-            self.assertTrue(connection.is_ready())
+            self.assertTrue(connection._is_ready())
 
     def test_is_ready_full(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
-        self.assertTrue(connection.is_ready())
-
-    def test_health(self):
-        db = Surreal(URL, use_http=True, timeout=1)
-        connection = db.connect()
-        self.assertEqual("OK", connection.health())
-
-    def test_health_full(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        self.assertEqual("OK", connection.health())
-
-    def test_status(self):
-        db = Surreal(URL, use_http=True, timeout=1)
-        connection = db.connect()
-        self.assertEqual("OK", connection.status())
-
-    def test_status_full(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        self.assertEqual("OK", connection.status())
-
-    def test_version(self):
-        db = Surreal(URL, use_http=True, timeout=1)
-        connection = db.connect()
-        self.assertEqual("surrealdb-1.1.1", connection.version())
-
-    def test_version_full(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        self.assertEqual("surrealdb-1.1.1", connection.version())
+        self.assertTrue(connection._is_ready())
 
     def test_select_one(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
