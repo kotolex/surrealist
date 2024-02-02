@@ -64,7 +64,7 @@ class OperationOnClosedConnectionError(PySurrealError):
 
 class CompatibilityError(PySurrealError):
     """
-    Raises on attempt to use methods for that client  incompatible (websocket ot http), for example **live** do not
+    Raises on attempt to use methods incompatible for that transport (websocket ot http), for example **live** do not
     work on http-connection.
     More on this here: url
     """

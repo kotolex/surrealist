@@ -12,10 +12,11 @@ def connected(func):
     Decorator for methods to make sure underlying connection is alive (connected to DB)
 
     :param func: method to decorate
-    :raise OperationOnClosedConnectionError if connection is already closed
+    :raise OperationOnClosedConnectionError: if connection is already closed
     """
 
     def wrapped(*args, **kwargs):
+        # args[0] is a self argument in methods
         if not args[0].is_connected():
             message = "Your connection already closed"
             logger.error(message, exc_info=False)
@@ -36,7 +37,7 @@ class Connection:
         Init any connection to use
         :param db_params: optional parameter, if it is not None, should be like {"NS": "test", "DB": "test"}
         :param credentials: optional pair of user and pass for auth, like ("root", "root")
-        :param timeout: timeout in second to wait connection results and responses
+        :param timeout: timeout in seconds to wait connection results and responses
         """
         self.db_params = db_params
         self.credentials = credentials

@@ -34,7 +34,13 @@ class WebSocketClient:
         self.messages = {}
         logger.debug("Connected to %s, timeout is %s seconds", base_url, timeout)
 
-    def on_message(self, _ws, message):
+    def on_message(self, _ws, message: str):
+        """
+        Called on message received from the websocket connection.
+        :param _ws: connection object
+        :param message: string message
+        :return: None
+        """
         logger.debug("Get message %s", crop_data(message))
         try:
             mess = json.loads(message)
@@ -53,10 +59,12 @@ class WebSocketClient:
                 if callback:
                     logger.debug("Use callback for %s", live_id)
                     callback(mess)
+                else:
+                    logger.warning(f"Got message, but no callback to work with. Message: %s", mess)
             else:
                 logger.warning(f"Got unexpected message without id and result:  %s", mess)
 
-    def on_error(self, _ws, err):
+    def on_error(self, _ws, err: Exception):
         logger.error("Websocket connection gets an error %s", err)
 
     def on_open(self, _ws):
@@ -78,8 +86,8 @@ class WebSocketClient:
         :param data: dict with request parameters
         :param callback: function to call on live query, it is set only for live method
         :return: result of the request
-        :raise TimeoutError if no response and time is over
-        :raise WebSocketConnectionClosed if connection was closed while waiting
+        :raise TimeoutError: if no response and time is over
+        :raise WebSocketConnectionClosed: if connection was closed while waiting
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
@@ -112,9 +120,9 @@ class WebSocketClient:
             raise ValueError(f"Dict returns None on thread-safe pop, {id_=}, {self.messages=}")
         return result
 
-    def _wait_until(self, predicate, timeout, period=0.25):
-        mustend = time.time() + timeout
-        while time.time() < mustend:
+    def _wait_until(self, predicate, timeout, period=0.1):
+        must_end = time.time() + timeout
+        while time.time() < must_end:
             if self.connected is False:
                 return False, "CLOSED"
             if predicate():
@@ -130,8 +138,8 @@ class WebSocketClient:
         :param predicate: function to call and check condition
         :param timeout: time in seconds to wait until condition
         :param error_text: custom error message on fail
-        :raise TimeoutError if condition not met until time
-        :raise WebSocketConnectionClosed if connection was closed while waiting
+        :raise TimeoutError: if condition not met until time
+        :raise WebSocketConnectionClosed: if connection was closed while waiting
         """
         result = self._wait_until(predicate, timeout)
         if result == (False, "TIME"):

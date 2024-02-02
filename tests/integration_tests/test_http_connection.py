@@ -110,13 +110,14 @@ class TestHttpConnection(TestCase):
         connection = db.connect()
         uid = get_uuid()
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.update("article", {"author": "inserted", "title": uid, "text": uid}, record_id=uid)
+        res = connection.update("article", {"author": "inserted"}, record_id=uid)
         self.assertTrue(len(res.result) == 1)
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
         self.assertEqual(res.result[0]["author"], "inserted", res)
         res = connection.select("article", uid)
         self.assertEqual(res.status, "OK")
+        self.assertEqual(len(res.result[0]), 2, res)
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
         self.assertEqual(res.result[0]["author"], "inserted", res)
 
@@ -130,30 +131,30 @@ class TestHttpConnection(TestCase):
         self.assertEqual(res.status, "OK")
         self.assertTrue(all(e["author"] == "inserted_all" for e in res.result))
 
-    def test_patch_one(self):
+    def test_merge_one(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         uid = get_uuid()
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.patch("article", {"new_field": "patch"}, record_id=uid)
+        res = connection.merge("article", {"new_field": "merge"}, record_id=uid)
         self.assertTrue(len(res.result) == 1)
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
-        self.assertEqual(res.result[0]["new_field"], "patch", res)
+        self.assertEqual(res.result[0]["new_field"], "merge", res)
         res = connection.select("article", uid)
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
-        self.assertEqual(res.result[0]["new_field"], "patch", res)
+        self.assertEqual(res.result[0]["new_field"], "merge", res)
 
-    def test_patch_z_all(self):
+    def test_merge_z_all(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         uid = get_uuid()
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.patch("article", {"all_field": "patch"})
+        res = connection.merge("article", {"all_field": "merge"})
         self.assertTrue(len(res.result) > 1)
         self.assertEqual(res.status, "OK")
-        self.assertTrue(all(e["all_field"] == "patch" for e in res.result))
+        self.assertTrue(all(e["all_field"] == "merge" for e in res.result))
 
     def test_query_success(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)

@@ -1,11 +1,11 @@
-from typing import Tuple, Optional
 from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
+from typing import Tuple, Optional
 
 from py_surreal.clients import HttpClient
 from py_surreal.connections.connection import Connection
 from py_surreal.connections.http_connection import HttpConnection
-from py_surreal.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK
 from py_surreal.connections.ws_connection import WebSocketConnection
+from py_surreal.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
 
 FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'
 basicConfig(level=ERROR, format=FORMAT)
@@ -76,7 +76,7 @@ class Surreal:
 
         Notice: authorization params and passwords cant be seen in logs in any time, if you see it, please report
         an issue
-        Notice: you will see logs of this library(in and out), but not SurrealDb logs
+        Notice: you will see logs of this library(in and out), but not SurrealDb server logs
 
         :param level: one of "DEBUG", "INFO", "ERROR"
         :return: None
@@ -96,19 +96,21 @@ class Surreal:
         ready to go with SurrealDB
 
         :return: connection object to work with SurrealDB
-        :raise SurrealConnectionError if cant connect with specified parameters
+        :raise SurrealConnectionError: if cant connect with specified parameters
         """
         return self.client(self.url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)
 
     def is_ready(self) -> bool:
         """
-        Checks that SurrealDB server is up and running. Under the hood it calls *health* and *status* methods to make
-        sure database web server is running and database server and storage engine are running.
+        Checks that SurrealDB server is up and running. Under the hood it calls **health** and **status** methods to
+        make sure database web server is running and database server and storage engine are running.
+
         Notice: Method uses the specified url, but not namespace, database or credentials, so success of this method
         (return True) should not be interpreted as authorization success
 
         Refer to:
         https://docs.surrealdb.com/docs/integration/http#status
+
         https://docs.surrealdb.com/docs/integration/http#health
 
         :return: True if you can use this server, False otherwise
@@ -119,32 +121,29 @@ class Surreal:
         """
         Checks that SurrealDB web server is running.
 
-        Refer to:
-        https://docs.surrealdb.com/docs/integration/http#status
+        Refer to: https://docs.surrealdb.com/docs/integration/http#status
 
         :return: "OK" if everything is ok, or error text
         """
         code, text = self.__get("status")
-        return OK if code == 200 else text
+        return OK if code == HTTP_OK else text
 
     def health(self) -> str:
         """
         Checks that SurrealDB server and storage engine are running.
 
-        Refer to:
-        https://docs.surrealdb.com/docs/integration/http#health
+        Refer to: https://docs.surrealdb.com/docs/integration/http#health
 
         :return: "OK" if everything is ok, or error text
         """
         code, text = self.__get("health")
-        return OK if code == 200 else text
+        return OK if code == HTTP_OK else text
 
     def version(self) -> str:
         """
         Get SurrealDB version
 
-        Refer to:
-        https://docs.surrealdb.com/docs/integration/http#version
+        Refer to: https://docs.surrealdb.com/docs/integration/http#version
 
         :return: version, for example "surrealdb-1.1.1"
         """

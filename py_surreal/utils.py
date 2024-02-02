@@ -6,6 +6,7 @@ from typing import Union, List, Dict, Optional
 
 ENCODING = "UTF-8"
 OK = "OK"
+HTTP_OK = 200  # status code for success
 DEFAULT_TIMEOUT = 5  # timeout in seconds for basic operations
 DATA_LENGTH_FOR_LOGS = 300  # size of data in logs, data will be cropped if bigger than that
 
@@ -16,12 +17,17 @@ def _set_length(length: int):
 
 
 def get_uuid() -> str:
+    """
+    Helper to generate uuid for records or testing purposes
+
+    :return: uuid string representation
+    """
     return str(uuid.uuid4())
 
 
 def mask_pass(text: str) -> str:
     """
-    Mask the passwords in logs. Replace all 'pass':'any_pass' in logs to 'pass':'******'/ Works both with ' and "
+    Mask the passwords in logs. Replace all 'pass':'any_pass' in logs to 'pass':'******'. Works both with ' and "
     :param text: text before put it to logs
     :return: text without visible passwords
     """

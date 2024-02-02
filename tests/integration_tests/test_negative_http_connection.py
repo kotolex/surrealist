@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from py_surreal.errors import HttpConnectionError, SurrealConnectionError
+from py_surreal.errors import HttpConnectionError, SurrealConnectionError, CompatibilityError
 from py_surreal.surreal import Surreal
 from py_surreal.utils import get_uuid
 from tests.integration_tests.utils import URL
@@ -105,22 +105,22 @@ class TestHttpConnectionNegative(TestCase):
                     connection.update("article", {})
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
-    def test_patch_one_failed(self):
+    def test_merge_one_failed(self):
         for expected, opts in PARAMS:
-            with self.subTest(f"patch one failed on data{opts}"):
+            with self.subTest(f"merge one failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
                 connection = db.connect()
                 with self.assertRaises(HttpConnectionError) as e:
-                    connection.patch("article", {}, "any")
+                    connection.merge("article", {}, "any")
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
-    def test_patch_all_failed(self):
+    def test_merge_all_failed(self):
         for expected, opts in PARAMS:
-            with self.subTest(f"patch all failed on data{opts}"):
+            with self.subTest(f"merge all failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
                 connection = db.connect()
                 with self.assertRaises(HttpConnectionError) as e:
-                    connection.patch("article", {})
+                    connection.merge("article", {})
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_delete_one_failed(self):
@@ -131,6 +131,24 @@ class TestHttpConnectionNegative(TestCase):
                 with self.assertRaises(HttpConnectionError) as e:
                     connection.delete("article", "any")
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+
+    def test_patch_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.patch("prediction", [])
+
+    def test_live_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.live("prediction", print)
+
+    def test_kill_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.kill("prediction")
 
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:

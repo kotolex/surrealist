@@ -19,6 +19,7 @@ class WebSocketConnection(Connection):
 
     Each objects create only one websocket connection and can be used in context manager to close properly.
     You can not and should not try to use this object after closing connection. Just create new connection.
+
     On creating, this object tries to create connection with specified data and will raise exception on fail.
     If namespace and database specified - use method will be called automatically
     If credentials specified - signin will be called automatically
@@ -86,7 +87,9 @@ class WebSocketConnection(Connection):
     def use(self, namespace: str, database: str) -> SurrealResult:
         """
         This method specifies the namespace and database for the current connection
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#use
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
 
         Example:
@@ -104,7 +107,9 @@ class WebSocketConnection(Connection):
     def info(self) -> SurrealResult:
         """
         This method returns the record of an authenticated scope user
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#info
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
 
@@ -118,12 +123,13 @@ class WebSocketConnection(Connection):
     def signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
                scope: Optional[str] = None) -> SurrealResult:
         """
-        This method allows you to signin a root, namespace, database or scope user against SurrealDB
+        This method allows you to sign in a root, namespace, database or scope user against SurrealDB
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#signin
 
         Example:
         websocket_connection.signin('root', 'root') # sign in as root user
-        websocket_connection.signin('root', 'root') # sign in as root user
+        websocket_connection.signin('root', 'root', namespace='test', database='test') # sign in as db user
 
 
         :param user: name of the user
@@ -147,8 +153,10 @@ class WebSocketConnection(Connection):
     @connected
     def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
         """
-        This method allows you to signup a user
+        This method allows you to sign up a user
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#signup
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
 
         Example:
@@ -171,6 +179,7 @@ class WebSocketConnection(Connection):
     def authenticate(self, token: str) -> SurrealResult:
         """
         This method authenticates user with given token
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#authenticate
 
         :param token: token for auth
@@ -184,6 +193,7 @@ class WebSocketConnection(Connection):
     def invalidate(self) -> SurrealResult:
         """
         This method will invalidate the user's session for the current connection
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#invalidate
 
         :return: result of request
@@ -196,7 +206,9 @@ class WebSocketConnection(Connection):
     def let(self, name: str, value: Any) -> SurrealResult:
         """
         This method sets and stores a value which can then be used in a subsequent query
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
 
 
@@ -212,6 +224,7 @@ class WebSocketConnection(Connection):
     def unset(self, name: str) -> SurrealResult:
         """
         This method unsets value, which was previously stored
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#unset
 
         :param name: name for the variable (without $ sign!)
@@ -224,9 +237,13 @@ class WebSocketConnection(Connection):
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
         This method can be used to initiate live query - a real-time selection from a table
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#live
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+
         About DIFF refer to: https://jsonpatch.com
+
         Please see py_surreal documentation to use this method properly
 
         Example:
@@ -249,7 +266,9 @@ class WebSocketConnection(Connection):
     def kill(self, live_query_id: str) -> SurrealResult:
         """
         This method is used to terminate a running live query by id
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#kill
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
 
         :param live_query_id: id for the query to kill
@@ -263,7 +282,9 @@ class WebSocketConnection(Connection):
     def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
         """
         This method used for execute a custom SurrealQL query
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#query
+
         For SurrealQL refer to: https://docs.surrealdb.com/docs/surrealql/overview
 
         Example:
@@ -286,7 +307,9 @@ class WebSocketConnection(Connection):
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method selects either all records in a table or a single record
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#select
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
 
         Examples:
@@ -310,7 +333,9 @@ class WebSocketConnection(Connection):
         """
         This method creates a record either with a random or specified record_id. If no id specified in record_id or
         in data arguments, then id will be generated by SurrealDB
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#create
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/create
 
         Examples:
@@ -340,7 +365,9 @@ class WebSocketConnection(Connection):
     def insert(self, table_name: str, data: Dict) -> SurrealResult:
         """
         This method inserts one or more records
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
         Examples:
@@ -363,7 +390,9 @@ class WebSocketConnection(Connection):
         """
         This method can be used to update or modify records in the database. So all old fields will be deleted and new
         will be added, if you wand just to add field to record, keeping old ones -use merge method instead
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
 
         Example:
@@ -389,11 +418,12 @@ class WebSocketConnection(Connection):
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
         will not be deleted, if you want to replace old data with new - use update method
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#merge
 
         Examples:
-        websocket_connection.update("person",{"active": True}) # "active" will be added to all records in person table
-        websocket_connection.update("person:my_id", {"active": True}) # "active" will be added to one record in person
+        websocket_connection.merge("person",{"active": True}) # "active" will be added to all records in person table
+        websocket_connection.merge("person:my_id", {"active": True}) # "active" will be added to one record in person
         table with specified id
 
         :param table_name: table name or table name with record_id to merge
@@ -411,7 +441,9 @@ class WebSocketConnection(Connection):
               return_diff: bool = False) -> SurrealResult:
         """
         This method changes specified data in one ar all records.
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#patch
+
         About allowed data format and DIFF refer to: https://jsonpatch.com
 
         Examples:
@@ -442,8 +474,15 @@ class WebSocketConnection(Connection):
         """
         This method deletes all records in a table or a single record, be careful and don't forget to specify id if you
         do not want to delete all records. This method do not remove table itself, only records in it
+
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
+
+        Examples:
+        websocket_connection.delete("person:my_id") # deletes one record in person table
+        websocket_connection.delete("person", "my_id") # deletes one record in person table
+        websocket_connection.delete("person") # deletes all records in person table
 
         :param table_name: table name or table name with record_id to delete
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
@@ -457,10 +496,11 @@ class WebSocketConnection(Connection):
     def export(self):
         """
         Websocket transport can not use export operation, so you can use http transport for that, or SurrealDB tools
+
         Refer to: https://docs.surrealdb.com/docs/cli/export
 
 
-        :raise CompatibilityError on any use
+        :raise CompatibilityError: on any use
         """
         message = "Export is not allowed for websocket transport in current SurrealDB version"
         logger.error(message)
@@ -472,10 +512,11 @@ class WebSocketConnection(Connection):
     def ml_export(self, _name: str, _version: str):
         """
         Websocket transport can not use ML export operation, so you can use http transport for that, or SurrealDB tools
+
         Refer to: https://docs.surrealdb.com/docs/cli/ml/export
 
 
-        :raise CompatibilityError on any use
+        :raise CompatibilityError: on any use
         """
         message = "ML export is not allowed for websocket transport in current SurrealDB version"
         logger.error(message)
@@ -487,10 +528,11 @@ class WebSocketConnection(Connection):
     def import_data(self, _path: Union[str, Path]):
         """
         Websocket transport can not use import operation, so you can use http transport for that, or SurrealDB tools
+
         Refer to: https://docs.surrealdb.com/docs/cli/import
 
 
-        :raise CompatibilityError on any use
+        :raise CompatibilityError: on any use
         """
         message = "Import is not allowed for websocket transport in current SurrealDB version"
         logger.error(message)
@@ -502,10 +544,11 @@ class WebSocketConnection(Connection):
     def ml_import(self, _path: Union[str, Path]):
         """
         Websocket transport can not use ML import operation, so you can use http transport for that, or SurrealDB tools
+
         Refer to: https://docs.surrealdb.com/docs/cli/ml/import
 
 
-        :raise CompatibilityError on any use
+        :raise CompatibilityError: on any use
         """
         message = "ML import is not allowed for websocket transport in current SurrealDB version"
         logger.error(message)

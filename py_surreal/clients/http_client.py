@@ -59,6 +59,7 @@ class HttpClient:
             logger.error("Http error on request %s, info: %s", url, e)
             if response:
                 response.close()
+            # we need it to check status code and text on error
             return e
         except (URLError, RemoteDisconnected, ConnectionResetError) as e:
             if response:
@@ -67,8 +68,13 @@ class HttpClient:
             raise HttpClientError(f"Error on connecting to '{url}'")
 
 
-
 def mask_opts(options: Dict) -> Dict:
+    """
+    Hide authorization data with asterisks, so "Authorization": "Basic ***" will be on return
+
+    :param options: dict with options(headers)
+    :return: same dict or dict with hided auth data
+    """
     masked_opts = {}
     for key, value in options.items():
         if key == "headers" and "Authorization" in value:
