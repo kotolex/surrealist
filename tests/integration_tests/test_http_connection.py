@@ -195,6 +195,9 @@ class TestHttpConnection(TestCase):
         # with open("import.surql", "wt", encoding="UTF-8") as file:
         #     file.write(res)
         self.assertTrue("article" in res)
+        self.assertTrue("user_db" in res)
+        # self.assertTrue("user_ns" in res)
+        self.assertTrue("user_scope" in res)
         self.assertTrue("OPTION IMPORT;" in res)
 
     def test_import(self):
