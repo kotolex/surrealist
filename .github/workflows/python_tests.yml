@@ -35,4 +35,5 @@ jobs:
     - name: Test with real db and integration tests
       run: |
         sh ./tests/up_db.sh &
+        sleep 3
         python -m unittest discover -s tests/integration_tests

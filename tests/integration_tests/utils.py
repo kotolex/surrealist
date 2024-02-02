@@ -1,10 +1,11 @@
+import logging
 import random
 from pathlib import Path
 from string import ascii_lowercase
 
 from py_surreal import Surreal
 from py_surreal.clients.http_client import HttpClient
-
+logging.getLogger("tests")
 URL = "http://127.0.0.1:8000/"
 
 assert HttpClient(URL).get('health').status == 200, "Start db on localhost!"
@@ -15,6 +16,7 @@ with db.connect() as connection:
     res = connection.import_data(file_path)
     print("="*15)
     print(res)
+    logging.critical(res)
     print("=" * 15)
 
 
