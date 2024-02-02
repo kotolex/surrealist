@@ -44,13 +44,13 @@ class WebSocketClient:
         logger.debug("Get message %s", crop_data(message))
         try:
             mess = json.loads(message)
-        except JSONDecodeError:
+        except JSONDecodeError as je:
             # Should never happen, all messages via json
             logger.error("Got non-json response %s", crop_data(message), exc_info=True)
-            raise ValueError(f"Got non-json response! {message}")
-        except RecursionError:
+            raise ValueError(f"Got non-json response! {message}") from je
+        except RecursionError as e:
             logger.error("Cant deserialize object, too many nested levels")
-            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         if "id" in mess:
             id_ = mess["id"]
             self.messages[id_] = mess
@@ -63,9 +63,9 @@ class WebSocketClient:
                     logger.debug("Use callback for %s", live_id)
                     callback(mess)
                 else:
-                    logger.warning(f"Got message, but no callback to work with. Message: %s", mess)
+                    logger.warning("Got message, but no callback to work with. Message: %s", mess)
             else:
-                logger.warning(f"Got unexpected message without id and result:  %s", mess)
+                logger.warning("Got unexpected message without id and result:  %s", mess)
 
     def on_error(self, _ws, err: Exception):
         logger.error("Websocket connection gets an error %s", err)
@@ -78,6 +78,11 @@ class WebSocketClient:
         logger.debug("Close connection to %s", self.base_url)
 
     def run(self):
+        """
+        Constantly waiting for messages on websocket connection, runs in separate thread
+
+        :return: None
+        """
         self.ws = websocket.WebSocketApp(self.base_url, on_open=self.on_open, on_message=self.on_message,
                                          on_error=self.on_error, on_close=self.on_close)
         self.ws.run_forever(skip_utf8_validation=True)
@@ -96,9 +101,9 @@ class WebSocketClient:
         data = {"id": id_, **data}
         try:
             data_string = json.dumps(data, ensure_ascii=False)
-        except RecursionError:
+        except RecursionError as e:
             logger.error("Cant serialize object, too many nested levels")
-            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
         self.ws.send(data_string)
         res = self._get_by_id(id_)
@@ -150,9 +155,9 @@ class WebSocketClient:
         """
         result = self._wait_until(predicate, timeout)
         if result == (False, "TIME"):
-            logger.error("Time exceeded: %s seconds. Error:", timeout, error_text)
+            logger.error("Time exceeded: %s seconds. Error: %s", timeout, error_text)
             raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
-        elif result == (False, "CLOSED"):
+        if result == (False, "CLOSED"):
             logger.error("Connection closed while client waits on it")
             raise WebSocketConnectionClosedError("Connection closed while client waits on it")
 

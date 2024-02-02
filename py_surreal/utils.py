@@ -81,8 +81,8 @@ def to_result(content: Union[str, Dict]) -> SurrealResult:
     if isinstance(content, str):
         try:
             content = json.loads(content)
-        except RecursionError:
-            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
+        except RecursionError as exc:
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from exc
     if isinstance(content, List):
         content = content[0]
     if 'details' in content:

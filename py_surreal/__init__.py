@@ -1,9 +1,9 @@
 from .surreal import Surreal
-from py_surreal.connections import WebSocketConnection, HttpConnection
+from .connections import WebSocketConnection, HttpConnection
 from .errors import *
 from .utils import DATA_LENGTH_FOR_LOGS
 
-__version__ = "1.1.1"
+__version__ = "0.1.1"
 
 __all__ = ("Surreal", "WebSocketConnection", "HttpConnection", "PySurrealError", "HttpConnectionError",
            "HttpClientError", "SurrealConnectionError", "WebSocketConnectionError", "WebSocketConnectionClosedError",

@@ -27,7 +27,7 @@ Via pip:
 ### Before you start ###
 Please, make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
 
-### Transports ###
+## Transports ##
 First of all, you should know that SurrealDB can work with websocket or http "transports", we chose to support both transports here, 
 but websockets is preferred and default one. Websockets can use live queries and other cool features.
 Each transport has functions it can not use by itself (in current SurrealDB version)
@@ -45,10 +45,10 @@ Each transport has functions it can not use by itself (in current SurrealDB vers
 Transports use query where it is possible, for compatibility, in all other cases CompatibilityError will be raised
 
 
-### Connect to SurrealDB ###
+## Connect to SurrealDB ##
 All you need is url of SurrealDB and sometimes a few more data to connect
 
-**Example**
+**Example 1**
 
 In this example we explicitly show all parameters, but remember many of them are optional
 ```python
@@ -62,7 +62,7 @@ print(surreal.is_ready()) # prints True if server up and running on that url
 print(surreal.version()) # prints server version
 ```
 **Note:** create of Surreal object does not attempt any connections or other actions, just store parameters for future use
-#### Parameters ####
+### Parameters ###
 **url** - url of SurrealDB server, if you sure you will use websocket connection - you can use url like ws://127.0.0.1:8000
 Url will be transform if using websocket connection, but http(s) url specified.
 For example standard http://127.0.0.1:8000 will transform to ws://127.0.0.1:8000/rpc
@@ -92,7 +92,7 @@ surreal = Surreal("http://127.0.0.1:8000")
 print(surreal.is_ready()) # prints True if server up and running on that url
 print(surreal.version()) # prints server version
 ```
-### Context managers and close ###
+## Context managers and close ##
 You should always close created connections, when you not need them anymore, the best way to do it is via context manager
 
 **Example 3**
@@ -118,7 +118,7 @@ print(result) # print result
 ws_connection.close() # explicitly close connection
 # after closing we can not use connection anymore, if you need one - create one more connection with surreal object
 ```
-### Debug mode ###
+## Debug mode ##
 As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use log level.
 If you specify "INFO" level, then you will transport operations, which methods were called, which parameters were used.
 For example
@@ -163,7 +163,7 @@ but if in example above (example 5) you choose "DEBUG", you will see:
 
 **Note:** passwords and auth information always masked in logs
 
-### Results ###
+## Results ##
 If method of connection not raised it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
 
 Here is standard result:
@@ -182,6 +182,8 @@ if result.is_error():
 Live queries let you subscribe on events of desired table, when changes happen - you get notification as simple result or in DIFF format
 
 About live query: https://surrealdb.com/products/lq
+
+Using live select: https://docs.surrealdb.com/docs/surrealql/statements/live-select
 
 About DIFF (jsonpatch): https://jsonpatch.com
 
@@ -224,21 +226,24 @@ def call_back(response: dict) -> None:
 # you need websockets for live query
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
-    res = connection.live("person", callback=call_back, return_diff=True)  # here we subscribe on person table and specify we need DIFF
+    # here we subscribe on person table and specify we need DIFF
+    res = connection.live("person", callback=call_back, return_diff=True)  
     connection.create("person", {"name": "John", "surname": "Doe"}) # here we create an event
     sleep(0.5) # sleep a little cause need some time to get message back
 ```
 in console you will get:
 `{'result': {'action': 'CREATE', 'id': '54a4dd0b-0008-46f4-b4e6-83e466cb4141', 'result': [{'op': 'replace', 'path': '/', 'value': {'id': 'person:fhglyrxkit3j0fnosjqg', 'name': 'John', 'surname': 'Doe'}}]}}`
 
-### Threads and thread-safety ###
+## Threads and thread-safety ##
 empty
 
-### Recursion and JSON in Python ###
+## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and
 standard json library use recursion to load and dump objects, so if you will have deep nesting in your objects - 
 you can get RecursionLimitError. The best choice here is to rethink your schema and objects, because you probably do 
-something wrong with such nesting. Second choice - increase recursion limit in your system with
+something wrong with such nesting. 
+
+Second choice - increase recursion limit in your system with
 ```python
 import sys
 sys.setrecursionlimit(10_000)

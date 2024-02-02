@@ -20,9 +20,9 @@ class WebSocketConnection(Connection):
     Each objects create only one websocket connection and can be used in context manager to close properly.
     You can not and should not try to use this object after closing connection. Just create new connection.
 
-    On creating, this object tries to create connection with specified data and will raise exception on fail.
-    If namespace and database specified - use method will be called automatically
-    If credentials specified - signin will be called automatically
+    On creating, this object tries to create connection with specified parameters and will raise exception on fail.
+    If namespace and database specified - USE method will be called automatically
+    If credentials specified - SIGNIN will be called automatically
     """
 
     def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
@@ -71,7 +71,7 @@ class WebSocketConnection(Connection):
                     raise WebSocketConnectionError(f"Error on connecting to {self._base_url}.\n"
                                                    f"Info: {signin_result.error}")
             else:
-                use_result = self.use(*list(self.params.values()))
+                use_result = self.use(self.params["NS"], self.params["DB"])
                 if use_result.is_error():
                     logger.error("Error on use %s. Info %s", self.params, use_result)
                     raise WebSocketConnectionError(f"Error on use '{self.params}'.\nInfo: {use_result.error}")
@@ -101,6 +101,10 @@ class WebSocketConnection(Connection):
         """
         data = {"method": "use", "params": [namespace, database]}
         logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
+        result = self._run(data)
+        if not result.is_error():
+            # if USE was OK we need to store new data (ns and db)
+            self.params = {"NS": namespace, "DB": database}
         return self._run(data)
 
     @connected

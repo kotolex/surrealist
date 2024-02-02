@@ -31,15 +31,38 @@ class HttpClient:
             self._headers["Authorization"] = f"Basic {base64string.decode(ENCODING)}"
 
     def get(self, path: str = '') -> HTTPResponse:
+        """
+        Represents GET method
+        :param path: endpoint to request
+        :return: response
+        """
         return self.request("GET", None, path)
 
     def post(self, data: Dict, path: str = '') -> HTTPResponse:
+        """
+        Represents POST method
+        :param data: json or bytes data
+        :param path: endpoint to request
+        :return: response
+        """
         return self.request("POST", data, path)
 
     def put(self, data: Dict, path: str = '') -> HTTPResponse:
+        """
+        Represents POST method
+        :param data: json or bytes data
+        :param path: endpoint to request
+        :return: response
+        """
         return self.request("PUT", data, path)
 
     def patch(self, data: Dict, path: str = '') -> HTTPResponse:
+        """
+        Represents POST method
+        :param data: json or bytes data
+        :param path: endpoint to request
+        :return: response
+        """
         return self.request("PATCH", data, path)
 
     def request(self, method: str, data: Optional[Union[Dict, str]], path: str = '',
@@ -50,9 +73,9 @@ class HttpClient:
         if method not in ("GET", "DELETE"):
             try:
                 js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
-            except RecursionError:
+            except RecursionError as e:
                 logger.error("Cant serialize object, too many nested levels")
-                raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
+                raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
             options['data'] = js
         try:
             req = urllib.request.Request(url, **options)
@@ -69,7 +92,7 @@ class HttpClient:
             if response:
                 response.close()
             logger.error("Error on connecting to %s, info: %s", url, e)
-            raise HttpClientError(f"Error on connecting to '{url}'")
+            raise HttpClientError(f"Error on connecting to '{url}'") from e
 
 
 def mask_opts(options: Dict) -> Dict:

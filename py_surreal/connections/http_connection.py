@@ -358,9 +358,9 @@ class HttpConnection(Connection):
         """
         try:
             data = json.dumps(value)
-        except RecursionError:
+        except RecursionError as e:
             logger.error("Cant serialize object, too many nested levels")
-            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
         return self.query(f"LET ${name} = {data};")
 
@@ -416,7 +416,7 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
-    def live(self, table_name, callback, need_diff: bool = False):
+    def live(self, table_name, callback, return_diff: bool = False):
         """
         Http transport can not use live queries, you should use websocket transport for that
 

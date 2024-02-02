@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  tests:
+  tests_python_38:
 
     runs-on: ubuntu-latest
 
@@ -27,12 +27,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install websocket-client
+        pip install pylint
         curl -sSf https://install.surrealdb.com | sh
         surreal version
-    - name: Test with unittest
+    - name: Lint
+      run: |
+        python -m pylint --rcfile pylint.toml py_surreal
+    - name: Unit-tests
       run: |
         python -m unittest discover -s tests/unit_tests
-    - name: Test with real db and integration tests
+    - name: Integration tests with real DB
       run: |
         sh ./tests/up_db.sh &
         sleep 3
