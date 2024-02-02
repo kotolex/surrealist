@@ -7,7 +7,8 @@ from tests.integration_tests.utils import URL
 
 class TestNegativeWebSocketConnection(TestCase):
     def test_connect_failed_on_invalid_url(self):
-        surreal = Surreal("http://127.0.0.1:8001", namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal("http://127.0.0.1:8001", namespace="test", database="test", credentials=('root', 'root'),
+                          timeout=1)
         with self.assertRaises(SurrealConnectionError):
             surreal.connect()
 
