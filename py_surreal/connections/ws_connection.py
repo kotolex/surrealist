@@ -3,11 +3,11 @@ from logging import getLogger
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Union, List, Callable, Any
 
+from py_surreal.clients.ws_client import WebSocketClient
 from py_surreal.connections.connection import Connection, connected
 from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
 from py_surreal.utils import DEFAULT_TIMEOUT, SurrealResult, crop_data, mask_pass
-from py_surreal.clients.ws_client import WebSocketClient
 
 logger = getLogger("websocket_connection")
 
@@ -217,7 +217,7 @@ class WebSocketConnection(Connection):
         :return: result of request
         """
         data = {"method": "let", "params": [name, value]}
-        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(value))
+        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
         return self._run(data)
 
     @connected

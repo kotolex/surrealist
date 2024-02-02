@@ -71,19 +71,6 @@ class Connection:
     def info(self) -> SurrealResult:
         return NotImplemented
 
-    def export(self) -> str:
-        return NotImplemented
-
-    def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
-
-    def ml_export(self, name: str, version: str) -> str:
-        return NotImplemented
-
-    def signin(self, user: str, password: str, namespace: Optional[str] = None,
-               database: Optional[str] = None, scope: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
-
     def authenticate(self, token: str) -> SurrealResult:
         return NotImplemented
 
@@ -103,6 +90,13 @@ class Connection:
         return NotImplemented
 
     def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
+        return NotImplemented
+
+    def signin(self, user: str, password: str, namespace: Optional[str] = None,
+               database: Optional[str] = None, scope: Optional[str] = None) -> SurrealResult:
+        return NotImplemented
+
+    def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         return NotImplemented
 
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -130,5 +124,11 @@ class Connection:
     def import_data(self, path) -> SurrealResult:
         return NotImplemented
 
+    def export(self) -> str:
+        return NotImplemented
+
     def ml_import(self, path) -> SurrealResult:
+        return NotImplemented
+
+    def ml_export(self, name: str, version: str) -> str:
         return NotImplemented

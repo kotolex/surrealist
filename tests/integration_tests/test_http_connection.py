@@ -228,6 +228,25 @@ class TestHttpConnection(TestCase):
         self.assertEqual(res.code, 200)
         self.assertEqual(res.result, "Authentication succeeded")
 
+    # TODO test for let and unset when fix bug https://github.com/surrealdb/surrealdb/issues/3418
+    # def test_let(self):
+    #     db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True, log_level="DEBUG")
+    #     connection = db.connect()
+    #     res = connection.let("name", "LEX")
+    #     self.assertEqual(res.result, None)
+    #     self.assertEqual(res.status, "OK")
+
+    def test_use(self):
+        db = Surreal(URL, credentials=("root", "root"), use_http=True, log_level="DEBUG")
+        with db.connect() as connection:
+            res = connection.use(namespace='test', database='test')
+            self.assertFalse(res.is_error())
+            res = connection.select("article", "any")
+            self.assertFalse(res.is_error())
+
+
+
+
 
 if __name__ == '__main__':
     main()

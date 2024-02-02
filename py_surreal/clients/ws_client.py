@@ -77,7 +77,7 @@ class WebSocketClient:
     def run(self):
         self.ws = websocket.WebSocketApp(self.base_url, on_open=self.on_open, on_message=self.on_message,
                                          on_error=self.on_error, on_close=self.on_close)
-        self.ws.run_forever(ping_interval=self.timeout, skip_utf8_validation=True)
+        self.ws.run_forever(skip_utf8_validation=True)
 
     def send(self, data: Dict, callback: Optional[Callable] = None) -> SurrealResult:
         """

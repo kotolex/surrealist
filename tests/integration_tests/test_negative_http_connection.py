@@ -150,6 +150,24 @@ class TestHttpConnectionNegative(TestCase):
         with self.assertRaises(CompatibilityError):
             connection.kill("prediction")
 
+    def test_authenticate_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.authenticate("prediction")
+
+    def test_invalidate_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.invalidate()
+
+    def test_info_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.info()
+
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"delete all failed on data{opts}"):

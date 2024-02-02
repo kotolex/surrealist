@@ -1,6 +1,7 @@
+import json
 from logging import getLogger
 from pathlib import Path
-from typing import Tuple, Dict, Optional, Union
+from typing import Tuple, Dict, Optional, Union, Any
 
 from py_surreal.clients.http_client import HttpClient
 from py_surreal.connections.connection import Connection, connected
@@ -25,6 +26,7 @@ class HttpConnection(Connection):
     def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Tuple[str, str] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         super().__init__(db_params, credentials, timeout)
+        self.url = url
         self.http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
         try:
             is_ready = self._is_ready()
@@ -339,11 +341,69 @@ class HttpConnection(Connection):
         return text
 
     @connected
+    def let(self, name: str, value: Any) -> SurrealResult:
+        """
+        This method sets and stores a value which can then be used in a subsequent query
+
+        Http transport use **query** method under the hood with "LET $@parameter = @value;"
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
+
+        :param name: name for the variable (without $ sign!)
+        :param value: value for the variable
+        :return: result of request
+        """
+        data = json.dumps(value)
+        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
+        return self.query(f"LET ${name} = {data};")
+
+    @connected
+    def unset(self, name: str) -> SurrealResult:
+        """
+        This method unsets value, which was previously stored
+
+        Http transport use **query** method under the hood with "LET $@parameter = @value;"
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#unset
+
+        :param name: name for the variable (without $ sign!)
+        :return: result of request
+        """
+        logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
+        return self.query(f"REMOVE PARAM ${name};")
+
+    @connected
+    def use(self, namespace: str, database: str) -> SurrealResult:
+        """
+        This method specifies the namespace and database for the current connection
+
+        Http transport use **query** method under the hood with "USE NS namespace DB database;"
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
+
+        Example:
+        http_connection.use("test", "test") # use test namespace and test database for this connection
+
+        :param namespace: name of the namespace to use
+        :param database: name of the database to use
+        :return: result of request
+        """
+        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
+        result = self.query(f"USE NS {namespace} DB {database};")
+        if not result.is_error():
+            # if USE was OK we need to store new data (ns and db)
+            self.db_params = {"NS": namespace, "DB": database}
+            self.http_client = HttpClient(self.url, headers=self.db_params, credentials=self.credentials,
+                                          timeout=self.timeout)
+        return result
+
+    @connected
     def patch(self, table_name: str, data: Dict, record_id: Optional[str] = None, return_diff: bool = False):
         """
-        Http transport can not use patch operation, so you can use websocket transport for that, or methods like
+        Http transport can not use patch operation, you can use websocket transport for that, or methods like
         **merge** and **update** for same results
-
 
         :raise CompatibilityError: on any use
         """
@@ -353,7 +413,7 @@ class HttpConnection(Connection):
 
     def live(self, table_name, callback, need_diff: bool = False):
         """
-        Http transport can not use live queries, so you should use websocket transport for that
+        Http transport can not use live queries, you should use websocket transport for that
 
         :raise CompatibilityError: on any use
         """
@@ -363,11 +423,57 @@ class HttpConnection(Connection):
 
     def kill(self, live_query_id: str):
         """
-        Http transport can not use KILL operation, so you should use websocket transport for that
+        Http transport can not use KILL operation, you should use websocket transport for that
 
         :raise CompatibilityError: on any use
         """
         message = "Http transport can not use kill, use websockets instead"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    @connected
+    def insert(self, table_name: str, data: Dict):
+        """
+        Http transport can not insert more than 1 one record, you should use **create** method for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport can not insert more than 1 one record, you should use create method for that"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    @connected
+    def authenticate(self, token: str):
+        """
+        Http transport can not use authenticate, you should use websocket for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport can not authenticate, you should use websocket for that"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    @connected
+    def invalidate(self):
+        """
+        Http transport can not use invalidate, you should use websocket for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport can not invalidate, you should use websocket for that"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    @connected
+    def info(self):
+        """
+        Http transport can not use INFO, you should use websocket or **query** method
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport can not use INFO, you should use query method or websocket for that"
         logger.error(message)
         raise CompatibilityError(message)
 
