@@ -35,4 +35,5 @@ jobs:
     - name: Test with real db and integration tests
       run: |
         sh ./tests/up_db.sh &
+        surreal import --conn http://localhost:8000 --user root --pass root --ns test --db test import.surql 
         python -m unittest discover -s tests/integration_tests
