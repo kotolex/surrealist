@@ -8,7 +8,7 @@ from typing import Dict, Callable, Optional
 
 import websocket
 
-from py_surreal.errors import WebSocketConnectionClosedError
+from py_surreal.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
 from py_surreal.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
 
 logger = getLogger("websocket_client")
@@ -48,6 +48,9 @@ class WebSocketClient:
             # Should never happen, all messages via json
             logger.error("Got non-json response %s", crop_data(message), exc_info=True)
             raise ValueError(f"Got non-json response! {message}")
+        except RecursionError:
+            logger.error("Cant deserialize object, too many nested levels")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
         if "id" in mess:
             id_ = mess["id"]
             self.messages[id_] = mess
@@ -91,7 +94,11 @@ class WebSocketClient:
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
-        data_string = json.dumps(data, ensure_ascii=False)
+        try:
+            data_string = json.dumps(data, ensure_ascii=False)
+        except RecursionError:
+            logger.error("Cant serialize object, too many nested levels")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
         logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
         self.ws.send(data_string)
         res = self._get_by_id(id_)

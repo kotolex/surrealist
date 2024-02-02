@@ -5,7 +5,8 @@ from typing import Tuple, Dict, Optional, Union, Any
 
 from py_surreal.clients.http_client import HttpClient
 from py_surreal.connections.connection import Connection, connected
-from py_surreal.errors import SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError
+from py_surreal.errors import SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError, \
+    TooManyNestedLevelsError
 from py_surreal.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
 
 logger = getLogger("http_connection")
@@ -355,7 +356,11 @@ class HttpConnection(Connection):
         :param value: value for the variable
         :return: result of request
         """
-        data = json.dumps(value)
+        try:
+            data = json.dumps(value)
+        except RecursionError:
+            logger.error("Cant serialize object, too many nested levels")
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
         logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
         return self.query(f"LET ${name} = {data};")
 

@@ -564,5 +564,7 @@ class WebSocketConnection(Connection):
     def is_connected(self) -> bool:
         return self.client.connected
 
-    def _run(self, data, callback: Callable = None):
-        return self.client.send(data, callback)
+    def _run(self, data, callback: Callable = None) -> SurrealResult:
+        result = self.client.send(data, callback)
+        logger.info("Got result: %s", crop_data(str(result)))
+        return result

@@ -237,7 +237,7 @@ class TestHttpConnection(TestCase):
     #     self.assertEqual(res.status, "OK")
 
     def test_use(self):
-        db = Surreal(URL, credentials=("root", "root"), use_http=True, log_level="DEBUG")
+        db = Surreal(URL, credentials=("root", "root"), use_http=True)
         with db.connect() as connection:
             res = connection.use(namespace='test', database='test')
             self.assertFalse(res.is_error())

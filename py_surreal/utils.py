@@ -4,6 +4,8 @@ import re
 import uuid
 from typing import Union, List, Dict, Optional
 
+from py_surreal.errors import TooManyNestedLevelsError
+
 ENCODING = "UTF-8"
 OK = "OK"
 HTTP_OK = 200  # status code for success
@@ -77,7 +79,10 @@ def to_result(content: Union[str, Dict]) -> SurrealResult:
     :return: Result object
     """
     if isinstance(content, str):
-        content = json.loads(content)
+        try:
+            content = json.loads(content)
+        except RecursionError:
+            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
     if isinstance(content, List):
         content = content[0]
     if 'details' in content:

@@ -70,3 +70,11 @@ class CompatibilityError(PySurrealError):
     """
     # TODO link here
     pass
+
+class TooManyNestedLevelsError(PySurrealError):
+    """
+    Raises when str or json cant handle the object because of too deep nesting and recursion limit in python
+    See documentation: url
+    """
+    # TODO link here
+    pass

@@ -7,7 +7,7 @@ from logging import getLogger
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from py_surreal.errors import HttpClientError
+from py_surreal.errors import HttpClientError, TooManyNestedLevelsError
 from py_surreal.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
 
 logger = getLogger("http_client")
@@ -48,7 +48,11 @@ class HttpClient:
         url = f'{self._base_url}{path}'
         options = {'method': method, 'headers': self._headers}
         if method not in ("GET", "DELETE"):
-            js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
+            try:
+                js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
+            except RecursionError:
+                logger.error("Cant serialize object, too many nested levels")
+                raise TooManyNestedLevelsError("Cant serialize object, too many nested levels\n See documentation:")
             options['data'] = js
         try:
             req = urllib.request.Request(url, **options)
