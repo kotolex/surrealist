@@ -1,8 +1,8 @@
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
-from py_surreal.errors import OperationOnClosedConnectionError
-from py_surreal.utils import SurrealResult, DEFAULT_TIMEOUT
+from surrealist.errors import OperationOnClosedConnectionError
+from surrealist.utils import SurrealResult, DEFAULT_TIMEOUT
 
 logger = getLogger("connection")
 

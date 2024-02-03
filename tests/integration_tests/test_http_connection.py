@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from py_surreal.surreal import Surreal
-from py_surreal.utils import get_uuid
+from surrealist import Surreal
+from surrealist.utils import get_uuid
 from tests.integration_tests.utils import URL, WS_URL
 
 

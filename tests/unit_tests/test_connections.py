@@ -1,8 +1,7 @@
 from unittest import TestCase, main
-from py_surreal.surreal import Surreal
-from py_surreal.errors import SurrealConnectionError, HttpClientError
-from py_surreal.utils import to_result, SurrealResult, crop_data, mask_pass
-from py_surreal.clients.http_client import mask_opts
+from surrealist import Surreal, SurrealConnectionError, HttpClientError
+from surrealist.utils import to_result, SurrealResult, crop_data, mask_pass
+from surrealist.clients.http_client import mask_opts
 
 WRONG_URL = "http://127.0.0.1:9999/"
 URL = "http://127.0.0.1:8000"

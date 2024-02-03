@@ -8,8 +8,8 @@ from typing import Dict, Callable, Optional
 
 import websocket
 
-from py_surreal.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
-from py_surreal.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
+from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
+from surrealist.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
 
 logger = getLogger("websocket_client")
 

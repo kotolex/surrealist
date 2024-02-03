@@ -3,11 +3,11 @@ from logging import getLogger
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Union, List, Callable, Any
 
-from py_surreal.clients.ws_client import WebSocketClient
-from py_surreal.connections.connection import Connection, connected
-from py_surreal.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
+from surrealist.clients.ws_client import WebSocketClient
+from surrealist.connections.connection import Connection, connected
+from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
-from py_surreal.utils import DEFAULT_TIMEOUT, SurrealResult, crop_data, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, SurrealResult, crop_data, mask_pass
 
 logger = getLogger("websocket_connection")
 
@@ -15,7 +15,7 @@ logger = getLogger("websocket_connection")
 class WebSocketConnection(Connection):
     """
     Represents websocket transport and abilities to work with SurrealDb. It is recommended connection.
-    Refer to py_surreal documentation and here https://docs.surrealdb.com/docs/integration/websocket
+    Refer to surrealist documentation and here https://docs.surrealdb.com/docs/integration/websocket
 
     Each objects create only one websocket connection and can be used in context manager to close properly.
     You can not and should not try to use this object after closing connection. Just create new connection.
@@ -249,7 +249,7 @@ class WebSocketConnection(Connection):
 
         About DIFF refer to: https://jsonpatch.com
 
-        Please see py_surreal documentation to use this method properly
+        Please see surrealist documentation to use this method properly
 
         Example:
         websocket_connection.live("article", callback=lambda a_dict: print(a_dict)) # creates live query to check any

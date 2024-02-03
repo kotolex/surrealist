@@ -2,11 +2,11 @@ import urllib.parse
 from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
 from typing import Tuple, Optional
 
-from py_surreal.clients import HttpClient
-from py_surreal.connections.connection import Connection
-from py_surreal.connections.http_connection import HttpConnection
-from py_surreal.connections.ws_connection import WebSocketConnection
-from py_surreal.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
+from surrealist.clients import HttpClient
+from surrealist.connections.connection import Connection
+from surrealist.connections.http_connection import HttpConnection
+from surrealist.connections.ws_connection import WebSocketConnection
+from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
 
 FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'
 basicConfig(level=ERROR, format=FORMAT)
@@ -53,7 +53,7 @@ class Surreal:
         self._is_http_url = url.startswith("http")
         # we should change only http endpoints
         if self._is_http_url and not url.endswith("/"):
-            self._url= f"{url}/"
+            self._url = f"{url}/"
         self.credentials = credentials
         self.timeout = timeout
         self._possible_url = self._url

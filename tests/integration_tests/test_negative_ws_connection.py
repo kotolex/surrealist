@@ -1,7 +1,6 @@
 from unittest import TestCase, main
 
-from py_surreal.errors import SurrealConnectionError, WebSocketConnectionError, CompatibilityError
-from py_surreal.surreal import Surreal
+from surrealist import Surreal, SurrealConnectionError, WebSocketConnectionError, CompatibilityError
 from tests.integration_tests.utils import URL
 
 

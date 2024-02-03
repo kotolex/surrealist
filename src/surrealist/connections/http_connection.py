@@ -3,11 +3,11 @@ from logging import getLogger
 from pathlib import Path
 from typing import Tuple, Dict, Optional, Union, Any
 
-from py_surreal.clients.http_client import HttpClient
-from py_surreal.connections.connection import Connection, connected
-from py_surreal.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError,
+from surrealist.clients.http_client import HttpClient
+from surrealist.connections.connection import Connection, connected
+from surrealist.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError,
                                TooManyNestedLevelsError)
-from py_surreal.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
+from surrealist.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
 
 logger = getLogger("http_connection")
 
@@ -17,7 +17,7 @@ class HttpConnection(Connection):
     Represents http transport and abilities to work with SurrealDb. It is not recommended connection, use websocket on
     any doubt, this connection exists for compatibility reasons. Some features as live query is not possible on this
     transport, but import and export are.
-    Refer to py_surreal documentation and here https://docs.surrealdb.com/docs/integration/http
+    Refer to surrealist documentation and here https://docs.surrealdb.com/docs/integration/http
 
     Each method call creates new http short-live connection.
 

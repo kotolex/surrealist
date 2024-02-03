@@ -1,6 +1,6 @@
 class PySurrealError(Exception):
     """
-    Parent for all types of errors in py_surreal, so you can use more broad error in except clauses
+    Parent for all types of errors in surrealist, so you can use more broad error in except clauses
 
     try:
         // some job with connection

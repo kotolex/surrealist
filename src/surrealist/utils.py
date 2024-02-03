@@ -4,7 +4,7 @@ import re
 import uuid
 from typing import Union, List, Dict, Optional
 
-from py_surreal.errors import TooManyNestedLevelsError
+from .errors import TooManyNestedLevelsError
 
 ENCODING = "UTF-8"
 OK = "OK"

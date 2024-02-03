@@ -1,9 +1,7 @@
 import threading
 from unittest import TestCase, main
 
-from py_surreal.connections import Connection
-from py_surreal.errors import OperationOnClosedConnectionError
-from py_surreal.surreal import Surreal
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection
 from tests.integration_tests.utils import URL, get_random_series
 
 

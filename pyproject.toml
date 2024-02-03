@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surrealist"
+version = "0.1.2"
+description = "Python client for SurrealDB, version 1.1.1 compatible, all features supported"
+readme = "README.md"
+authors = [{ name = "kotolex", email = "farofwell@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["surreal", "Surreal", "SurrealDB", "surrealist"]
+dependencies = [
+    "websocket-client",
+]
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/kotolex/py_surreal"
+

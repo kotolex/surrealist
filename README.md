@@ -1,6 +1,6 @@
 # README #
 
-Py_Surreal is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro)
 
 It is blocking and **unofficial**, so if you need async AND/OR official client go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -18,13 +18,14 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+
 More to come:
  * connections pool
  * additional features (count, remove etc.)
+ * transactions, explain
 
 
 ### Installation ###
 
 Via pip:
 
-`pip install py_surreal` # not working right now
+`pip install surrealist`
 
 ### Before you start ###
 Please, make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
@@ -53,15 +54,16 @@ All you need is url of SurrealDB and sometimes a few more data to connect
 **Example 1**
 
 In this example we explicitly show all parameters, but remember many of them are optional
+
 ```python
-from py_surreal import Surreal
+from surrealist import Surreal
 
 # we create surreal object, it can be used to create one or more connections with websockets (use_http=False)
 # with timeout 10 seconds and ERROR logging level
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"),
-                      use_http=False, timeout=10, log_level="ERROR")
-print(surreal.is_ready()) # prints True if server up and running on that url
-print(surreal.version()) # prints server version
+                  use_http=False, timeout=10, log_level="ERROR")
+print(surreal.is_ready())  # prints True if server up and running on that url
+print(surreal.version())  # prints server version
 ```
 **Note:** create of Surreal object does not attempt any connections or other actions, just store parameters for future use
 
@@ -91,39 +93,42 @@ For example for wss://127.0.0.1:9000/some/rps predicted http url will be https:/
 **Example 2**
 
 In this example we do not use default(optional) parameters
+
 ```python
-from py_surreal import Surreal
+from surrealist import Surreal
 
 # we create surreal object, it can be used to create one or more connections with websockets
 # with timeout 5 seconds and ERROR logging level
 surreal = Surreal("http://127.0.0.1:8000")
-print(surreal.is_ready()) # prints True if server up and running on that url
-print(surreal.version()) # prints server version
+print(surreal.is_ready())  # prints True if server up and running on that url
+print(surreal.version())  # prints server version
 ```
 ## Context managers and close ##
 You should always close created connections, when you not need them anymore, the best way to do it is via context manager
 
 **Example 3**
+
 ```python
-from py_surreal import Surreal
+from surrealist import Surreal
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
-with surreal.connect() as ws_connection: # create context manager, it will close connection for us
+with surreal.connect() as ws_connection:  # create context manager, it will close connection for us
     result = ws_connection.select("person")  # select from db
-    print(result) # print result
+    print(result)  # print result
 # here connection is closed
 ```
 You can do the same by itself:
 
 **Example 4**
+
 ```python
-from py_surreal import Surreal
+from surrealist import Surreal
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
-ws_connection = surreal.connect() # open connection
+ws_connection = surreal.connect()  # open connection
 result = ws_connection.select("person")  # select from db
-print(result) # print result
-ws_connection.close() # explicitly close connection
+print(result)  # print result
+ws_connection.close()  # explicitly close connection
 # after closing we can not use connection anymore, if you need one - create one more connection with surreal object
 ```
 
@@ -179,11 +184,12 @@ If you specify "INFO" level, then you will see transport operations, which metho
 For example
 
 **Example 5**
+
 ```python
-from py_surreal import Surreal
+from surrealist import Surreal
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"),
-                      log_level="INFO")
+                  log_level="INFO")
 with surreal.connect() as connection:
     res = connection.create("article", {"author": "John Doe", "title": "In memoriam", "text": "text"})
 
@@ -239,43 +245,49 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 and will disappear on connection close, even if other connections still active
 
 **Example 6**
+
 ```python
 from time import sleep
-from py_surreal import Surreal
+from surrealist import Surreal
+
 
 # you need callback, a function which will get dictionary and do something with it
 def call_back(response: dict) -> None:
     print(response)
+
 
 # you need websockets for live query
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
     res = connection.live("person", callback=call_back)  # here we subscribe on person table
-    live_id = res.result # live_id is a LQ id, we need it to kill query
-    connection.create("person", {"name": "John", "surname": "Doe"}) # here we create an event
-    sleep(0.5) # sleep a little cause need some time to get message back
+    live_id = res.result  # live_id is a LQ id, we need it to kill query
+    connection.create("person", {"name": "John", "surname": "Doe"})  # here we create an event
+    sleep(0.5)  # sleep a little cause need some time to get message back
 ```
 in console you will get:
 `{'result': {'action': 'CREATE', 'id': 'c2c8952b-b2bc-4d3a-aa68-4609f5818d7c', 'result': {'id': 'person:dik1sm50xr2d5mc7fysi', 'name': 'John', 'surname': 'Doe'}}}`
 
 **Example 7**
+
 ```python
 from time import sleep
-from py_surreal import Surreal
+from surrealist import Surreal
+
 
 # you need callback, a function which will get dictionary and do something with it
 def call_back(response: dict) -> None:
     print(response)
 
+
 # you need websockets for live query
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
     # here we subscribe on person table and specify we need DIFF
-    res = connection.live("person", callback=call_back, return_diff=True) 
-    live_id = res.result # live_id is a LQ id, we need it to kill query
-    connection.create("person", {"name": "John", "surname": "Doe"}) # here we create an event
-    sleep(0.5) # sleep a little cause need some time to get message back
-    connection.kill(live_id) # we kill LQ, no more events to come
+    res = connection.live("person", callback=call_back, return_diff=True)
+    live_id = res.result  # live_id is a LQ id, we need it to kill query
+    connection.create("person", {"name": "John", "surname": "Doe"})  # here we create an event
+    sleep(0.5)  # sleep a little cause need some time to get message back
+    connection.kill(live_id)  # we kill LQ, no more events to come
 ```
 in console you will get:
 `{'result': {'action': 'CREATE', 'id': '54a4dd0b-0008-46f4-b4e6-83e466cb4141', 'result': [{'op': 'replace', 'path': '/', 'value': {'id': 'person:fhglyrxkit3j0fnosjqg', 'name': 'John', 'surname': 'Doe'}}]}}`

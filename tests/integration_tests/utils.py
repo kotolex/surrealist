@@ -3,8 +3,8 @@ import random
 from pathlib import Path
 from string import ascii_lowercase
 
-from py_surreal import Surreal
-from py_surreal.clients.http_client import HttpClient
+from src.surrealist import Surreal
+from src.surrealist.clients.http_client import HttpClient
 
 logging.getLogger("tests")
 URL = "http://127.0.0.1:8000/"

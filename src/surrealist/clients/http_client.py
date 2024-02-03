@@ -7,8 +7,8 @@ from logging import getLogger
 from typing import Optional, Tuple, Dict, Union
 from urllib.error import URLError, HTTPError
 
-from py_surreal.errors import HttpClientError, TooManyNestedLevelsError
-from py_surreal.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
+from surrealist.errors import HttpClientError, TooManyNestedLevelsError
+from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
 
 logger = getLogger("http_client")
 
@@ -24,7 +24,7 @@ class HttpClient:
         self._credentials = credentials
         self._timeout = timeout
         headers = headers or {}
-        self._headers = {"Accept": "application/json", "User-Agent": "py_surreal http-client", **headers}
+        self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
         if credentials:
             self._user, self._pass = credentials
             base64string = base64.encodebytes(f'{self._user}:{self._pass}'.encode(ENCODING))[:-1]
