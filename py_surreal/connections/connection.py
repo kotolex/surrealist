@@ -39,17 +39,17 @@ class Connection:
         :param credentials: optional pair of user and pass for auth, like ("root", "root")
         :param timeout: timeout in seconds to wait connection results and responses
         """
-        self.db_params = db_params
-        self.credentials = credentials
-        self.connected = False
-        self.timeout = timeout
+        self._db_params = db_params
+        self._credentials = credentials
+        self._connected = False
+        self._timeout = timeout
 
     def close(self):
         """
         Closes the connection. You can not and should not use connection object after that
         """
         logger.info("Connection was closed")
-        self.connected = False
+        self._connected = False
 
     def __enter__(self):
         return self
@@ -63,7 +63,7 @@ class Connection:
 
         :return: True if connection is usable, False otherwise
         """
-        return self.connected
+        return self._connected
 
     def use(self, namespace: str, database: str) -> SurrealResult:
         return NotImplemented

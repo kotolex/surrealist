@@ -29,13 +29,13 @@ class WebSocketConnection(Connection):
                  timeout: int = DEFAULT_TIMEOUT):
         super().__init__(db_params, credentials, timeout)
         base_url = urllib.parse.urlparse(url.lower())
-        self.params = {}
+        self._params = {}
         if db_params:
             if "NS" in db_params:
-                self.params["NS"] = db_params["NS"]
+                self._params["NS"] = db_params["NS"]
             if "DB" in db_params:
-                self.params["DB"] = db_params["DB"]
-            if not self.params:
+                self._params["DB"] = db_params["DB"]
+            if not self._params:
                 message = "Connection parameters namespace and database required"
                 logger.error(message)
                 raise ConnectionParametersError(message)
@@ -44,9 +44,9 @@ class WebSocketConnection(Connection):
         if base_url.scheme in ("http", "https"):
             self._base_url = f"{base_url.scheme.replace('http', 'ws')}://{base_url.netloc}/rpc"
         try:
-            self.client = WebSocketClient(self._base_url, timeout)
+            self._client = WebSocketClient(self._base_url, timeout)
         except TimeoutError:
-            logger.error("Cant connect to %s in %s seconds", self._base_url, self.timeout)
+            logger.error("Cant connect to %s in %s seconds", self._base_url, self._timeout)
             raise SurrealConnectionError(f"Cant connect to {self._base_url} in {timeout} seconds.\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
@@ -56,28 +56,28 @@ class WebSocketConnection(Connection):
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
         self._use_or_sign_on_params(credentials)
-        self.connected = True
+        self._connected = True
         masked_creds = None if not credentials else (credentials[0], "******")
         logger.info("Connected to %s, params: %s, credentials: %s, timeout: %s", self._base_url, db_params,
                     masked_creds, timeout)
 
     def _use_or_sign_on_params(self, credentials):
-        if self.params:
+        if self._params:
             if credentials:
-                self._user, self._pass = self.credentials
-                signin_result = self.signin(self._user, self._pass, *list(self.params.values()))
+                self._user, self._pass = self._credentials
+                signin_result = self.signin(self._user, self._pass, *list(self._params.values()))
                 if signin_result.is_error():
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
                     raise WebSocketConnectionError(f"Error on connecting to {self._base_url}.\n"
                                                    f"Info: {signin_result.error}")
             else:
-                use_result = self.use(self.params["NS"], self.params["DB"])
+                use_result = self.use(self._params["NS"], self._params["DB"])
                 if use_result.is_error():
-                    logger.error("Error on use %s. Info %s", self.params, use_result)
-                    raise WebSocketConnectionError(f"Error on use '{self.params}'.\nInfo: {use_result.error}")
+                    logger.error("Error on use %s. Info %s", self._params, use_result)
+                    raise WebSocketConnectionError(f"Error on use '{self._params}'.\nInfo: {use_result.error}")
         else:
             if credentials:
-                self._user, self._pass = self.credentials
+                self._user, self._pass = self._credentials
                 signin_result = self.signin(self._user, self._pass)
                 if signin_result.is_error():
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
@@ -104,7 +104,7 @@ class WebSocketConnection(Connection):
         result = self._run(data)
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
-            self.params = {"NS": namespace, "DB": database}
+            self._params = {"NS": namespace, "DB": database}
         return self._run(data)
 
     @connected
@@ -238,6 +238,7 @@ class WebSocketConnection(Connection):
         logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
         return self._run(data)
 
+    @connected
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
         This method can be used to initiate live query - a real-time selection from a table
@@ -512,7 +513,6 @@ class WebSocketConnection(Connection):
                        f"Refer to: https://docs.surrealdb.com/docs/cli/export"
         raise CompatibilityError(full_message)
 
-    @connected
     def ml_export(self, _name: str, _version: str):
         """
         Websocket transport can not use ML export operation, so you can use http transport for that, or SurrealDB tools
@@ -528,7 +528,6 @@ class WebSocketConnection(Connection):
                        f"Refer to: https://docs.surrealdb.com/docs/cli/ml/export"
         raise CompatibilityError(full_message)
 
-    @connected
     def import_data(self, _path: Union[str, Path]):
         """
         Websocket transport can not use import operation, so you can use http transport for that, or SurrealDB tools
@@ -544,7 +543,6 @@ class WebSocketConnection(Connection):
                        f"Refer to: https://docs.surrealdb.com/docs/cli/import"
         raise CompatibilityError(full_message)
 
-    @connected
     def ml_import(self, _path: Union[str, Path]):
         """
         Websocket transport can not use ML import operation, so you can use http transport for that, or SurrealDB tools
@@ -563,12 +561,12 @@ class WebSocketConnection(Connection):
     def close(self):
         super().close()
         if self.is_connected():
-            self.client.close()
+            self._client.close()
 
     def is_connected(self) -> bool:
-        return self.client.connected
+        return self._client.is_connected()
 
     def _run(self, data, callback: Callable = None) -> SurrealResult:
-        result = self.client.send(data, callback)
+        result = self._client.send(data, callback)
         logger.info("Got result: %s", crop_data(str(result)))
         return result

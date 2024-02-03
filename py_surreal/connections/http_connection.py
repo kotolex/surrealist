@@ -5,8 +5,8 @@ from typing import Tuple, Dict, Optional, Union, Any
 
 from py_surreal.clients.http_client import HttpClient
 from py_surreal.connections.connection import Connection, connected
-from py_surreal.errors import SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError, \
-    TooManyNestedLevelsError
+from py_surreal.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError,
+                               TooManyNestedLevelsError)
 from py_surreal.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
 
 logger = getLogger("http_connection")
@@ -27,8 +27,8 @@ class HttpConnection(Connection):
     def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Tuple[str, str] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         super().__init__(db_params, credentials, timeout)
-        self.url = url
-        self.http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
+        self._url = url
+        self._http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
         try:
             is_ready = self._is_ready()
         except HttpClientError:
@@ -38,7 +38,7 @@ class HttpConnection(Connection):
             raise SurrealConnectionError(f"Cant connect to {url} OR /status and /health are not OK.\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
-        self.connected = True
+        self._connected = True
         masked_creds = None if not credentials else (credentials[0], "******")
         logger.info("Connected to %s, params: %s, credentials: %s, timeout: %s", url, db_params, masked_creds, timeout)
 
@@ -399,12 +399,11 @@ class HttpConnection(Connection):
         result = self.query(f"USE NS {namespace} DB {database};")
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
-            self.db_params = {"NS": namespace, "DB": database}
-            self.http_client = HttpClient(self.url, headers=self.db_params, credentials=self.credentials,
-                                          timeout=self.timeout)
+            self._db_params = {"NS": namespace, "DB": database}
+            self._http_client = HttpClient(self._url, headers=self._db_params, credentials=self._credentials,
+                                           timeout=self._timeout)
         return result
 
-    @connected
     def patch(self, table_name: str, data: Dict, record_id: Optional[str] = None, return_diff: bool = False):
         """
         Http transport can not use patch operation, you can use websocket transport for that, or methods like
@@ -436,7 +435,6 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
-    @connected
     def insert(self, table_name: str, data: Dict):
         """
         Http transport can not insert more than 1 one record, you should use **create** method for that
@@ -447,7 +445,6 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
-    @connected
     def authenticate(self, token: str):
         """
         Http transport can not use authenticate, you should use websocket for that
@@ -458,7 +455,6 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
-    @connected
     def invalidate(self):
         """
         Http transport can not use invalidate, you should use websocket for that
@@ -469,7 +465,6 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
-    @connected
     def info(self):
         """
         Http transport can not use INFO, you should use websocket or **query** method
@@ -483,14 +478,14 @@ class HttpConnection(Connection):
         raise CompatibilityError(message)
 
     def _simple_get(self, endpoint: str) -> Tuple[int, str]:
-        with self.http_client.get(endpoint) as resp:
+        with self._http_client.get(endpoint) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
             _body = "is empty" if not text else crop_data(text)
             logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, _body)
             return status, text
 
     def _simple_request(self, method, endpoint: str, data: Union[Dict, str], not_json: bool = False) -> Tuple[int, str]:
-        with self.http_client.request(method, data, endpoint, not_json) as resp:
+        with self._http_client.request(method, data, endpoint, not_json) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
             _body = "is empty" if not text else crop_data(text)
             logger.info("Response from /%s, status_code: %s, body %s", endpoint, status, _body)

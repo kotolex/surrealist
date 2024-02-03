@@ -21,8 +21,8 @@ class HttpClient:
     def __init__(self, base_url: str, headers: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         self._base_url = base_url
-        self.credentials = credentials
-        self.timeout = timeout
+        self._credentials = credentials
+        self._timeout = timeout
         headers = headers or {}
         self._headers = {"Accept": "application/json", "User-Agent": "py_surreal http-client", **headers}
         if credentials:
@@ -79,8 +79,8 @@ class HttpClient:
             options['data'] = js
         try:
             req = urllib.request.Request(url, **options)
-            logger.debug("Request to %s, options: %s, timeout: %d", url, mask_opts(options), self.timeout)
-            response = urllib.request.urlopen(req, timeout=self.timeout)
+            logger.debug("Request to %s, options: %s, timeout: %d", url, mask_opts(options), self._timeout)
+            response = urllib.request.urlopen(req, timeout=self._timeout)
             return response
         except HTTPError as e:
             logger.error("Http error on request %s, info: %s", url, e)
