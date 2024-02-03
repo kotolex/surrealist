@@ -2,6 +2,7 @@ import urllib.parse
 from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
 from typing import Tuple, Optional
 
+from surrealist.errors import HttpClientError, SurrealConnectionError
 from surrealist.clients import HttpClient
 from surrealist.connections.connection import Connection
 from surrealist.connections.http_connection import HttpConnection
@@ -38,8 +39,8 @@ class Surreal:
         :param log_level: level of logging for debug purposes, one of (DEBUG, INFO, ERROR) allowed, where ERROR
         is default, INFO - to see only operations, DEBUG - to see all, including transport requests/responses
         """
-        self.log_level = log_level
-        self.log_data_length = DATA_LENGTH_FOR_LOGS
+        self._log_level = log_level
+        self._log_data_length = DATA_LENGTH_FOR_LOGS
         self.set_log_level(log_level)
         self.client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
@@ -74,7 +75,7 @@ class Surreal:
         :return: None
         """
         _set_length(length)
-        self.log_data_length = length
+        self._log_data_length = length
 
     def set_log_level(self, level: str):
         """
@@ -98,7 +99,7 @@ class Surreal:
         new_level = levels[level]
         logger.setLevel(new_level)
         logger.debug("Log level switch to %s", level)
-        self.log_level = level
+        self._log_level = level
 
     def connect(self) -> Connection:
         """
@@ -161,10 +162,20 @@ class Surreal:
         return self.__get("version")[1]
 
     def __get(self, endpoint: str) -> Tuple[int, str]:
-        with HttpClient(self._possible_url, timeout=DEFAULT_TIMEOUT).get(endpoint) as resp:
-            status, text = resp.status, resp.read().decode(ENCODING)
-            body = "is empty" if not text else text
-            logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, body)
-            if status != HTTP_OK:
-                logger.error("Status is %s for predicted http %s", status, self._possible_url)
-            return status, text
+        try:
+            with HttpClient(self._possible_url, timeout=DEFAULT_TIMEOUT).get(endpoint) as resp:
+                status, text = resp.status, resp.read().decode(ENCODING)
+                body = "is empty" if not text else text
+                logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, body)
+                if status != HTTP_OK:
+                    logger.error("Status is %s for predicted http %s", status, self._possible_url)
+                return status, text
+        except HttpClientError as e:
+            logger.error("Cant connect to %s", self._possible_url)
+            raise SurrealConnectionError(f"Cant connect to {self._possible_url}{endpoint}\n"
+                                         f"Is your SurrealDB started and work on {self._possible_url} ?\n"
+                                         f"Refer to https://docs.surrealdb.com/docs/introduction/start") from e
+
+
+if __name__ == '__main__':
+    sur = Surreal("http://127.0.0.1:9000").version()
