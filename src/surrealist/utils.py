@@ -88,8 +88,7 @@ def to_result(content: Union[str, Dict]) -> SurrealResult:
     if isinstance(content, List):
         if len(content) == 1:
             return _check_error(SurrealResult(**content[0]))
-        else:
-            return SurrealResult(result=[_check_error(SurrealResult(**e))for e in content])
+        return SurrealResult(result=[_check_error(SurrealResult(**e))for e in content])
     if 'details' in content:
         content['result'] = content['details']
         del content['details']

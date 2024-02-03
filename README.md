@@ -4,7 +4,7 @@ Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrea
 
 It is blocking and **unofficial**, so if you need async AND/OR official client go [here](https://github.com/surrealdb/surrealdb.py)
 
-Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+
+Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+(including python 3.12)
 
 #### Key features: ####
 

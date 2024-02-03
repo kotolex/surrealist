@@ -115,7 +115,7 @@ class Connection:
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/functions/session
 
-        :return: full db information
+        :return: full session information
         """
         query = """return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), 
         "ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};"""
@@ -123,6 +123,13 @@ class Connection:
         return self.query(query)
 
     def db_tables(self) -> SurrealResult:
+        """
+        Returns all tables names in current database. You should have permissions for this action.
+
+        Actually call **db_info** and parse tables attribute there.
+
+        :return: list of all tables names
+        """
         logger.info("Query-Operation: DB_TABLES")
         res = self.db_info()
         res.result = list(res.result["tables"].keys())
