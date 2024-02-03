@@ -1,10 +1,11 @@
 from pathlib import Path
 from unittest import TestCase, main
 
+from tests.integration_tests.utils import URL
+from surrealist.utils import get_uuid
 from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError
 from surrealist import Surreal
-from surrealist.utils import get_uuid
-from tests.integration_tests.utils import URL
+
 
 PARAMS = (
     ('Specify a namespace to use', {'credentials': ('root', 'root'), }),

@@ -1,7 +1,12 @@
 import logging
 import random
-from pathlib import Path
 from string import ascii_lowercase
+from pathlib import Path
+import sys
+
+TESTS = Path(__file__).parent.parent
+SRC = TESTS.parent / "src"
+sys.path.append(str(SRC))
 
 from src.surrealist import Surreal
 from src.surrealist.clients.http_client import HttpClient

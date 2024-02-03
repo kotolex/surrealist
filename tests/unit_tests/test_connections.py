@@ -1,4 +1,13 @@
 from unittest import TestCase, main
+
+from pathlib import Path
+import sys
+
+TESTS = Path(__file__).parent.parent
+SRC = TESTS.parent / "src"
+sys.path.append(str(SRC))
+
+
 from surrealist import Surreal, SurrealConnectionError, HttpClientError
 from surrealist.utils import to_result, SurrealResult, crop_data, mask_pass
 from surrealist.clients.http_client import mask_opts

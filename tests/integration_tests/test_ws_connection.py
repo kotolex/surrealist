@@ -1,8 +1,8 @@
 from unittest import TestCase, main
 
+from tests.integration_tests.utils import URL, get_random_series
 from surrealist import Surreal
 from surrealist.utils import get_uuid
-from tests.integration_tests.utils import URL, get_random_series
 
 
 class TestWebSocketConnection(TestCase):
@@ -67,7 +67,7 @@ class TestWebSocketConnection(TestCase):
             res = connection.info()
             self.assertTrue(res.is_error(), res)
 
-# TODO uncomment when bug fix
+    # TODO uncomment when bug fix
     # def test_let(self):
     #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
     #     with surreal.connect() as connection:
