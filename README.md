@@ -4,18 +4,20 @@ Py_Surreal is a Python tool to work with awesome [SurrealDB](https://docs.surrea
 
 It is blocking and **unofficial**, so if you need async AND/OR official client go [here](https://github.com/surrealdb/surrealdb.py)
 
-Key features:
+Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+
+
+#### Key features: ####
 
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
- * fully tested (on latest Ubuntu, macOS and Windows 10)
+ * well tested (on latest Ubuntu, macOS and Windows 10)
  * fully compatible with latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq)
  * debug mode to see all that goes in and out, if you need
  * http or websocket transport to use
 
 More to come:
  * connections pool
- * additional features (explain, count, remove etc.)
+ * additional features (count, remove etc.)
 
 
 ### Installation ###
@@ -42,7 +44,7 @@ Each transport has functions it can not use by itself (in current SurrealDB vers
  - import or export data (you should use http connection or cli tools for that)
  - import or export ML files (you should use http connection or cli tools for that)
 
-Transports use query where it is possible, for compatibility, in all other cases CompatibilityError will be raised
+Transports use query where it is possible, for compatibility, in all other cases if you use these methods on transports -CompatibilityError will be raised
 
 
 ## Connect to SurrealDB ##
@@ -62,11 +64,17 @@ print(surreal.is_ready()) # prints True if server up and running on that url
 print(surreal.version()) # prints server version
 ```
 **Note:** create of Surreal object does not attempt any connections or other actions, just store parameters for future use
+
+Calls of **is_ready()**, **health()** or **version()** on Surreal objects are for server checks only, these not validates or checks your namespace, database or credentials.
+
 ### Parameters ###
-**url** - url of SurrealDB server, if you sure you will use websocket connection - you can use url like ws://127.0.0.1:8000
-Url will be transform if using websocket connection, but http(s) url specified.
-For example standard http://127.0.0.1:8000 will transform to ws://127.0.0.1:8000/rpc
+
+**url** - url of SurrealDB server, if you sure you will use websocket connection - you can use url like ws://127.0.0.1:8000/rpc, but http will work fine too even for websockets.
+So, you can simply use http://127.0.0.1:8000, it will be transform to ws://127.0.0.1:8000/rpc under the hood.
 If your url is differs - specify url in ws(s) format
+
+But if you will use ws(s) format, Surreal object will try to predict http url too, it is important for status and version checks.
+For example for wss://127.0.0.1:9000/some/rps predicted http url will be https://127.0.0.1:9000/
 
 **namespace** - name of the namespace, it is optional, but if you use it, you should specify database too
 
@@ -118,9 +126,56 @@ print(result) # print result
 ws_connection.close() # explicitly close connection
 # after closing we can not use connection anymore, if you need one - create one more connection with surreal object
 ```
+
+
+## Results and RecordID ##
+If method of connection not raised it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
+
+Here is standard result:
+`SurrealResult(id='8ad04f2f-8ec7-4a86-98ba-e0d147fd4a7d', error=None, result=None, code=None, token=None, status='OK', time='')`
+
+Here is standard error:
+`SurrealResult(id='9f3afdf6-c66c-468f-85e7-27f0f228ea6c', error={'code': -32000, 'message': "There was a problem with the database: Can not execute KILL statement using id '$id'"}, result=None, code=None, token=None, status='OK', time='')`
+
+You can always check for error, using is_error() method
+```python
+if result.is_error():
+    raise ValueError("Got error")
+```
+
+You need read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
+
+For support and compatibility reasons there are many way to specify recordID in method.
+Let's consider CREATE method for example:
+```python
+# all the same
+ws_connection.create("person", {"id":"john", "name":"John Doe"})
+ws_connection.create("person:john", {"name":"John Doe"})
+ws_connection.create("person", {"name":"John Doe"}, record_id="john")
+```
+These function calls are the same, so, as you can see, recordID can be specified:
+ - in data json (if data allowed in method)
+ - in table name after colon, for example "person:john"
+ - in record_id argument
+
+**Attention!** Using recordID 2 or 3 times in one method will cause error on SurrealDB side, for example
+`ws_connection.select("person:john", record_id="john")` is invalid call, id should be specified only once.
+
+**Important note:** uuid-type recordID, like 8424486b-85b3-4448-ac8d-5d51083391c7 should be specified with "`" backticks, for example
+```python
+ws_connection.select("person:`8424486b-85b3-4448-ac8d-5d51083391c7`")
+ws_connection.select("person", record_id="`8424486b-85b3-4448-ac8d-5d51083391c7`")
+```
+otherwise you cant find your record
+
+**Note:** record_id parameter of methods is only concatenate with table_name and colon, so
+ws_connection.select("person", record_id="john") under the hood became
+ws_connection.select("person:john"), but no other logic performed. Do not expect we specified "`" for you.
+
+
 ## Debug mode ##
 As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use log level.
-If you specify "INFO" level, then you will transport operations, which methods were called, which parameters were used.
+If you specify "INFO" level, then you will see transport operations, which methods were called, which parameters were used.
 For example
 
 **Example 5**
@@ -143,7 +198,7 @@ if you run it, you get in console:
 2024-02-02 18:31:09,733 : MainThread : websocket_connection : INFO : Got result: SurrealResult(id='0870492e-faba-4a5f-b454-c7f7315348bd', error=None, result=[{'author': 'John Doe', 'id': 'article:pt0907zkhkhb94evjnze', 'text': 'text', 'title': 'In memoriam'}], code=None, token=None, status='OK', time='')
 2024-02-02 18:31:09,734 : MainThread : connection : INFO : Connection was closed
 ```
-but if in example above (example 5) you choose "DEBUG", you will see:
+but if in example above (example 5) you choose "DEBUG", you will see all, including low-level clients data:
 ```
 2024-02-02 18:33:15,119 : MainThread : root : DEBUG : Log level switch to DEBUG
 2024-02-02 18:33:15,124 : Thread-1 : websocket : INFO : Websocket connected
@@ -161,22 +216,7 @@ but if in example above (example 5) you choose "DEBUG", you will see:
 2024-02-02 18:33:15,434 : MainThread : websocket_client : DEBUG : Client is closed connection to ws://127.0.0.1:8000/rpc
 ```
 
-**Note:** passwords and auth information always masked in logs
-
-## Results ##
-If method of connection not raised it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
-
-Here is standard result:
-`SurrealResult(id='8ad04f2f-8ec7-4a86-98ba-e0d147fd4a7d', error=None, result=None, code=None, token=None, status='OK', time='')`
-
-Here is standard error:
-`SurrealResult(id='9f3afdf6-c66c-468f-85e7-27f0f228ea6c', error={'code': -32000, 'message': "There was a problem with the database: Can not execute KILL statement using id '$id'"}, result=None, code=None, token=None, status='OK', time='')`
-
-You can always check for error, using is_error() method
-```python
-if result.is_error():
-    raise ValueError("Got error")
-```
+**Note:** passwords and auth information always masked in logs. If you still see it in logs - please, report an issue
 
 ## Live Query ##
 Live queries let you subscribe on events of desired table, when changes happen - you get notification as simple result or in DIFF format
@@ -195,6 +235,9 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 
 **Note 2:** LQ only produce events which happen after creation of this LQ
 
+**Note 3:** LQ is associated with connection, where it was created, if you have 2 or more connections, LQ will depends only on one, 
+and will disappear on connection close, even if other connections still active
+
 **Example 6**
 ```python
 from time import sleep
@@ -208,6 +251,7 @@ def call_back(response: dict) -> None:
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
     res = connection.live("person", callback=call_back)  # here we subscribe on person table
+    live_id = res.result # live_id is a LQ id, we need it to kill query
     connection.create("person", {"name": "John", "surname": "Doe"}) # here we create an event
     sleep(0.5) # sleep a little cause need some time to get message back
 ```
@@ -227,21 +271,32 @@ def call_back(response: dict) -> None:
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
     # here we subscribe on person table and specify we need DIFF
-    res = connection.live("person", callback=call_back, return_diff=True)  
+    res = connection.live("person", callback=call_back, return_diff=True) 
+    live_id = res.result # live_id is a LQ id, we need it to kill query
     connection.create("person", {"name": "John", "surname": "Doe"}) # here we create an event
     sleep(0.5) # sleep a little cause need some time to get message back
+    connection.kill(live_id) # we kill LQ, no more events to come
 ```
 in console you will get:
 `{'result': {'action': 'CREATE', 'id': '54a4dd0b-0008-46f4-b4e6-83e466cb4141', 'result': [{'op': 'replace', 'path': '/', 'value': {'id': 'person:fhglyrxkit3j0fnosjqg', 'name': 'John', 'surname': 'Doe'}}]}}`
 
+If you do not need LQ anymore, -call KILL method, with live_id
+
 ## Threads and thread-safety ##
-empty
+This library were made for using in multithreaded environments, just remember some rules of thumb:
+ - if you work with only one server of SurrealDB, you need only one Surreal object
+ - one Connection object represents exactly one connection (websocket or http) with DB
+ - it is OK to use connection in different threads, but it can be your bottleneck, as there is only one connection to DB
+ - with many queries and high load you should consider using more than 1 connection, but not too much of them. Number of connections equal to number of CPU-cores is the best choice
+ - do not forget to properly close connections
 
 ## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and
-standard json library use recursion to load and dump objects, so if you will have deep nesting in your objects - 
-you can get RecursionLimitError. The best choice here is to rethink your schema and objects, because you probably do 
-something wrong with such nesting. 
+standard json library (and str function) use recursion to load and dump objects, so if you will have deep nesting in your objects - 
+you can get RecursionLimitError. 
+
+The best choice here is to rethink your schema and objects, because you probably do 
+something wrong with such high level of nesting. 
 
 Second choice - increase recursion limit in your system with
 ```python

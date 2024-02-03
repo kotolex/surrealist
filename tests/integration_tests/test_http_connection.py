@@ -3,7 +3,7 @@ from unittest import TestCase, main
 
 from py_surreal.surreal import Surreal
 from py_surreal.utils import get_uuid
-from tests.integration_tests.utils import URL
+from tests.integration_tests.utils import URL, WS_URL
 
 
 class TestSurreal(TestCase):
@@ -21,6 +21,23 @@ class TestSurreal(TestCase):
 
     def test_version(self):
         surreal = Surreal(URL)
+        result = surreal.version()
+        self.assertTrue("surrealdb-1." in result, result)
+
+    def test_health_ws(self):
+        surreal = Surreal(WS_URL)
+        self.assertEqual("OK", surreal.health())
+
+    def test_status_ws(self):
+        surreal = Surreal(WS_URL)
+        self.assertEqual("OK", surreal.status())
+
+    def test_is_ready_ws(self):
+        surreal = Surreal(WS_URL)
+        self.assertEqual(True, surreal.is_ready())
+
+    def test_version_ws(self):
+        surreal = Surreal(WS_URL)
         result = surreal.version()
         self.assertTrue("surrealdb-1." in result, result)
 
@@ -160,6 +177,13 @@ class TestHttpConnection(TestCase):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         res = connection.query("INFO FOR ROOT;")
+        self.assertTrue(len(res.result) > 1)
+        self.assertEqual(res.status, "OK")
+
+    def test_query_success_with_vars(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        res = connection.query("INFO FOR ROOT;", variables={})
         self.assertTrue(len(res.result) > 1)
         self.assertEqual(res.status, "OK")
 

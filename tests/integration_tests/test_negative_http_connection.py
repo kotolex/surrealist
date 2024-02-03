@@ -168,6 +168,12 @@ class TestHttpConnectionNegative(TestCase):
         with self.assertRaises(CompatibilityError):
             connection.info()
 
+    def test_insert_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        connection = db.connect()
+        with self.assertRaises(CompatibilityError):
+            connection.insert("a",[])
+
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"delete all failed on data{opts}"):

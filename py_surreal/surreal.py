@@ -1,3 +1,4 @@
+import urllib.parse
 from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
 from typing import Tuple, Optional
 
@@ -48,9 +49,19 @@ class Surreal:
             self.db_params["DB"] = database
         if not self.db_params:
             self.db_params = None
-        self.url = url if url.endswith("/") else f"{url}/"
+        self._url = url
+        self._is_http_url = url.startswith("http")
+        # we should change only http endpoints
+        if self._is_http_url and not url.endswith("/"):
+            self._url= f"{url}/"
         self.credentials = credentials
         self.timeout = timeout
+        self._possible_url = self._url
+        # we can try to predict http url when wss url was specified
+        if not self._is_http_url:
+            _url = urllib.parse.urlparse(url.lower())
+            self._possible_url = f"{_url.scheme.replace('ws', 'http')}://{_url.netloc}/"
+            logger.info("Predicted url is: %s", self._possible_url)
 
     def set_log_length_for_data(self, length: int):
         """
@@ -98,7 +109,7 @@ class Surreal:
         :return: connection object to work with SurrealDB
         :raise SurrealConnectionError: if cant connect with specified parameters
         """
-        return self.client(self.url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)
+        return self.client(self._url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)
 
     def is_ready(self) -> bool:
         """
@@ -150,8 +161,10 @@ class Surreal:
         return self.__get("version")[1]
 
     def __get(self, endpoint: str) -> Tuple[int, str]:
-        with HttpClient(self.url, timeout=DEFAULT_TIMEOUT).get(endpoint) as resp:
+        with HttpClient(self._possible_url, timeout=DEFAULT_TIMEOUT).get(endpoint) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
             body = "is empty" if not text else text
             logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, body)
+            if status != HTTP_OK:
+                logger.error("Status is %s for predicted http %s", status, self._possible_url)
             return status, text

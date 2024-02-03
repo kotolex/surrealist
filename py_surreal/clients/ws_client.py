@@ -27,6 +27,7 @@ class WebSocketClient:
         self.base_url = base_url
         thread = threading.Thread(target=self.run, daemon=True)
         thread.start()
+        logger.debug("Connecting to %s", base_url)
         self._raise_on_wait(lambda: self.connected is True, timeout=timeout,
                             error_text=f"Not connected to {self.base_url}")
         self.lock = Lock()
@@ -37,6 +38,7 @@ class WebSocketClient:
     def on_message(self, _ws, message: str):
         """
         Called on message received from the websocket connection.
+
         :param _ws: connection object
         :param message: string message
         :return: None
@@ -146,7 +148,6 @@ class WebSocketClient:
         """
         Method to wait some condition or raise on timeout
 
-
         :param predicate: function to call and check condition
         :param timeout: time in seconds to wait until condition
         :param error_text: custom error message on fail
@@ -158,7 +159,7 @@ class WebSocketClient:
             logger.error("Time exceeded: %s seconds. Error: %s", timeout, error_text)
             raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
         if result == (False, "CLOSED"):
-            logger.error("Connection closed while client waits on it")
+            logger.error("Connection %s closed while client waits on it", self.base_url)
             raise WebSocketConnectionClosedError("Connection closed while client waits on it")
 
     def close(self):

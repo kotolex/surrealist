@@ -26,8 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install websocket-client
-        pip install pylint
+        pip install websocket-client pylint
         curl -sSf https://install.surrealdb.com | sh
         surreal version
     - name: Lint
@@ -41,3 +40,27 @@ jobs:
         sh ./tests/up_db.sh &
         sleep 3
         python -m unittest discover -s tests/integration_tests
+  check_versions:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install websocket-client pylint
+          curl -sSf https://install.surrealdb.com | sh
+          surreal version
+      - name: All tests
+        run: |
+          sh ./tests/up_db.sh &
+          sleep 3
+          python -m unittest discover -s tests

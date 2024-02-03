@@ -12,6 +12,12 @@ class TestWebSocketConnection(TestCase):
             self.assertTrue(connection.is_connected())
             self.assertEqual("ws://127.0.0.1:8000/rpc", connection._base_url)
 
+    def test_connect_ws(self):
+        surreal = Surreal("ws://127.0.0.1:8000/rpc", namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            self.assertTrue(connection.is_connected())
+            self.assertEqual("ws://127.0.0.1:8000/rpc", connection._base_url)
+
     def test_use(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:

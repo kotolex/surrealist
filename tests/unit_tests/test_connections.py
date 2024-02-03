@@ -39,6 +39,10 @@ class TestConnections(TestCase):
         with self.assertRaises(HttpClientError):
             surreal.version()
 
+    def test_predicted_url(self):
+        surreal = Surreal("wss://127.0.0.1:9000/some/rpc")
+        self.assertEqual("https://127.0.0.1:9000/", surreal._possible_url)
+
 
 class TestConst(TestCase):
 

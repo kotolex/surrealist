@@ -17,6 +17,11 @@ class TestNegativeWebSocketConnection(TestCase):
         with self.assertRaises(WebSocketConnectionError):
             surreal.connect()
 
+    def test_connect_failed_on_wrong_creds_no_ns(self):
+        surreal = Surreal(URL, credentials=('wrong', 'wrong'))
+        with self.assertRaises(WebSocketConnectionError):
+            surreal.connect()
+
     def test_connect_failed_no_db(self):
         surreal = Surreal(URL, namespace="test", credentials=('root', 'root'))
         with surreal.connect() as connection:

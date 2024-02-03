@@ -40,7 +40,7 @@ class WebSocketConnection(Connection):
                 logger.error(message)
                 raise ConnectionParametersError(message)
         if base_url.scheme in ("ws", "wss"):
-            self._base_url = base_url
+            self._base_url = url
         if base_url.scheme in ("http", "https"):
             self._base_url = f"{base_url.scheme.replace('http', 'ws')}://{base_url.netloc}/rpc"
         try:

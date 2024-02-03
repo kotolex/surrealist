@@ -8,6 +8,7 @@ from py_surreal.clients.http_client import HttpClient
 
 logging.getLogger("tests")
 URL = "http://127.0.0.1:8000/"
+WS_URL = "ws://127.0.0.1:8000/rpc"
 
 assert HttpClient(URL).get('health').status == 200, "Start db on localhost!"
 
