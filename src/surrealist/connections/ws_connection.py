@@ -15,7 +15,9 @@ logger = getLogger("websocket_connection")
 class WebSocketConnection(Connection):
     """
     Represents websocket transport and abilities to work with SurrealDb. It is recommended connection.
-    Refer to surrealist documentation and here https://docs.surrealdb.com/docs/integration/websocket
+
+    Refer to surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
+    Refer to: https://docs.surrealdb.com/docs/integration/websocket
 
     Each objects create only one websocket connection and can be used in context manager to close properly.
     You can not and should not try to use this object after closing connection. Just create new connection.
@@ -249,7 +251,7 @@ class WebSocketConnection(Connection):
 
         About DIFF refer to: https://jsonpatch.com
 
-        Please see surrealist documentation to use this method properly
+        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
 
         Example:
         websocket_connection.live("article", callback=lambda a_dict: print(a_dict)) # creates live query to check any
@@ -367,7 +369,7 @@ class WebSocketConnection(Connection):
         return self._run(_data)
 
     @connected
-    def insert(self, table_name: str, data: Dict) -> SurrealResult:
+    def insert(self, table_name: str, data: Union[List, Dict]) -> SurrealResult:
         """
         This method inserts one or more records
 
@@ -383,7 +385,7 @@ class WebSocketConnection(Connection):
         Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to insert
-        :param data: dict with data to create, it can contain many records
+        :param data: dict or list(many records) with data to create
         :return: result of request
         """
         _data = {"method": "insert", "params": [table_name, data]}

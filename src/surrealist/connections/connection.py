@@ -1,10 +1,12 @@
+import json
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
-from surrealist.errors import OperationOnClosedConnectionError
+from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
 from surrealist.utils import SurrealResult, DEFAULT_TIMEOUT
 
 logger = getLogger("connection")
+LINK = "https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python"
 
 
 def connected(func):
@@ -64,6 +66,13 @@ class Connection:
         :return: True if connection is usable, False otherwise
         """
         return self._connected
+
+    def _in_out_json(self, data, is_loads: bool):
+        try:
+            return json.loads(data) if is_loads else json.dumps(data)
+        except RecursionError as e:
+            logger.error("Cant serialize/deserialize object, too many nested levels")
+            raise TooManyNestedLevelsError(f"Cant serialize object, too many nested levels\nRefer to: {LINK}") from e
 
     def use(self, namespace: str, database: str) -> SurrealResult:
         return NotImplemented

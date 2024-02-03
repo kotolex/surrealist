@@ -36,7 +36,6 @@ but websockets is preferred and default one. Websockets can use live queries and
 Each transport has functions it can not use by itself (in current SurrealDB version)
 
 **Http-transport can not:**
- - insert 2 or more records at once (you should use create instead)
  - invalidate, authenticate session
  - create or kill live query
  - use operations INFO or PATCH (you should use raw query instead)

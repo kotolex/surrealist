@@ -6,7 +6,6 @@ from surrealist.utils import get_uuid
 from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError
 from surrealist import Surreal
 
-
 PARAMS = (
     ('Specify a namespace to use', {'credentials': ('root', 'root'), }),
     ('Specify a namespace to use', {'database': 'test', 'credentials': ('root', 'root'), }),
@@ -168,12 +167,6 @@ class TestHttpConnectionNegative(TestCase):
         connection = db.connect()
         with self.assertRaises(CompatibilityError):
             connection.info()
-
-    def test_insert_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.insert("a",[])
 
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:

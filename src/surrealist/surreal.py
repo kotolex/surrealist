@@ -19,6 +19,9 @@ class Surreal:
     Represents the SurrealDB client, all connections should be established via this class. By default, connection will
     use websocket transport (recommended). This class use log level to monitor all actions, can check version and state
     of the SurrealDb server
+    If you have only one SurrealDB server you need exactly one object of this class!
+
+    Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#connect-to-surrealdb
     """
 
     def __init__(self, url: str, namespace: Optional[str] = None, database: Optional[str] = None,
@@ -28,6 +31,7 @@ class Surreal:
         Initiating all parameters for connection, this method do not check or validate anything by itself, just save
         data for future use. To make sure your url is valid and accessible -use is_ready method of Surreal object.
 
+        About log_level and debug mode: https://github.com/kotolex/py_surreal?tab=readme-ov-file#debug-mode
 
         :param url: database url, for local database http://127.0.0.1:8000/
         :param namespace: namespace to use
@@ -42,7 +46,7 @@ class Surreal:
         self._log_level = log_level
         self._log_data_length = DATA_LENGTH_FOR_LOGS
         self.set_log_level(log_level)
-        self.client = HttpConnection if use_http else WebSocketConnection
+        self._client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
         if namespace:
             self.db_params["NS"] = namespace
@@ -50,13 +54,26 @@ class Surreal:
             self.db_params["DB"] = database
         if not self.db_params:
             self.db_params = None
+        self._url, self._possible_url, self._is_http_url = url, url, True
+        self.set_url(url)
+        self.credentials = credentials
+        self.timeout = timeout
+
+    def set_url(self, url: str):
+        """
+        Setting base and predicted urls to work with. If url starts with http, then both url and predicted url will be
+        the same. If url in ws(s) format, try to create predicted url based on it.
+
+        For example for wss://127.0.0.1:9000/some/rps predicted http url will be https://127.0.0.1:9000/
+
+        :param url: url of the SurrealDb server
+        :return: None
+        """
         self._url = url
         self._is_http_url = url.startswith("http")
         # we should change only http endpoints
         if self._is_http_url and not url.endswith("/"):
             self._url = f"{url}/"
-        self.credentials = credentials
-        self.timeout = timeout
         self._possible_url = self._url
         # we can try to predict http url when wss url was specified
         if not self._is_http_url:
@@ -86,6 +103,8 @@ class Surreal:
         - DEBUG, when you will see all logs, including requests and responses via transport level. This level is very
         useful for debugging and finding some useful information in logs
 
+        Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#debug-mode
+
         Notice: authorization params and passwords cant be seen in logs in any time, if you see it, please report
         an issue
         Notice: you will see logs of this library(in and out), but not SurrealDb server logs
@@ -110,7 +129,7 @@ class Surreal:
         :return: connection object to work with SurrealDB
         :raise SurrealConnectionError: if cant connect with specified parameters
         """
-        return self.client(self._url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)
+        return self._client(self._url, db_params=self.db_params, credentials=self.credentials, timeout=self.timeout)
 
     def is_ready(self) -> bool:
         """
@@ -126,6 +145,7 @@ class Surreal:
         https://docs.surrealdb.com/docs/integration/http#health
 
         :return: True if you can use this server, False otherwise
+        :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         return self.status() == OK and self.health() == OK
 
@@ -136,6 +156,7 @@ class Surreal:
         Refer to: https://docs.surrealdb.com/docs/integration/http#status
 
         :return: "OK" if everything is ok, or error text
+        :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         code, text = self.__get("status")
         return OK if code == HTTP_OK else text
@@ -147,6 +168,7 @@ class Surreal:
         Refer to: https://docs.surrealdb.com/docs/integration/http#health
 
         :return: "OK" if everything is ok, or error text
+        :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         code, text = self.__get("health")
         return OK if code == HTTP_OK else text
@@ -158,6 +180,7 @@ class Surreal:
         Refer to: https://docs.surrealdb.com/docs/integration/http#version
 
         :return: version, for example "surrealdb-1.1.1"
+        :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         return self.__get("version")[1]
 
@@ -170,12 +193,8 @@ class Surreal:
                 if status != HTTP_OK:
                     logger.error("Status is %s for predicted http %s", status, self._possible_url)
                 return status, text
-        except HttpClientError as e:
+        except HttpClientError:
             logger.error("Cant connect to %s", self._possible_url)
             raise SurrealConnectionError(f"Cant connect to {self._possible_url}{endpoint}\n"
                                          f"Is your SurrealDB started and work on {self._possible_url} ?\n"
-                                         f"Refer to https://docs.surrealdb.com/docs/introduction/start") from e
-
-
-if __name__ == '__main__':
-    sur = Surreal("http://127.0.0.1:9000").version()
+                                         f"Refer to https://docs.surrealdb.com/docs/introduction/start")

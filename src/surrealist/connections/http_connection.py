@@ -1,12 +1,10 @@
-import json
 from logging import getLogger
 from pathlib import Path
-from typing import Tuple, Dict, Optional, Union, Any
+from typing import Tuple, Dict, Optional, Union, Any, List
 
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
-from surrealist.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError,
-                               TooManyNestedLevelsError)
+from surrealist.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError)
 from surrealist.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
 
 logger = getLogger("http_connection")
@@ -17,7 +15,9 @@ class HttpConnection(Connection):
     Represents http transport and abilities to work with SurrealDb. It is not recommended connection, use websocket on
     any doubt, this connection exists for compatibility reasons. Some features as live query is not possible on this
     transport, but import and export are.
-    Refer to surrealist documentation and here https://docs.surrealdb.com/docs/integration/http
+
+    Refer to surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
+    Refer to: https://docs.surrealdb.com/docs/integration/http
 
     Each method call creates new http short-live connection.
 
@@ -356,11 +356,7 @@ class HttpConnection(Connection):
         :param value: value for the variable
         :return: result of request
         """
-        try:
-            data = json.dumps(value)
-        except RecursionError as e:
-            logger.error("Cant serialize object, too many nested levels")
-            raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
+        data = self._in_out_json(value, is_loads=False)
         logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
         return self.query(f"LET ${name} = {data};")
 
@@ -404,6 +400,29 @@ class HttpConnection(Connection):
                                            timeout=self._timeout)
         return result
 
+    @connected
+    def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
+        """
+        This method inserts one or more records. Under the hood it simply generates QL "INSERT INTO person {data};"
+        for the **query** call
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
+
+        Examples:
+        http_connection.insert("person:my_id", {"name": "John Doe"}) # inserts one record with specified id
+        http_connection.insert("person", [{"name": "John Doe"}, {"name", "Jane Doe"}]) # inserts two records
+        with random ids
+
+        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+
+        :param table_name: table name or table name with record_id to insert
+        :param data: dict or list(many records) with data to create
+        :return: result of request
+        """
+        logger.info("Operation: INSERT. Table_name: %s, data %s", crop_data(table_name), crop_data(str(data)))
+        data = self._in_out_json(data, is_loads=False)
+        return self.query(f"INSERT INTO person {data};")
+
     def patch(self, table_name: str, data: Dict, record_id: Optional[str] = None, return_diff: bool = False):
         """
         Http transport can not use patch operation, you can use websocket transport for that, or methods like
@@ -432,16 +451,6 @@ class HttpConnection(Connection):
         :raise CompatibilityError: on any use
         """
         message = "Http transport can not use kill, use websockets instead"
-        logger.error(message)
-        raise CompatibilityError(message)
-
-    def insert(self, table_name: str, data: Dict):
-        """
-        Http transport can not insert more than 1 one record, you should use **create** method for that
-
-        :raise CompatibilityError: on any use
-        """
-        message = "Http transport can not insert more than 1 one record, you should use create method for that"
         logger.error(message)
         raise CompatibilityError(message)
 

@@ -3,11 +3,10 @@ class PySurrealError(Exception):
     Parent for all types of errors in surrealist, so you can use more broad error in except clauses
 
     try:
-        // some job with connection
+        code() # some job with connection
     except PySurrealError:
-        // do something on error
+        report() # do something on error
     """
-    # TODO make code pretty-formatted
 
 
 class SurrealConnectionError(PySurrealError):
@@ -58,14 +57,12 @@ class CompatibilityError(PySurrealError):
     """
     Raises on attempt to use methods incompatible for that transport (websocket ot http), for example **live** do not
     work on http-connection.
-    More on this here: url
+    More on this here: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
     """
-    # TODO link here
 
 
 class TooManyNestedLevelsError(PySurrealError):
     """
     Raises when str or json cant handle the object because of too deep nesting and recursion limit in python
-    See documentation: url
+    See documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python
     """
-    # TODO link here

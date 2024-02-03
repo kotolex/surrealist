@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, WS_URL
+from tests.integration_tests.utils import URL, WS_URL, get_random_series
 from surrealist.utils import get_uuid
 from surrealist import Surreal
 
@@ -268,8 +268,34 @@ class TestHttpConnection(TestCase):
             res = connection.select("article", "any")
             self.assertFalse(res.is_error())
 
+    def test_insert_one(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(27)
+            res = connection.insert("article", {"id": uid, "author": uid, "title": uid, "text": uid})
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            self.assertFalse(res.result == [])
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
 
-
+    def test_insert_bulk(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(21)
+            uid2 = get_random_series(33)
+            res = connection.insert("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
+                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            self.assertTrue(len(res.result) == 2)
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            res = connection.select(f"article:{uid2}")
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
 
 
 if __name__ == '__main__':

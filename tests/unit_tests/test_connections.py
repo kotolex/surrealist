@@ -29,27 +29,33 @@ class TestConnections(TestCase):
 
     def test_health(self):
         surreal = Surreal(WRONG_URL)
-        with self.assertRaises(HttpClientError):
+        with self.assertRaises(SurrealConnectionError):
             surreal.health()
 
     def test_status(self):
         surreal = Surreal(WRONG_URL)
-        with self.assertRaises(HttpClientError):
+        with self.assertRaises(SurrealConnectionError):
             surreal.status()
 
     def test_is_ready(self):
         surreal = Surreal(WRONG_URL)
-        with self.assertRaises(HttpClientError):
+        with self.assertRaises(SurrealConnectionError):
             surreal.is_ready()
 
     def test_version(self):
         surreal = Surreal(WRONG_URL)
-        with self.assertRaises(HttpClientError):
+        with self.assertRaises(SurrealConnectionError):
             surreal.version()
 
     def test_predicted_url(self):
         surreal = Surreal("wss://127.0.0.1:9000/some/rpc")
         self.assertEqual("https://127.0.0.1:9000/", surreal._possible_url)
+
+    def test_set_url(self):
+        surreal = Surreal(URL)
+        surreal.set_url("wss://127.0.0.1:9000/some/rpc")
+        self.assertEqual("https://127.0.0.1:9000/", surreal._possible_url)
+        self.assertEqual("wss://127.0.0.1:9000/some/rpc", surreal._url)
 
 
 class TestConst(TestCase):
