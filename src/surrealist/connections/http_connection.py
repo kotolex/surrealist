@@ -266,7 +266,9 @@ class HttpConnection(Connection):
                            "embed them into your query or switch to websocket connection")
         logger.info("Operation: QUERY. Query: %s", crop_data(query))
         text = raise_if_not_http_ok(self._simple_request("POST", "sql", query, not_json=True))
-        return to_result(text)
+        result = to_result(text)
+        result.query = query
+        return result
 
     @connected
     def import_data(self, path: Union[str, Path]) -> SurrealResult:
@@ -357,7 +359,7 @@ class HttpConnection(Connection):
         :return: result of request
         """
         data = self._in_out_json(value, is_loads=False)
-        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
+        logger.info("Query-Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
         return self.query(f"LET ${name} = {data};")
 
     @connected
@@ -372,7 +374,7 @@ class HttpConnection(Connection):
         :param name: name for the variable (without $ sign!)
         :return: result of request
         """
-        logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
+        logger.info("Query-Operation: UNSET. Variable name: %s", crop_data(name))
         return self.query(f"REMOVE PARAM ${name};")
 
     @connected
@@ -391,7 +393,7 @@ class HttpConnection(Connection):
         :param database: name of the database to use
         :return: result of request
         """
-        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
+        logger.info("Query-Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
         result = self.query(f"USE NS {namespace} DB {database};")
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
@@ -419,7 +421,7 @@ class HttpConnection(Connection):
         :param data: dict or list(many records) with data to create
         :return: result of request
         """
-        logger.info("Operation: INSERT. Table_name: %s, data %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Query-Operation: INSERT. Table_name: %s, data %s", crop_data(table_name), crop_data(str(data)))
         data = self._in_out_json(data, is_loads=False)
         return self.query(f"INSERT INTO person {data};")
 

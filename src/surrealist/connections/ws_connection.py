@@ -308,7 +308,9 @@ class WebSocketConnection(Connection):
             params.append(variables)
         data = {"method": "query", "params": params}
         logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
-        return self._run(data)
+        result = self._run(data)
+        result.query = query
+        return result
 
     @connected
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:

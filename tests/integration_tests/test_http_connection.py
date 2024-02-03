@@ -229,7 +229,7 @@ class TestHttpConnection(TestCase):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         res = connection.import_data(file_path)
-        self.assertEqual(res.result, None)
+        self.assertTrue(len(res.result) > 10)
         self.assertEqual(res.status, "OK")
 
     def test_signin(self):
@@ -296,6 +296,54 @@ class TestHttpConnection(TestCase):
             res = connection.select(f"article:{uid2}")
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
+
+    def test_count(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.count("author")
+            self.assertFalse(res.is_error())
+            self.assertEqual(2, res.result)
+            self.assertEqual("SELECT count() FROM author GROUP ALL;", res.query)
+
+    def test_count_is_zero_if_wrong(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.count("wrong")
+            self.assertFalse(res.is_error())
+            self.assertEqual(0, res.result)
+
+    def test_count_returns_fields(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.count("author:john")
+            self.assertFalse(res.is_error())
+            self.assertEqual(1, res.result)
+
+    def test_db_info(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.db_info()
+            self.assertFalse(res.is_error())
+            self.assertTrue('tables' in res.result)
+            self.assertEqual("INFO FOR DB;", res.query)
+
+    def test_db_tables(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.db_tables()
+            self.assertFalse(res.is_error())
+            self.assertTrue('article' in res.result)
+            self.assertTrue('person' in res.result)
+            self.assertEqual("INFO FOR DB;", res.query)
+
+    def test_session_info(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.session_info()
+            self.assertFalse(res.is_error())
+            self.assertIsNotNone(res.query)
+            self.assertEqual({'db': 'test', 'http_origin': None, 'ip': '127.0.0.1', 'ns': 'test',
+                              'scope': None, 'session_id': None}, res.result)
 
 
 if __name__ == '__main__':

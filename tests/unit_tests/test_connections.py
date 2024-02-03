@@ -78,7 +78,7 @@ class TestConst(TestCase):
 
     def test_ws_message_to_result_error(self):
         res = to_result({'id': 100, 'error': {1: 1}})
-        self.assertEqual(SurrealResult(id=100, error={1: 1}), res)
+        self.assertEqual(SurrealResult(id=100, error={1: 1}, status="ERR"), res)
         self.assertTrue(res.is_error())
 
     def test_ws_message_to_result(self):

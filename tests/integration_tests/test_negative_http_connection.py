@@ -255,6 +255,14 @@ class TestHttpConnectionNegative(TestCase):
                     connection.import_data(file_path)
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
+    def test_db_info_failed_permissions(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.db_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("INFO FOR DB;", res.query)
+            self.assertEqual("Specify a namespace to use", res.error)
+
     # TODO uncomment after bugfix
     # def test_ml_import_failed_wrong_file(self):
     #     db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)

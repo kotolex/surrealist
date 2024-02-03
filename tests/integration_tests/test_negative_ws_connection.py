@@ -93,6 +93,14 @@ class TestNegativeWebSocketConnection(TestCase):
             with self.assertRaises(CompatibilityError):
                 connection.ml_import(None)
 
+    def test_db_info_failed_permissions(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.db_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("INFO FOR DB;", res.query)
+            self.assertEqual("Specify a namespace to use", res.error)
+
 
 if __name__ == '__main__':
     main()

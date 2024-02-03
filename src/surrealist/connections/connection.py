@@ -3,7 +3,7 @@ from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
-from surrealist.utils import SurrealResult, DEFAULT_TIMEOUT
+from surrealist.utils import SurrealResult, DEFAULT_TIMEOUT, crop_data
 
 logger = getLogger("connection")
 LINK = "https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python"
@@ -74,6 +74,60 @@ class Connection:
             logger.error("Cant serialize/deserialize object, too many nested levels")
             raise TooManyNestedLevelsError(f"Cant serialize object, too many nested levels\nRefer to: {LINK}") from e
 
+    def count(self, table_name: str) -> SurrealResult:
+        """
+        Returns records count for given table. You should have permissions for this action.
+        Actually converts to QL "SELECT count() FROM {table_name} GROUP ALL;" to use in **query** method.
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/count
+
+        Note: returns 0 if table not exists, if you need to check table existence use **is_table_exists**
+
+        Note: if you specify table_name with recordID like "person:john" you will get count of fields in record
+
+        :param table_name: name of the table
+        :return: result containing count, like SurrealResult(id='', error=None, result=[{'count': 1}], time='123.333µs')
+        """
+        logger.info("Query-Operation: COUNT. Table: %s", crop_data(table_name))
+        result = self.query(f"SELECT count() FROM {table_name} GROUP ALL;")
+        if not result.is_error():
+            result.result = self._get_count(result.result)
+        return result
+
+    def db_info(self) -> SurrealResult:
+        """
+        Returns info about current database. You should have permissions for this action.
+
+        Actually converts to QL "INFO FOR DB;" to use in **query** method.
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+
+        :return: full db information
+        """
+        logger.info("Query-Operation: DB_INFO")
+        return self.query("INFO FOR DB;")
+
+    def session_info(self) -> SurrealResult:
+        """
+        Returns info about current session. You should have permissions for this action.
+
+        Actually converts to QL query to use in **query** method.
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/session
+
+        :return: full db information
+        """
+        query = """return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), 
+        "ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};"""
+        logger.info("Query-Operation: SESSION_INFO")
+        return self.query(query)
+
+    def db_tables(self) -> SurrealResult:
+        logger.info("Query-Operation: DB_TABLES")
+        res = self.db_info()
+        res.result = list(res.result["tables"].keys())
+        return res
+
     def use(self, namespace: str, database: str) -> SurrealResult:
         return NotImplemented
 
@@ -141,3 +195,12 @@ class Connection:
 
     def ml_export(self, name: str, version: str) -> str:
         return NotImplemented
+
+    def _get_count(self, res) -> int:
+        if not res:
+            return 0
+        if 'count' in res:
+            return res['count']
+        if 'result' in res:
+            return self._get_count(res["result"])
+        return self._get_count(res[0])
