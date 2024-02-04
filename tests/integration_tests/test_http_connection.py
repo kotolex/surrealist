@@ -2,8 +2,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, WS_URL, get_random_series
-from surrealist.utils import get_uuid
-from surrealist import Surreal
+from surrealist import Surreal, get_uuid
 
 
 class TestSurreal(TestCase):
@@ -242,7 +241,7 @@ class TestHttpConnection(TestCase):
                 connection = db.connect()
                 res = connection.signin(type_, type_, namespace='test', database='test')
                 self.assertEqual(res.code, 200)
-                self.assertEqual(res.result, "Authentication succeeded")
+                self.assertEqual(res.additional_info["details"], "Authentication succeeded")
 
     def test_signup(self):
         db = Surreal(URL, 'test', 'test', use_http=True)
@@ -250,7 +249,7 @@ class TestHttpConnection(TestCase):
         res = connection.signup(namespace='test', database='test', scope='user_scope',
                                 params={'user': 'john:doe', 'pass': '123456'})
         self.assertEqual(res.code, 200)
-        self.assertEqual(res.result, "Authentication succeeded")
+        self.assertEqual(res.additional_info["details"], "Authentication succeeded")
 
     # TODO test for let and unset when fix bug https://github.com/surrealdb/surrealdb/issues/3418
     # def test_let(self):
@@ -363,7 +362,7 @@ class TestHttpConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(9)
             tb_name = f"table_{uid}"
-            res = connection.create(tb_name, {"id":"john", "name": "John", "status": True})
+            res = connection.create(tb_name, {"id": "john", "name": "John", "status": True})
             self.assertFalse(res.is_error())
             res = connection.delete(tb_name, record_id="john")
             self.assertFalse(res.is_error())
@@ -372,7 +371,6 @@ class TestHttpConnection(TestCase):
             res = connection.db_tables()
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)
-
 
 
 if __name__ == '__main__':

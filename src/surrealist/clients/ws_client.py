@@ -9,7 +9,8 @@ from typing import Dict, Callable, Optional
 import websocket
 
 from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
-from surrealist.utils import to_result, SurrealResult, DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
+from surrealist.result  import to_result, SurrealResult
 
 logger = getLogger("websocket_client")
 

@@ -7,7 +7,9 @@ from surrealist.clients.ws_client import WebSocketClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
-from surrealist.utils import DEFAULT_TIMEOUT, SurrealResult, crop_data, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass
+from surrealist.result import SurrealResult
+
 
 logger = getLogger("websocket_connection")
 
@@ -71,12 +73,12 @@ class WebSocketConnection(Connection):
                 if signin_result.is_error():
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
                     raise WebSocketConnectionError(f"Error on connecting to {self._base_url}.\n"
-                                                   f"Info: {signin_result.error}")
+                                                   f"Info: {signin_result.result}")
             else:
                 use_result = self.use(self._params["NS"], self._params["DB"])
                 if use_result.is_error():
                     logger.error("Error on use %s. Info %s", self._params, use_result)
-                    raise WebSocketConnectionError(f"Error on use '{self._params}'.\nInfo: {use_result.error}")
+                    raise WebSocketConnectionError(f"Error on use '{self._params}'.\nInfo: {use_result.result}")
         else:
             if credentials:
                 self._user, self._pass = self._credentials

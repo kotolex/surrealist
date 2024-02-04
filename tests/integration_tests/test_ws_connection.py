@@ -2,8 +2,7 @@ import time
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import Surreal
-from surrealist.utils import get_uuid
+from surrealist import Surreal, get_uuid
 
 
 class TestWebSocketConnection(TestCase):

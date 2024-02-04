@@ -5,7 +5,6 @@ from tests.integration_tests.utils import URL, get_random_series
 from surrealist import OperationOnClosedConnectionError, Surreal, Connection
 
 
-
 class TestUseCases(TestCase):
     connections = []
 

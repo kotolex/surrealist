@@ -4,7 +4,8 @@ from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
-from surrealist.utils import SurrealResult, DEFAULT_TIMEOUT, crop_data
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data
+from surrealist.result import SurrealResult
 
 logger = getLogger("connection")
 LINK = "https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python"

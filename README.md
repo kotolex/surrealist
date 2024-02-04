@@ -135,10 +135,11 @@ ws_connection.close()  # explicitly close connection
 If method of connection not raised it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
 
 Here is standard result:
-`SurrealResult(id='8ad04f2f-8ec7-4a86-98ba-e0d147fd4a7d', error=None, result=None, code=None, token=None, status='OK', time='')`
+`SurrealResult(id=None, status=OK, result=[{'author': '51ff5faa-d798-4194-93c6-179ce7525a8c', 'id': 'article:⟨51ff5faa-d798-4194-93c6-179ce7525a8c⟩', 'text': '51ff5faa-d798-4194-93c6-179ce7525a8c', 'title': '51ff5faa-d798-4194-93c6-179ce7525a8c'}], query=None, code=None, time=77.25µs, additional_info={})`
 
 Here is standard error:
-`SurrealResult(id='9f3afdf6-c66c-468f-85e7-27f0f228ea6c', error={'code': -32000, 'message': "There was a problem with the database: Can not execute KILL statement using id '$id'"}, result=None, code=None, token=None, status='OK', time='')`
+`SurrealResult(id=ca3eface-9287-4092-a198-4f91ed27a010, status=ERR, result={'code': -32000, 'message': 'There was a problem with authentication'}, query=None, code=None, time=None, additional_info={})
+`
 
 You can always check for error, using is_error() method
 ```python
@@ -354,6 +355,8 @@ sys.setrecursionlimit(10_000)
  - now you can use custom live query, not just simple one, look above in LQ part
  - added some helper function to get database info, session info, table names
  - add Release Notes to docs
+ - now even errors returns as SurrealResult
+ - exceptions will be raised only if nothing we can do
 
 
 ### Contacts ###

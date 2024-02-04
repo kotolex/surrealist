@@ -1,16 +1,15 @@
-from unittest import TestCase, main
-
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest import TestCase, main
 
 TESTS = Path(__file__).parent.parent
 SRC = TESTS.parent / "src"
 sys.path.append(str(SRC))
 
-
 from surrealist import Surreal, SurrealConnectionError
-from surrealist.utils import to_result, SurrealResult, crop_data, mask_pass
+from surrealist.utils import crop_data, mask_pass
 from surrealist.clients.http_client import mask_opts
+from surrealist.result import to_result, SurrealResult
 
 WRONG_URL = "http://127.0.0.1:9999/"
 URL = "http://127.0.0.1:8000"
@@ -64,9 +63,9 @@ class TestConst(TestCase):
         res = SurrealResult()
         self.assertEqual(res.result, None)
         self.assertEqual(res.code, None)
-        self.assertEqual(res.token, None)
         self.assertEqual(res.status, 'OK')
-        self.assertEqual(res.time, '')
+        self.assertEqual(res.time, None)
+        self.assertEqual(res.additional_info, {})
 
     def test_to_db_result(self):
         res = to_result('[{"result":{}, "status":"ready","time":"0"}]')
@@ -74,11 +73,11 @@ class TestConst(TestCase):
 
     def test_to_auth_result(self):
         res = to_result('{"code":32000, "details":"ready","token":"token"}')
-        self.assertEqual(SurrealResult(code=32000, result="ready", token="token"), res)
+        self.assertEqual(SurrealResult(code=32000, result="ready", token="token", details='ready'), res)
 
     def test_ws_message_to_result_error(self):
         res = to_result({'id': 100, 'error': {1: 1}})
-        self.assertEqual(SurrealResult(id=100, error={1: 1}, status="ERR"), res)
+        self.assertEqual(SurrealResult(id=100, result={1: 1}, status="ERR"), res)
         self.assertTrue(res.is_error())
 
     def test_ws_message_to_result(self):
