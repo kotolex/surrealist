@@ -18,164 +18,171 @@ class TestHttpConnectionNegative(TestCase):
 
     def test_create_one_failed_on_2_id(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid}, record_id=uid2)
-        self.assertEqual(res.status, "ERR", res)
+        with db.connect() as connection:
+            uid = get_uuid()
+            uid2 = get_uuid()
+            res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid}, record_id=uid2)
+            self.assertEqual(res.status, "ERR", res)
 
     def test_create_many_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        res = connection.create("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
-                                            {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
-        self.assertEqual(res.status, "ERR", res)
+        with db.connect() as connection:
+            uid = get_uuid()
+            uid2 = get_uuid()
+            res = connection.create("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
+                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
+            self.assertEqual(res.status, "ERR", res)
 
     def test_update_many_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        uid = get_uuid()
-        uid2 = get_uuid()
-        connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                            {"author": "inserted", "title": uid2, "text": uid2},
-                                            ], record_id=uid)
-        self.assertEqual(res.status, "ERR", res)
-        res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                            {"author": "inserted", "title": uid2, "text": uid2},
-                                            ])
-        self.assertEqual(res.status, "ERR", res)
+        with db.connect() as connection:
+            uid = get_uuid()
+            uid2 = get_uuid()
+            connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
+            res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
+                                                {"author": "inserted", "title": uid2, "text": uid2},
+                                                ], record_id=uid)
+            self.assertEqual(res.status, "ERR", res)
+            res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
+                                                {"author": "inserted", "title": uid2, "text": uid2},
+                                                ])
+            self.assertEqual(res.status, "ERR", res)
 
     def test_query_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(HttpConnectionError):
-            connection.query("SELECT * FROM DATA NOT REALLY AN SQL;")
+        with db.connect() as connection:
+            res = connection.query("SELECT * FROM DATA NOT REALLY AN SQL;")
+            self.assertTrue(res.is_error())
+            self.assertTrue("Failed to parse query" in res.error)
 
     def test_ml_export_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(HttpConnectionError):
-            connection.ml_export("prediction", "1.0.0")
+        with db.connect() as connection:
+            with self.assertRaises(HttpConnectionError):
+                connection.ml_export("prediction", "1.0.0")
 
     def test_select_one_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"select failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.select("article", "any")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.select("article", "any")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_select_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"select all failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.select("article")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.select("article")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_create_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"create failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.create("article", {}, "any")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.create("article", {}, "any")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_update_one_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"update one failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.update("article", {}, "any")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.update("article", {}, "any")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_update_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"update all failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.update("article", {})
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.update("article", {})
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_merge_one_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"merge one failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.merge("article", {}, "any")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.merge("article", {}, "any")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_merge_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"merge all failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.merge("article", {})
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.merge("article", {})
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_delete_one_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"delete one failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.delete("article", "any")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.delete("article", "any")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_patch_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.patch("prediction", [])
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.patch("prediction", [])
 
     def test_live_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.live("prediction", print)
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.live("prediction", print)
+
+    def test_custom_live_failed(self):
+        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.custom_live("LIVE SELECT FROM person;", print)
 
     def test_kill_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.kill("prediction")
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.kill("prediction")
 
     def test_authenticate_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.authenticate("prediction")
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.authenticate("prediction")
 
     def test_invalidate_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.invalidate()
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.invalidate()
 
     def test_info_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        connection = db.connect()
-        with self.assertRaises(CompatibilityError):
-            connection.info()
+        with db.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.info()
 
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"delete all failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.delete("article")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.delete("article")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_connect_failed(self):
         params = (
@@ -194,38 +201,38 @@ class TestHttpConnectionNegative(TestCase):
             with self.subTest(f"import failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
                 file_path = Path(__file__).parent / "import.surql"
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.import_data(file_path)
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.import_data(file_path)
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_ml_import_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"ml import failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
                 file_path = Path(__file__).parent / "empty.surql"
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.ml_import(file_path)
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.ml_import(file_path)
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_export_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"export failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.export()
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.export()
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_ml_export_failed_on_fields(self):
         for expected, opts in PARAMS:
             with self.subTest(f"export failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.ml_export("prediction", "1.0.0")
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.ml_export("prediction", "1.0.0")
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_query_failed_on_headers(self):
         params = (
@@ -236,10 +243,10 @@ class TestHttpConnectionNegative(TestCase):
         for expected, opts in params:
             with self.subTest(f"query failed on data{opts}"):
                 db = Surreal(URL, use_http=True, namespace='test', )
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.query('INFO FOR ROOT;')
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.query('INFO FOR ROOT;')
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_import_empty(self):
         params = (
@@ -250,10 +257,10 @@ class TestHttpConnectionNegative(TestCase):
             with self.subTest(f"Import {file}"):
                 file_path = Path(__file__).parent / file
                 db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-                connection = db.connect()
-                with self.assertRaises(HttpConnectionError) as e:
-                    connection.import_data(file_path)
-                self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
+                with db.connect() as connection:
+                    with self.assertRaises(HttpConnectionError) as e:
+                        connection.import_data(file_path)
+                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
     def test_db_info_failed_permissions(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -267,7 +274,7 @@ class TestHttpConnectionNegative(TestCase):
     # def test_ml_import_failed_wrong_file(self):
     #     db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
     #     file_path = Path(__file__).parent / "import.srql"
-    #     connection = db.connect()
+    #     with db.connect() as connection:
     #     with self.assertRaises(HttpClientError):
     #         connection.ml_import(file_path)
 

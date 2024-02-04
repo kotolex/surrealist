@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
@@ -28,7 +29,7 @@ def connected(func):
     return wrapped
 
 
-class Connection:
+class Connection(ABC):
     """
     Parent for connection objects, contains all public methods to work with API
     """
@@ -117,8 +118,8 @@ class Connection:
 
         :return: full session information
         """
-        query = """return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), 
-        "ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};"""
+        query = 'return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), ' \
+                '"ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};'
         logger.info("Query-Operation: SESSION_INFO")
         return self.query(query)
 
@@ -135,7 +136,7 @@ class Connection:
         res.result = list(res.result["tables"].keys())
         return res
 
-    def remove_table(self, table_name: str) ->SurrealResult:
+    def remove_table(self, table_name: str) -> SurrealResult:
         """
         Fully removes table, even if it contains some records, analog of SQL "DROP table". You should have permissions
         for this action.This method can not remove any other resource, if you need to remove db, ns or scope -
@@ -151,74 +152,99 @@ class Connection:
         logger.info("Query-Operation: REMOVE. Table name %s", table_name)
         return self.query(f"REMOVE TABLE {table_name};")
 
-
+    @abstractmethod
     def use(self, namespace: str, database: str) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def info(self) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def authenticate(self, token: str) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def invalidate(self) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def let(self, name: str, value) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def unset(self, name: str) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
+    def custom_live(self, custom_query: str, callback: Callable[[Dict], Any]) -> SurrealResult:
+        pass
+
+    @abstractmethod
     def kill(self, live_query_id: str) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def signin(self, user: str, password: str, namespace: Optional[str] = None,
                database: Optional[str] = None, scope: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
               return_diff: bool = False) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def import_data(self, path) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def export(self) -> str:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def ml_import(self, path) -> SurrealResult:
-        return NotImplemented
+        pass
 
+    @abstractmethod
     def ml_export(self, name: str, version: str) -> str:
-        return NotImplemented
+        pass
 
     def _get_count(self, res) -> int:
         if not res:

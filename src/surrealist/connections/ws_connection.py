@@ -270,6 +270,33 @@ class WebSocketConnection(Connection):
         return self._run(data, callback)
 
     @connected
+    def custom_live(self, custom_query: str, callback: Callable[[Dict], Any]) -> SurrealResult:
+        """
+        This method can be used to initiate custom live query - a real-time selection from a table with filters and
+        other features of Live Query
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+
+        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+
+        Note: all results, DIFF, formats etc. should be specified in query itself
+
+        Example:
+        ws.custom_live("LIVE SELECT * FROM person WHERE age > 18;", callback=lambda a_dict: print(a_dict)) # creates
+        live query to check any events on person table with records, where age field is bigger than 18, and just
+        printing all incoming results
+
+        :param custom_query: full LIVE SELECT query text
+        :param callback: a function to call on any incoming event. It should take one argument - a dict
+        :return: result of request with the live_id in 'result' field
+        """
+        data = {"method": "query", "params": [custom_query], "additional": "live"}
+        logger.info("Operation: CUSTOM LIVE. Query: %s", crop_data(custom_query))
+        result = self._run(data, callback)
+        result.query = custom_query
+        return result
+
+    @connected
     def kill(self, live_query_id: str) -> SurrealResult:
         """
         This method is used to terminate a running live query by id
@@ -309,7 +336,7 @@ class WebSocketConnection(Connection):
         data = {"method": "query", "params": params}
         logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
         result = self._run(data)
-        result.query = query
+        result.query = params[0] if len(params) == 1 else params
         return result
 
     @connected

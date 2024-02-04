@@ -1,3 +1,4 @@
+import time
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
@@ -375,7 +376,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(10)
             tb_name = f"table_{uid}"
-            res = connection.create(tb_name, {"id":"john", "name": "John", "status": True})
+            res = connection.create(tb_name, {"id": "john", "name": "John", "status": True})
             self.assertFalse(res.is_error())
             res = connection.delete(tb_name, record_id="john")
             self.assertFalse(res.is_error())
@@ -384,6 +385,25 @@ class TestWebSocketConnection(TestCase):
             res = connection.db_tables()
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)
+
+    def test_custom_live(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.custom_live("LIVE SELECT * FROM ws_person WHERE age > 18;", callback=function)
+            self.assertFalse(res.is_error(), res)
+            self.assertIsNotNone(res.result)
+            token = res.result
+            connection.create("ws_person", {"age": 18, "name": "Jane"})
+            connection.create("ws_person", {"age": 28, "name": "John"})
+            time.sleep(0.3)
+            self.assertTrue(len(a_list) == 1, a_list)
+            self.assertEqual(a_list[0]['result']['action'], "CREATE")
+            self.assertEqual(a_list[0]['result']['result']["age"], 28)
+            self.assertEqual(a_list[0]['result']['result']["name"], "John")
+            res = connection.kill(token)
+            self.assertFalse(res.is_error(), res)
 
 
 # TODO uncomment after bugfix

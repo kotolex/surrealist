@@ -70,6 +70,9 @@ class WebSocketClient:
                 logger.warning("Got unexpected message without id and result:  %s", mess)
 
     def on_error(self, _ws, err: Exception):
+        """
+        Callback on getting any errors with sockets
+        """
         logger.error("Websocket connection gets an error %s", err)
 
     def is_connected(self) -> bool:
@@ -81,9 +84,15 @@ class WebSocketClient:
         return bool(self._connected)
 
     def on_open(self, _ws):
+        """
+        Callback on establishing new connection
+        """
         self._connected = True
 
     def on_close(self, *_ignore):
+        """
+        Callback on closing websocket connection
+        """
         self._connected = False
         logger.debug("Close connection to %s", self._base_url)
 
@@ -109,15 +118,16 @@ class WebSocketClient:
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
+        to_send = data if "additional" not in data else {k: v for k, v in data.items() if k != "additional"}
         try:
-            data_string = json.dumps(data, ensure_ascii=False)
+            data_string = json.dumps(to_send, ensure_ascii=False)
         except RecursionError as e:
             logger.error("Cant serialize object, too many nested levels")
             raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
         self._ws.send(data_string)
         res = self._get_by_id(id_)
-        if data['method'] in ('live', 'kill'):
+        if data['method'] in ('live', 'kill') or "additional" in data:
             if 'error' not in res:
                 # now we know live or kill was successful, so now we need to manage callbacks
                 self._on_success(data, callback, res)
@@ -127,9 +137,11 @@ class WebSocketClient:
         if data['method'] == 'kill':
             logger.debug("Delete callback for %s", data['params'][0])
             self._callbacks[data['params'][0]] = None
-        if data['method'] == 'live':
+        else:
+            # custom query returns nested result
+            key = result['result'] if data['method'] == 'live' else result['result'][0]['result']
             logger.debug("Set callback for %s", result['result'])
-            self._callbacks[result['result']] = callback
+            self._callbacks[key] = callback
 
     def _get_by_id(self, id_) -> Dict:
         self._raise_on_wait(lambda: id_ in self._messages, timeout=self._timeout,
@@ -171,6 +183,9 @@ class WebSocketClient:
             raise WebSocketConnectionClosedError("Connection closed while client waits on it")
 
     def close(self):
+        """
+        Close websocket client and close websocket connection, clears all that can, you cant use this object after close
+        """
         self._connected = False
         self._ws.close()
         del self._ws

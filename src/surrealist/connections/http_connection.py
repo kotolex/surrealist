@@ -5,7 +5,7 @@ from typing import Tuple, Dict, Optional, Union, Any, List
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError)
-from surrealist.utils import (ENCODING, to_result, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
+from surrealist.utils import (ENCODING, SurrealResult, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK, ERR)
 
 logger = getLogger("http_connection")
 
@@ -73,8 +73,8 @@ class HttpConnection(Connection):
         if scope:
             opts['scope'] = scope
         logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(opts))))
-        text = raise_if_not_http_ok(self._simple_request("POST", "signin", opts))
-        return to_result(text)
+        pair = self._simple_request("POST", "signin", opts)
+        return self.to_result(pair)
 
     @connected
     def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
@@ -98,8 +98,8 @@ class HttpConnection(Connection):
         params = params or {}
         body = {"ns": namespace, "db": database, "sc": scope, **params}
         logger.info("Operation: SIGNUP. Data: %s", crop_data(mask_pass(str(body))))
-        text = raise_if_not_http_ok(self._simple_request("POST", "signup", body))
-        return to_result(text)
+        pair = self._simple_request("POST", "signup", body)
+        return self.to_result(pair)
 
     @connected
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
@@ -125,8 +125,7 @@ class HttpConnection(Connection):
         """
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: SELECT. Path: %s", crop_data(url))
-        text = raise_if_not_http_ok(self._simple_get(url))
-        return to_result(text)
+        return self.to_result(self._simple_get(url))
 
     @connected
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -159,8 +158,8 @@ class HttpConnection(Connection):
         """
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: CREATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
-        text = raise_if_not_http_ok(self._simple_request("POST", url, data))
-        return to_result(text)
+        pair = self._simple_request("POST", url, data)
+        return self.to_result(pair)
 
     @connected
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -189,8 +188,8 @@ class HttpConnection(Connection):
         """
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: UPDATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
-        text = raise_if_not_http_ok(self._simple_request("PUT", url, data))
-        return to_result(text)
+        pair = self._simple_request("PUT", url, data)
+        return self.to_result(pair)
 
     @connected
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
@@ -215,8 +214,8 @@ class HttpConnection(Connection):
         """
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: DELETE. Path: %s", crop_data(url))
-        text = raise_if_not_http_ok(self._simple_request("DELETE", url, {}))
-        return to_result(text)
+        pair = self._simple_request("DELETE", url, {})
+        return self.to_result(pair)
 
     @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -240,8 +239,8 @@ class HttpConnection(Connection):
         """
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: PATCH. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
-        text = raise_if_not_http_ok(self._simple_request("PATCH", url, data))
-        return to_result(text)
+        pair = self._simple_request("PATCH", url, data)
+        return self.to_result(pair)
 
     @connected
     def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
@@ -265,8 +264,8 @@ class HttpConnection(Connection):
             logger.warning("Variables parameter cant be used on QUERY with http-connection, "
                            "embed them into your query or switch to websocket connection")
         logger.info("Operation: QUERY. Query: %s", crop_data(query))
-        text = raise_if_not_http_ok(self._simple_request("POST", "sql", query, not_json=True))
-        result = to_result(text)
+        pair = self._simple_request("POST", "sql", query, not_json=True)
+        result = self.to_result(pair)
         result.query = query
         return result
 
@@ -285,9 +284,8 @@ class HttpConnection(Connection):
         """
         with open(path, 'rb') as file:
             logger.info("Operation: IMPORT. Path: %s", crop_data(str(path)))
-            text = raise_if_not_http_ok(self._simple_request("POST", "import", file.read().decode(ENCODING),
-                                                             not_json=True))
-        return to_result(text)
+            pair = self._simple_request("POST", "import", file.read().decode(ENCODING), not_json=True)
+        return self.to_result(pair)
 
     @connected
     def export(self) -> str:
@@ -318,9 +316,8 @@ class HttpConnection(Connection):
         """
         with open(path, 'rb') as file:
             logger.info("Operation: ML IMPORT. Path: %s", crop_data(str(path)))
-            text = raise_if_not_http_ok(self._simple_request("POST", "ml/import", file.read().decode(ENCODING),
-                                                             not_json=True))
-        return to_result(text)
+            pair = self._simple_request("POST", "ml/import", file.read().decode(ENCODING), not_json=True)
+        return self.to_result(pair)
 
     @connected
     def ml_export(self, name: str, version: str) -> str:
@@ -446,6 +443,16 @@ class HttpConnection(Connection):
         logger.error(message)
         raise CompatibilityError(message)
 
+    def custom_live(self, custom_query, callback):
+        """
+        Http transport can not use live queries, you should use websocket transport for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport can not use custom live queries, use websockets instead"
+        logger.error(message)
+        raise CompatibilityError(message)
+
     def kill(self, live_query_id: str):
         """
         Http transport can not use KILL operation, you should use websocket transport for that
@@ -502,6 +509,17 @@ class HttpConnection(Connection):
             logger.info("Response from /%s, status_code: %s, body %s", endpoint, status, _body)
             return status, text
 
+    def to_result(self, pair: Tuple[int, str]) -> SurrealResult:
+        code, text = pair
+        print(pair)
+        js = self._in_out_json(text, is_loads=True)
+        if "code" in js and "information" in js:
+            return SurrealResult(code=js["code"], error=js["information"], status=ERR)
+        else:
+            logger.error("Status code is %s, check your data! Info %s", code, text)
+            text = text.replace(',', ',\n')
+            raise HttpConnectionError(f"Status code is {code}, check your data! Info:\n{text}")
+
 
 def raise_if_not_http_ok(result: Tuple[int, str]) -> str:
     """
@@ -513,7 +531,10 @@ def raise_if_not_http_ok(result: Tuple[int, str]) -> str:
     """
     status, text = result
     if status != HTTP_OK:
+        print(status, text)
         logger.error("Status code is %s, check your data! Info %s", status, text)
         text = text.replace(',', ',\n')
         raise HttpConnectionError(f"Status code is {status}, check your data! Info:\n{text}")
     return text
+
+

@@ -17,7 +17,6 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+(including pyt
 
 More to come:
  * connections pool
- * additional features (count, remove etc.)
  * transactions, explain
 
 
@@ -293,6 +292,40 @@ in console you will get:
 
 If you do not need LQ anymore, -call KILL method, with live_id
 
+You can use custom live query if you need, it lets you use filters and conditions, as refer [here](https://docs.surrealdb.com/docs/surrealql/statements/live-select#filter-the-live-query)
+
+**Example 8**
+
+```python
+from time import sleep
+
+from surrealist import Surreal
+
+
+# you need callback, a function which will get dictionary and do something with it
+def call_back(response: dict) -> None:
+    print(response)
+
+
+# you need websockets for live query
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+with surreal.connect() as connection:
+    # here we subscribe and specify custom query for persons
+    res = connection.custom_live("LIVE SELECT * FROM ws_person WHERE age > 18;", callback=call_back)
+    live_id = res.result  # live_id is a LQ id, we need it to kill query in future
+    # here we create 2 records but only second one is what we look for
+    connection.create("ws_person", {"age": 16, "name": "Jane"})  # Jane is too young for us :)
+    connection.create("ws_person", {"age": 28, "name": "John"})  # John older than 18, so wee need this event
+    sleep(0.5)  # sleep a little cause need some time to get message back
+    connection.kill(live_id)  # we kill LQ, no more events to come
+```
+
+in console you will get:
+`{'result': {'action': 'CREATE', 'id': '1f57f2de-354a-43ba-8f39-57000944707c', 'result': {'age': 28, 'id': 'ws_person:awot8zdkg3mqj4wymq8c', 'name': 'John'}}}`
+
+Pay attention - there is no info about Jane in events we get from LQ, cause Jane is younger than 18.
+
+
 ## Threads and thread-safety ##
 This library were made for using in multithreaded environments, just remember some rules of thumb:
  - if you work with only one server of SurrealDB, you need only one Surreal object
@@ -314,6 +347,14 @@ Second choice - increase recursion limit in your system with
 import sys
 sys.setrecursionlimit(10_000)
 ```
+## Release Notes ##
+
+**Version 0.1.4 (compatible with SurrealDB version 1.1.1):**
+
+ - now you can use custom live query, not just simple one, look above in LQ part
+ - added some helper function to get database info, session info, table names
+ - add Release Notes to docs
+
 
 ### Contacts ###
 Mail me at farofwell@gmail.com
