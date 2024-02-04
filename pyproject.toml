@@ -11,10 +11,14 @@ authors = [{ name = "kotolex", email = "farofwell@gmail.com" }]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development",
+    "Topic :: Database",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
 ]
-keywords = ["surreal", "Surreal", "SurrealDB", "surrealist"]
+keywords = ["surreal", "Surreal", "SurrealDB", "surrealist", "database"]
 dependencies = [
     "websocket-client",
 ]
