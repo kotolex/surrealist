@@ -357,6 +357,34 @@ class TestWebSocketConnection(TestCase):
             self.assertTrue('person' in res.result)
             self.assertEqual("INFO FOR DB;", res.query)
 
+    def test_remove_table_with_record(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(11)
+            tb_name = f"table_{uid}"
+            res = connection.create(tb_name, {"name": "John", "status": True})
+            self.assertFalse(res.is_error())
+            res = connection.remove_table(tb_name)
+            self.assertFalse(res.is_error())
+            res = connection.db_tables()
+            self.assertFalse(res.is_error())
+            self.assertFalse(tb_name in res.result)
+
+    def test_remove_table_without_record(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(10)
+            tb_name = f"table_{uid}"
+            res = connection.create(tb_name, {"id":"john", "name": "John", "status": True})
+            self.assertFalse(res.is_error())
+            res = connection.delete(tb_name, record_id="john")
+            self.assertFalse(res.is_error())
+            res = connection.remove_table(tb_name)
+            self.assertFalse(res.is_error())
+            res = connection.db_tables()
+            self.assertFalse(res.is_error())
+            self.assertFalse(tb_name in res.result)
+
 
 # TODO uncomment after bugfix
 # def test_nesting_1000(self):

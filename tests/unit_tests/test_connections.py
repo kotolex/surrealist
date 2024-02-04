@@ -8,7 +8,7 @@ SRC = TESTS.parent / "src"
 sys.path.append(str(SRC))
 
 
-from surrealist import Surreal, SurrealConnectionError, HttpClientError
+from surrealist import Surreal, SurrealConnectionError
 from surrealist.utils import to_result, SurrealResult, crop_data, mask_pass
 from surrealist.clients.http_client import mask_opts
 
@@ -28,22 +28,22 @@ class TestConnections(TestCase):
             Surreal(URL, log_level="WARN")
 
     def test_health(self):
-        surreal = Surreal(WRONG_URL)
+        surreal = Surreal(WRONG_URL, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             surreal.health()
 
     def test_status(self):
-        surreal = Surreal(WRONG_URL)
+        surreal = Surreal(WRONG_URL, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             surreal.status()
 
     def test_is_ready(self):
-        surreal = Surreal(WRONG_URL)
+        surreal = Surreal(WRONG_URL, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             surreal.is_ready()
 
     def test_version(self):
-        surreal = Surreal(WRONG_URL)
+        surreal = Surreal(WRONG_URL, timeout=1)
         with self.assertRaises(SurrealConnectionError):
             surreal.version()
 
