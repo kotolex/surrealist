@@ -124,6 +124,8 @@ class HttpConnection(Connection):
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: SELECT. Path: %s", crop_data(url))
         _, text = self._simple_get(url)
@@ -158,6 +160,8 @@ class HttpConnection(Connection):
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: CREATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
         _, text = self._simple_request("POST", url, data)
@@ -166,8 +170,12 @@ class HttpConnection(Connection):
     @connected
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
-        This method can be used to update or modify records in the database. So all old fields will be deleted and new
-        will be added, if you wand just to add field to record, keeping old ones - use merge method instead
+        This method can be used to update or create record in the database. So all old fields will be deleted and new
+        will be added, if you wand just to add field to record, keeping old ones - use **merge** method instead.If
+        record with specified id does not exist it will be created, if exist - all fields will be replaced
+
+        Note: if you want to create/replace one record you should specify recordID in table_name or in record_id, but
+        not in data parameters.
 
         Refer to:
         https://docs.surrealdb.com/docs/integration/http#put-table
@@ -181,13 +189,15 @@ class HttpConnection(Connection):
         http_connection.update("person", {"name": "Alex Doe"}, "my_id") # record with specified id will be now
         {"name": "Alex Doe"}, all data stored in record before will be deleted
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Notice: do not specify id twice, for example in table name and in record_id, it will cause error
 
         :param table_name: table name or table name with record_id to update
         :param data: dict with data to create
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: UPDATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
         _, text = self._simple_request("PUT", url, data)
@@ -197,7 +207,8 @@ class HttpConnection(Connection):
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method deletes all records in a table or a single record, be careful and do not forget to specify id if you
-        do not want to delete all records. This method do not remove table itself, only records in it
+        do not want to delete all records. This method do not remove table itself, only records in it. As a result of
+        this method you will get all deleted records or None if no such record or table
 
         Refer to:
         https://docs.surrealdb.com/docs/integration/http#delete-table
@@ -214,6 +225,8 @@ class HttpConnection(Connection):
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: DELETE. Path: %s", crop_data(url))
         _, text = self._simple_request("DELETE", url, {})
@@ -223,7 +236,8 @@ class HttpConnection(Connection):
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
-        will not be deleted, if you want to replace old data with new - use update method
+        will not be deleted, if you want to replace old data with new - use **update** method. If
+        record with specified id does not exist it will be created.
 
         Refer to:
         https://docs.surrealdb.com/docs/integration/http#patch-table
@@ -239,6 +253,8 @@ class HttpConnection(Connection):
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: PATCH. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
         _, text = self._simple_request("PATCH", url, data)
@@ -404,17 +420,20 @@ class HttpConnection(Connection):
     @connected
     def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
         """
-        This method inserts one or more records. Under the hood it simply generates QL "INSERT INTO person {data};"
-        for the **query** call
+        This method inserts one or more records. If you specify recordID in data and record with that id already
+        exists - no inserts or updates will happen and the content of existing record will be return. If you need to
+        change existing record, please consider **update** or **merge**
+
+        Under the hood it simply generates QL "INSERT INTO table_name {data};" for the **query** call
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
         Examples:
-        http_connection.insert("person:my_id", {"name": "John Doe"}) # inserts one record with specified id
+        http_connection.insert("person", {"name": "John Doe"}) # inserts one record with random id
         http_connection.insert("person", [{"name": "John Doe"}, {"name", "Jane Doe"}]) # inserts two records
         with random ids
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Note: do not use record id in table_name parameter (table:recordID) - it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to insert
         :param data: dict or list(many records) with data to create
@@ -422,18 +441,41 @@ class HttpConnection(Connection):
         """
         logger.info("Query-Operation: INSERT. Table_name: %s, data %s", crop_data(table_name), crop_data(str(data)))
         data = self._in_out_json(data, is_loads=False)
-        return self.query(f"INSERT INTO person {data};")
+        return self.query(f"INSERT INTO {table_name} {data};")
 
-    def patch(self, table_name: str, data: Dict, record_id: Optional[str] = None, return_diff: bool = False):
+    @connected
+    def patch(self, table_name: str, data: List, record_id: Optional[str] = None,
+              return_diff: bool = False) -> SurrealResult:
         """
-        Http transport can not use patch operation, you can use websocket transport for that, or methods like
-        **merge** and **update** for same results
+        This method changes specified data in one ar all records. If given table does not exist, new table and record
+        will not be created, if table exist but no such record_id - new record will be created, if no record id -all
+        records will be transformed.
+        Http transport use **query** method under the hood with "UPDATE {table_name} PATCH {data} RETURN DIFF"
 
-        :raise CompatibilityError: on any use
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+
+        About allowed data format and DIFF refer to: https://jsonpatch.com
+
+        Examples:
+        http_connection.patch("person", [{"op": "replace", "path": "/active", "value": False}]) # replaces active
+        field for all records in person table to False
+        http_connection.patch("person:my_id", [{"op": "replace", "path": "/active", "value": False}]) # replaces
+        active field for one record with specified id to False
+
+        Notice: do not specify id twice, for example in table name and in record_id, it will cause error
+
+        :param table_name: table name or table name with record_id to patch
+        :param data: list with json-patch data
+        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param return_diff: True if you want to get only DIFF info, False for standard results
+        :return: result of request
         """
-        message = "Http transport can not use PATCH operation, use websocket transport or methods like merge and update"
-        logger.error(message)
-        raise CompatibilityError(message)
+        data = self._in_out_json(data, is_loads=False)
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        query = f"UPDATE {table_name} PATCH {data}"
+        if return_diff:
+            query = f"{query} RETURN DIFF"
+        return self.query(f"{query};")
 
     def live(self, table_name, callback, return_diff: bool = False):
         """
@@ -482,18 +524,6 @@ class HttpConnection(Connection):
         :raise CompatibilityError: on any use
         """
         message = "Http transport can not invalidate, you should use websocket for that"
-        logger.error(message)
-        raise CompatibilityError(message)
-
-    def info(self):
-        """
-        Http transport can not use INFO, you should use websocket or **query** method
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
-
-        :raise CompatibilityError: on any use
-        """
-        message = "Http transport can not use INFO, you should use query method or websocket for that"
         logger.error(message)
         raise CompatibilityError(message)
 

@@ -7,9 +7,8 @@ from surrealist.clients.ws_client import WebSocketClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass
 from surrealist.result import SurrealResult
-
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass
 
 logger = getLogger("websocket_connection")
 
@@ -109,22 +108,6 @@ class WebSocketConnection(Connection):
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
             self._params = {"NS": namespace, "DB": database}
-        return self._run(data)
-
-    @connected
-    def info(self) -> SurrealResult:
-        """
-        This method returns the record of an authenticated scope user
-
-        Refer to: https://docs.surrealdb.com/docs/integration/websocket#info
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
-
-
-        :return: result of request
-        """
-        data = {"method": "info"}
-        logger.info("Operation: INFO")
         return self._run(data)
 
     @connected
@@ -402,18 +385,20 @@ class WebSocketConnection(Connection):
     @connected
     def insert(self, table_name: str, data: Union[List, Dict]) -> SurrealResult:
         """
-        This method inserts one or more records
+        This method inserts one or more records. If you specify recordID in data and record with that id already
+        exists - no inserts or updates will happen and the content of existing record will be return. If you need to
+        change existing record, please consider **update** or **merge**
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
         Examples:
-        websocket_connection.insert("person:my_id", {"name": "John Doe"}) # inserts one record with specified id
+        websocket_connection.insert("person", {"name": "John Doe"}) # inserts one record with random id
         websocket_connection.insert("person", [{"name": "John Doe"}, {"name", "Jane Doe"}]) # inserts two records
         with random ids
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Note: do not use record id in table_name parameter (table:recordID) - it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to insert
         :param data: dict or list(many records) with data to create
@@ -427,7 +412,11 @@ class WebSocketConnection(Connection):
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method can be used to update or modify records in the database. So all old fields will be deleted and new
-        will be added, if you wand just to add field to record, keeping old ones -use merge method instead
+        will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.If
+        record with specified id does not exist it will be created, if exist - all fields will be replaced
+
+        Note: if you want to create/replace one record you should specify recordID in table_name or in record_id, but
+        not in data parameters.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
 
@@ -439,7 +428,7 @@ class WebSocketConnection(Connection):
         websocket_connection.update("person", {"name": "Alex Doe"}, "my_id") # record with specified id will be now
         {"name": "Alex Doe"}, all data stored in record before will be deleted
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Notice: do not specify id twice, for example in table name and in record_id, it will cause error
 
         :param table_name: table name or table name with record_id to update
         :param data: dict with data to create
@@ -455,7 +444,8 @@ class WebSocketConnection(Connection):
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
-        will not be deleted, if you want to replace old data with new - use update method
+        will not be deleted, if you want to replace old data with new - use **update** method.If
+        record with specified id does not exist it will be created.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#merge
 
@@ -478,7 +468,9 @@ class WebSocketConnection(Connection):
     def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
               return_diff: bool = False) -> SurrealResult:
         """
-        This method changes specified data in one ar all records.
+        This method changes specified data in one ar all records. If given table does not exist, new table and record
+        will not be created, if table exist but no such record_id - new record will be created, if no record id -all
+        records will be transformed
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#patch
 
@@ -511,7 +503,8 @@ class WebSocketConnection(Connection):
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method deletes all records in a table or a single record, be careful and don't forget to specify id if you
-        do not want to delete all records. This method do not remove table itself, only records in it
+        do not want to delete all records. This method do not remove table itself, only records in it.As a result of
+        this method you will get all deleted records or None if no such record or table
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
 

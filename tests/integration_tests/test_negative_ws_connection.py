@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL
 from surrealist import Surreal, SurrealConnectionError, WebSocketConnectionError, CompatibilityError
+from tests.integration_tests.utils import URL
 
 
 class TestNegativeWebSocketConnection(TestCase):
@@ -20,20 +20,6 @@ class TestNegativeWebSocketConnection(TestCase):
         surreal = Surreal(URL, credentials=('wrong', 'wrong'))
         with self.assertRaises(WebSocketConnectionError):
             surreal.connect()
-
-    def test_connect_failed_no_db(self):
-        surreal = Surreal(URL, namespace="test", credentials=('root', 'root'))
-        with surreal.connect() as connection:
-            res = connection.info()
-            self.assertTrue(res.is_error(), res)
-            self.assertTrue("Specify a database to use" in res.result["message"])
-
-    def test_info_failed_no_ns(self):
-        surreal = Surreal(URL, credentials=('root', 'root'))
-        with surreal.connect() as connection:
-            res = connection.info()
-            self.assertTrue(res.is_error(), res)
-            self.assertTrue("Specify a namespace to use" in res.result["message"])
 
     def test_authenticate_failed_wrong_token(self):
         surreal = Surreal(URL, namespace="test", database="test")
@@ -100,6 +86,26 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertTrue(res.is_error())
             self.assertEqual("INFO FOR DB;", res.query)
             self.assertEqual("Specify a namespace to use", res.result)
+
+    def test_insert_failed_if_have_id(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.insert("new_table:new_insert", {'new_field2': 'field2'})
+            self.assertTrue(res.is_error())
+
+    def test_root_info_failed(self):
+        surreal = Surreal(URL, 'test', 'test', ('user_db', 'user_db'))
+        with surreal.connect() as connection:
+            res = connection.root_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("Not enough permissions to perform this action", res.result)
+
+    def test_ns_info_failed(self):
+        surreal = Surreal(URL, 'test', 'test', ('user_db', 'user_db'))
+        with surreal.connect() as connection:
+            res = connection.ns_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("Not enough permissions to perform this action", res.result)
 
 
 if __name__ == '__main__':

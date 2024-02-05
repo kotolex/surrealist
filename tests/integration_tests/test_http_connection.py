@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest import TestCase, main
 
+
 from tests.integration_tests.utils import URL, WS_URL, get_random_series
 from surrealist import Surreal, get_uuid
 
@@ -371,6 +372,88 @@ class TestHttpConnection(TestCase):
             res = connection.db_tables()
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)
+
+    def test_insert_when_id_exists_returns_existing(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(11)
+            res = connection.insert("article", {'id': uid, 'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.insert("article", {'id': uid, 'field': 'new'})
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
+
+    def test_update_creates_if_not_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(13)
+            res = connection.update(f"article:{uid}", {'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
+
+    def test_merge_creates_if_not_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(14)
+            res = connection.merge(f"article:{uid}", {'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
+
+    def test_delete_unexisting(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(14)
+            res = connection.delete(f"article:{uid}")
+            self.assertEqual(res.result, [None])
+            self.assertFalse(res.is_error())
+            res = connection.delete(uid)
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [])
+
+    def test_info_root(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.root_info()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 2)
+
+    def test_info_ns(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.ns_info()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 3)
+
+    def test_patch_one(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(24)
+            connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid})
+            res = connection.patch("article", [{"op": "replace", "path": "/active", "value": True}], uid)
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result, [{"id": f"article:{uid}", "author": uid, "title": uid, "text": uid,
+                                          "active": True}])
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result[0]['author'], uid)
+            self.assertEqual(res.result[0]['active'], True)
+
+    def test_patch_with_diff(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(24)
+            connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid, "active": False})
+            res = connection.patch("article", [{"op": "replace", "path": "/active", "value": True}], uid, True)
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result, [[{'op': 'replace', 'path': '/active', 'value': True}]])
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result[0]['author'], uid)
+            self.assertEqual(res.result[0]['active'], True)
 
 
 if __name__ == '__main__':

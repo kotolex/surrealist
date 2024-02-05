@@ -37,7 +37,6 @@ Each transport has functions it can not use by itself (in current SurrealDB vers
 **Http-transport can not:**
  - invalidate, authenticate session
  - create or kill live query
- - use operations INFO or PATCH (you should use raw query instead)
 
 **Websocket-transport can not:**
  - import or export data (you should use http connection or cli tools for that)
@@ -130,6 +129,14 @@ ws_connection.close()  # explicitly close connection
 # after closing we can not use connection anymore, if you need one - create one more connection with surreal object
 ```
 
+## Methods ##
+Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/surrealql/overview)
+
+The best and the most efficient way is to use **query** method, cause it allow you to do all that is possible, if you have permissions.
+All other methods like **create**, **update**, **merge**, **delete** is limited in their abilities and return results. 
+
+For example, helper delete will return all deleted data back to you, if it is not that you want - use query:
+`connection.query("DELETE my_table RETURN NONE;")`
 
 ## Results and RecordID ##
 If method of connection not raised it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
@@ -149,20 +156,18 @@ if result.is_error():
 
 You need read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
 
-For support and compatibility reasons there are many way to specify recordID in method.
+For support and compatibility reasons there are two way to specify recordID in method.
 Let's consider CREATE method for example:
 ```python
 # all the same
-ws_connection.create("person", {"id":"john", "name":"John Doe"})
 ws_connection.create("person:john", {"name":"John Doe"})
 ws_connection.create("person", {"name":"John Doe"}, record_id="john")
 ```
 These function calls are the same, so, as you can see, recordID can be specified:
- - in data json (if data allowed in method)
  - in table name after colon, for example "person:john"
  - in record_id argument
 
-**Attention!** Using recordID 2 or 3 times in one method will cause error on SurrealDB side, for example
+**Attention!** Using recordID 2 times in one method will cause error on SurrealDB side, for example
 `ws_connection.select("person:john", record_id="john")` is invalid call, id should be specified only once.
 
 **Important note:** uuid-type recordID, like 8424486b-85b3-4448-ac8d-5d51083391c7 should be specified with "`" backticks, for example
@@ -357,6 +362,15 @@ sys.setrecursionlimit(10_000)
  - add Release Notes to docs
  - now even errors returns as SurrealResult
  - exceptions will be raised only if nothing we can do
+
+**Version 0.1.5 (compatible with SurrealDB version 1.1.1):**
+
+ - http transport now can use PATCH (via query)
+ - remove INFO and add db_info, ns_info, root_info
+ - fix bug with http methods, when use table_name "table:id"
+ - add docs to connection(parent for transports), including features
+
+
 
 
 ### Contacts ###

@@ -1,8 +1,8 @@
 import time
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, get_random_series
 from surrealist import Surreal, get_uuid
+from tests.integration_tests.utils import URL, get_random_series
 
 
 class TestWebSocketConnection(TestCase):
@@ -22,13 +22,6 @@ class TestWebSocketConnection(TestCase):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             res = connection.use('test', 'test')
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(None, res.result)
-
-    def test_info(self):
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
-        with surreal.connect() as connection:
-            res = connection.info()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, res.result)
 
@@ -64,7 +57,7 @@ class TestWebSocketConnection(TestCase):
             res = connection.invalidate()
             self.assertFalse(res.is_error(), res)
             self.assertIsNone(res.result)
-            res = connection.info()
+            res = connection.ns_info()
             self.assertTrue(res.is_error(), res)
 
     # TODO uncomment when bug fix
@@ -403,6 +396,61 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(a_list[0]['result']['result']["name"], "John")
             res = connection.kill(token)
             self.assertFalse(res.is_error(), res)
+
+    def test_insert_when_id_exists_returns_existing(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(11)
+            res = connection.insert("article", {'id': uid, 'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.insert("article", {'id': uid, 'field': 'new'})
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
+
+    def test_update_creates_if_not_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(13)
+            res = connection.update(f"ws_article:{uid}", {'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.select(f"ws_article:{uid}")
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, {'id': f"ws_article:{uid}", 'field': 'old'})
+
+    def test_merge_creates_if_not_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(14)
+            res = connection.merge(f"article:{uid}", {'field': 'old'})
+            self.assertFalse(res.is_error())
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, {'id': f"article:{uid}", 'field': 'old'})
+
+    def test_delete_unexisting(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            uid = get_random_series(14)
+            res = connection.delete(f"ws_article:{uid}")
+            self.assertEqual(res.result, None)
+            self.assertFalse(res.is_error())
+            res = connection.delete(uid)
+            self.assertFalse(res.is_error())
+            self.assertEqual(res.result, [])
+
+    def test_info_root(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.root_info()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 2)
+
+    def test_info_ns(self):
+        surreal = Surreal(URL, 'test', credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.ns_info()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 3)
 
 
 # TODO uncomment after bugfix

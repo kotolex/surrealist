@@ -132,12 +132,6 @@ class TestHttpConnectionNegative(TestCase):
                     self.assertTrue(res.is_error())
                     self.assertTrue(expected in res.result, res)
 
-    def test_patch_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        with db.connect() as connection:
-            with self.assertRaises(CompatibilityError):
-                connection.patch("prediction", [])
-
     def test_live_failed(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         with db.connect() as connection:
@@ -167,12 +161,6 @@ class TestHttpConnectionNegative(TestCase):
         with db.connect() as connection:
             with self.assertRaises(CompatibilityError):
                 connection.invalidate()
-
-    def test_info_failed(self):
-        db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
-        with db.connect() as connection:
-            with self.assertRaises(CompatibilityError):
-                connection.info()
 
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:
@@ -268,6 +256,28 @@ class TestHttpConnectionNegative(TestCase):
             self.assertTrue(res.is_error())
             self.assertEqual("INFO FOR DB;", res.query)
             self.assertEqual("Specify a namespace to use", res.result)
+
+    def test_insert_failed_if_have_id(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.insert("new_table:new_insert", {'new_field2': 'field2'})
+            self.assertTrue(res.is_error())
+            self.assertEqual(400, res.code)
+
+    def test_root_info_failed(self):
+        surreal = Surreal(URL, 'test', 'test', ('user_db', 'user_db'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.root_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("Not enough permissions to perform this action", res.result)
+
+    def test_ns_info_failed(self):
+        surreal = Surreal(URL, 'test', 'test', ('user_db', 'user_db'), use_http=True)
+        with surreal.connect() as connection:
+            res = connection.ns_info()
+            self.assertTrue(res.is_error())
+            self.assertEqual("Not enough permissions to perform this action", res.result)
+
 
     # TODO uncomment after bugfix
     # def test_ml_import_failed_wrong_file(self):
