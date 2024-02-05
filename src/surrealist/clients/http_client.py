@@ -4,7 +4,7 @@ import urllib.parse
 import urllib.request
 from http.client import HTTPResponse, RemoteDisconnected
 from logging import getLogger
-from typing import Optional, Tuple, Dict, Union
+from typing import Optional, Tuple, Dict, Union, BinaryIO
 from urllib.error import URLError, HTTPError
 
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
@@ -65,18 +65,23 @@ class HttpClient:
         """
         return self.request("PATCH", data, path)
 
-    def request(self, method: str, data: Optional[Union[Dict, str]], path: str = '',
-                not_json: bool = False) -> HTTPResponse:
+    def request(self, method: str, data: Optional[Union[Dict, str, BinaryIO]], path: str = '',
+                type_of_content: str = "JSON") -> HTTPResponse:
         response = None
         url = f'{self._base_url}{path}'
         options = {'method': method, 'headers': self._headers}
         if method not in ("GET", "DELETE"):
-            try:
-                js = json.dumps(data).encode(ENCODING) if not not_json else data.encode(ENCODING)
-            except RecursionError as e:
-                logger.error("Cant serialize object, too many nested levels")
-                raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
-            options['data'] = js
+            if type_of_content == "JSON":
+                try:
+                    data_to_send = json.dumps(data).encode(ENCODING)
+                except RecursionError as e:
+                    logger.error("Cant serialize object, too many nested levels")
+                    raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
+            elif type_of_content == "STR":
+                data_to_send = data.encode(ENCODING)
+            else: # it is a file-like object (BinaryIO)
+                data_to_send = data
+            options['data'] = data_to_send
         try:
             req = urllib.request.Request(url, **options)
             logger.debug("Request to %s, options: %s, timeout: %d", url, mask_opts(options), self._timeout)

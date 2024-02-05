@@ -1,6 +1,6 @@
 from logging import getLogger
 from pathlib import Path
-from typing import Tuple, Dict, Optional, Union, Any, List
+from typing import Tuple, Dict, Optional, Union, Any, List, BinaryIO
 
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
@@ -282,7 +282,7 @@ class HttpConnection(Connection):
             logger.warning("Variables parameter cant be used on QUERY with http-connection, "
                            "embed them into your query or switch to websocket connection")
         logger.info("Operation: QUERY. Query: %s", crop_data(query))
-        _, text = self._simple_request("POST", "sql", query, not_json=True)
+        _, text = self._simple_request("POST", "sql", query, type_of_content="STR")
         result = to_result(text)
         result.query = query
         return result
@@ -302,7 +302,7 @@ class HttpConnection(Connection):
         """
         with open(path, 'rb') as file:
             logger.info("Operation: IMPORT. Path: %s", crop_data(str(path)))
-            _, text = self._simple_request("POST", "import", file.read().decode(ENCODING), not_json=True)
+            _, text = self._simple_request("POST", "import", file, type_of_content="FILE")
         return to_result(text)
 
     @connected
@@ -334,7 +334,7 @@ class HttpConnection(Connection):
         """
         with open(path, 'rb') as file:
             logger.info("Operation: ML IMPORT. Path: %s", crop_data(str(path)))
-            _, text = self._simple_request("POST", "ml/import", file.read().decode(ENCODING), not_json=True)
+            _, text = self._simple_request("POST", "ml/import", file.read().decode(ENCODING), type_of_content="STR")
         return to_result(text)
 
     @connected
@@ -534,12 +534,15 @@ class HttpConnection(Connection):
             logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, _body)
             return status, text
 
-    def _simple_request(self, method, endpoint: str, data: Union[Dict, str], not_json: bool = False) -> Tuple[int, str]:
-        with self._http_client.request(method, data, endpoint, not_json) as resp:
+    def _simple_request(self, method, endpoint: str, data: Union[Dict, str, BinaryIO],
+                        type_of_content: str = "JSON") -> Tuple[int, str]:
+        with self._http_client.request(method, data, endpoint, type_of_content=type_of_content) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
+            if type_of_content == "FILE":
+                data.close()
             _body = "is empty" if not text else crop_data(text)
             logger.info("Response from /%s, status_code: %s, body %s", endpoint, status, _body)
-            return status, text
+        return status, text
 
 
 def raise_if_not_http_ok(result: Tuple[int, str]) -> str:

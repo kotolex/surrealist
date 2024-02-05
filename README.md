@@ -68,7 +68,7 @@ Calls of **is_ready()**, **health()** or **version()** on Surreal objects are fo
 
 ### Parameters ###
 
-**url** - url of SurrealDB server, if you sure you will use websocket connection - you can use url like ws://127.0.0.1:8000/rpc, but http will work fine too even for websockets.
+**url** - url of SurrealDB server, if you sure you will use websocket connection - you can use url like ws://127.0.0.1:8000/rpc, but http will work fine too, even for websockets.
 So, you can simply use http://127.0.0.1:8000, it will be transform to ws://127.0.0.1:8000/rpc under the hood.
 If your url is differs - specify url in ws(s) format
 
@@ -85,7 +85,7 @@ For example for wss://127.0.0.1:9000/some/rps predicted http url will be https:/
 
 **timeout** - optional, 5 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
 
-**log_level** - optional, "ERROR" by default, one of (DEBUG, INFO, ERROR), where ERROR - to see only errors, INFO - to see only operations, DEBUG - to see all, including transport requests/responses
+**log_level** - optional, "ERROR" by default, one of (DEBUG, INFO, ERROR), where ERROR - to see only errors, INFO - to see errors and operations, DEBUG - to see all, including transport requests/responses
 
 **Example 2**
 
@@ -135,7 +135,7 @@ Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/su
 The best and the most efficient way is to use **query** method, cause it allow you to do all that is possible, if you have permissions.
 All other methods like **create**, **update**, **merge**, **delete** is limited in their abilities and return results. 
 
-For example, helper delete will return all deleted data back to you, if it is not that you want - use query:
+For example, helper **delete** will return all deleted data back to you, if it is not that you want - use query:
 `connection.query("DELETE my_table RETURN NONE;")`
 
 ## Results and RecordID ##
@@ -156,7 +156,7 @@ if result.is_error():
 
 You need read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
 
-For support and compatibility reasons there are two way to specify recordID in method.
+For support and compatibility reasons there are two ways to specify recordID in method.
 Let's consider CREATE method for example:
 ```python
 # all the same
@@ -355,14 +355,6 @@ sys.setrecursionlimit(10_000)
 ```
 ## Release Notes ##
 
-**Version 0.1.4 (compatible with SurrealDB version 1.1.1):**
-
- - now you can use custom live query, not just simple one, look above in LQ part
- - added some helper function to get database info, session info, table names
- - add Release Notes to docs
- - now even errors returns as SurrealResult
- - exceptions will be raised only if nothing we can do
-
 **Version 0.1.5 (compatible with SurrealDB version 1.1.1):**
 
  - http transport now can use PATCH (via query)
@@ -370,7 +362,13 @@ sys.setrecursionlimit(10_000)
  - fix bug with http methods, when use table_name "table:id"
  - add docs to connection(parent for transports), including features
 
+**Version 0.1.4 (compatible with SurrealDB version 1.1.1):**
 
+ - now you can use custom live query, not just simple one, look above in LQ part
+ - added some helper function to get database info, session info, table names
+ - add Release Notes to docs
+ - now even errors returns as SurrealResult
+ - exceptions will be raised only if nothing we can do
 
 
 ### Contacts ###
