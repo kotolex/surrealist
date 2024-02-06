@@ -1,6 +1,6 @@
 class PySurrealError(Exception):
     """
-    Parent for all types of errors in surrealist, so you can use more broad error in except clauses
+    Parent for all types of errors in surrealist, so you can use broader error in except clauses
 
     try:
         code() # some job with connection
@@ -17,7 +17,7 @@ class SurrealConnectionError(PySurrealError):
 
 class HttpClientError(PySurrealError):
     """
-    Raises on http-client specific errors, in normal situations user should never see this
+    Raises on http-client-specific errors, in normal situations user should never see this
     """
 
 
@@ -49,7 +49,7 @@ class ConnectionParametersError(PySurrealError):
 
 class OperationOnClosedConnectionError(PySurrealError):
     """
-    Raises on attempt to use already closed connection
+    Raises on an attempt to use already closed connection
     """
 
 

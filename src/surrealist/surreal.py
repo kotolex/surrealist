@@ -17,9 +17,9 @@ logger = getLogger()
 class Surreal:
     """
     Represents the SurrealDB client, all connections should be established via this class. By default, connection will
-    use websocket transport (recommended). This class use log level to monitor all actions, can check version and state
-    of the SurrealDb server
-    If you have only one SurrealDB server you need exactly one object of this class!
+    use websocket transport (recommended). This class uses log level to monitor all actions, can check a version and
+    state of the SurrealDb server.
+    If you have only one SurrealDB server, you need exactly one object of this class!
 
     Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#connect-to-surrealdb
     """
@@ -28,14 +28,14 @@ class Surreal:
                  credentials: Tuple[str, str] = None, use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
                  log_level: str = "ERROR"):
         """
-        Initiating all parameters for connection, this method do not check or validate anything by itself, just save
+        Initiating all parameters for connection, this method does not check or validates anything by itself, just save
         data for future use. To make sure your url is valid and accessible - use **is_ready** method of Surreal object.
 
         About log_level and debug mode: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
 
         :param url: database url, for local database http://127.0.0.1:8000/
         :param namespace: namespace to use
-        :param database: database to use, make sure to use both namespace and database or none of them
+        :param database: a database to use, make sure to use both namespace and database or none of them
         :param credentials: pair of user and password, for example ("root", "root")
         :param use_http: boolean flag of using http transport. Will use websocket-client if False.
         It is strongly recommended to use websocket transport as it is more powerful.
@@ -62,7 +62,7 @@ class Surreal:
     def set_url(self, url: str):
         """
         Setting base and predicted urls to work with. If url starts with http, then both url and predicted url will be
-        the same. If url in ws(s) format, method will try to create predicted url based on it.
+        the same. If url in ws(s) format, method will try to create a predicted url based on it.
 
         For example for wss://127.0.0.1:9000/some/rps predicted http url will be https://127.0.0.1:9000/
 
@@ -84,8 +84,9 @@ class Surreal:
         """
         Setting maximum string length for object(json) in logs, it is not always desirable to see all data that comes
         in and out in logs, because some objects(jsons) can be very large, but for debug purposes you can increase it
-        to see full picture. However, is not recommended to set length too small for speed reasons, or set it too large,
-        except when you in the debug mode. Default is 300 chars, which is enough for standard SurrealDB messages.
+        to see the full picture. However, it is not recommended to set length too small for speed reasons, or set it
+        too large, except when you are in the debug mode. Default is 300 chars, which is enough for standard
+        SurrealDB messages.
 
         :param length: new maximum length for one string in logs
         """
@@ -103,8 +104,9 @@ class Surreal:
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
 
-        Notice: authorization params and passwords cant be seen in logs in any time, if you see it, please report
+        Notice: authorization params and passwords can't be seen in logs at any time, if you see it, please report
         an issue
+
         Notice: you will see logs of this library(in and out), but not SurrealDb server logs
 
         :param level: one of "DEBUG", "INFO", "ERROR"
@@ -119,8 +121,8 @@ class Surreal:
 
     def connect(self) -> Connection:
         """
-        Actually connects to database via chosen transport (websocket or http), uses specified namespace, database and
-        credentials parameters, so can raise exception if connect will fail. If this method succeeded - you are
+        Actually connects to a database via chosen transport (websocket or http), uses specified namespace, database and
+        credentials parameters, so can raise exception if connect will fail. If this method succeeded, you are
         ready to go with SurrealDB
 
         :return: connection object to work with SurrealDB
@@ -176,7 +178,7 @@ class Surreal:
 
         Refer to: https://docs.surrealdb.com/docs/integration/http#version
 
-        :return: version, for example "surrealdb-1.1.1"
+        :return: version, for example, "surrealdb-1.1.1"
         :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         return self.__get("version")[1]

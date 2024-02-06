@@ -17,8 +17,8 @@ logger = getLogger("websocket_client")
 
 class WebSocketClient:
     """
-    Blocking thread-safe client to work with websockets, always wait a response for message, comparing by id (uuid).
-    Every client creates at least 2 threads (in and out)
+    Blocking a thread-safe client to work with websockets, always wait a response for message, comparing by id (uuid).
+    Every client creates at least two threads (in and out)
     """
 
     def __init__(self, base_url: str, timeout: int = DEFAULT_TIMEOUT):
@@ -38,7 +38,7 @@ class WebSocketClient:
 
     def on_message(self, _ws, message: str):
         """
-        Called on message received from the websocket connection.
+        Called on a message received from the websocket connection.
 
         :param _ws: connection object
         :param message: string message
@@ -65,9 +65,9 @@ class WebSocketClient:
                     logger.debug("Use callback for %s", live_id)
                     callback(mess)
                 else:
-                    logger.warning("Got message, but no callback to work with. Message: %s", mess)
+                    logger.warning("Got a message, but no callback to work with. Message: %s", mess)
             else:
-                logger.warning("Got unexpected message without id and result:  %s", mess)
+                logger.warning("Got an unexpected message without id and result: %s", mess)
 
     def on_error(self, _ws, err: Exception):
         """
@@ -77,7 +77,7 @@ class WebSocketClient:
 
     def is_connected(self) -> bool:
         """
-        Shows is websocket client is connected to SurrealDB
+        Shows is a websocket client is connected to SurrealDB
 
         :return: True if connected, False otherwise
         """
@@ -111,10 +111,10 @@ class WebSocketClient:
         Method to send messages to SurrealDB, blocks until gets a response or raise on timeout
 
         :param data: dict with request parameters
-        :param callback: function to call on live query, it is set only for live method
+        :param callback: function to call on a live query, it is set only for a live method
         :return: result of the request
         :raise TimeoutError: if no response and time is over
-        :raise WebSocketConnectionClosed: if connection was closed while waiting
+        :raise WebSocketConnectionClosed: if the connection was closed while waiting
         """
         id_ = get_uuid()
         data = {"id": id_, **data}
@@ -154,7 +154,7 @@ class WebSocketClient:
             raise ValueError(f"Dict returns None on thread-safe pop, {id_=}, {self._messages=}")
         return result
 
-    def _wait_until(self, predicate, timeout, period=0.1):
+    def _wait_until(self, predicate, timeout, period=0.06):
         must_end = time.time() + timeout
         while time.time() < must_end:
             if self._connected is False:
@@ -169,7 +169,7 @@ class WebSocketClient:
         Method to wait some condition or raise on timeout
 
         :param predicate: function to call and check condition
-        :param timeout: time in seconds to wait until condition
+        :param timeout: time in seconds to wait until a condition
         :param error_text: custom error message on fail
         :raise TimeoutError: if condition not met until time
         :raise WebSocketConnectionClosed: if connection was closed while waiting
@@ -179,12 +179,12 @@ class WebSocketClient:
             logger.error("Time exceeded: %s seconds. Error: %s", timeout, error_text)
             raise TimeoutError(f"Time exceeded: {timeout} seconds. Error: {error_text}")
         if result == (False, "CLOSED"):
-            logger.error("Connection %s closed while client waits on it", self._base_url)
-            raise WebSocketConnectionClosedError("Connection closed while client waits on it")
+            logger.error("Connection %s closed while a client waits on it", self._base_url)
+            raise WebSocketConnectionClosedError("Connection closed while a client waits on it")
 
     def close(self):
         """
-        Close websocket client and close websocket connection, you can not use this object after close
+        Close websocket client and close websocket connection, you cannot use this object after close
         """
         self._connected = False
         self._ws.close()

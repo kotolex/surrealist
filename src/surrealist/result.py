@@ -7,7 +7,7 @@ from surrealist.utils import OK, ERR, HTTP_OK
 
 class SurrealResult:
     """
-    Represents result of the request both via http or websocket.
+    Represents a result of the request both via http or websocket.
     """
 
     def __init__(self, **kwargs):
@@ -63,7 +63,7 @@ class SurrealResult:
 
 def to_result(content: Union[str, Dict]) -> SurrealResult:
     """
-    Converts str or dict response of SurrealDB to common object for convenient use
+    Converts str or dict response of SurrealDB to a common object for convenient use
 
     :param content: response from SurrealDB
     :return: Result object

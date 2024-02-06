@@ -15,17 +15,17 @@ logger = getLogger("websocket_connection")
 
 class WebSocketConnection(Connection):
     """
-    Represents websocket transport and abilities to work with SurrealDb. It is recommended connection.
+    Represents websocket transport and abilities to work with SurrealDb. It is a recommended connection.
 
     Refer to surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
     Refer to: https://docs.surrealdb.com/docs/integration/websocket
 
-    Each objects create only one websocket connection and can be used in context manager to close properly.
-    You can not and should not try to use this object after closing connection. Just create new connection.
+    Each object creates only one websocket connection and can be used in the context manager to close properly.
+    You cannot and should not try to use this object after closing connection. Just create a new connection.
 
     On creating, this object tries to create connection with specified parameters and will raise exception on fail.
-    If namespace and database specified - USE method will be called automatically
-    If credentials specified - SIGNIN will be called automatically
+    If namespace and database specified - USE method are called automatically
+    If credentials specified - SIGNIN are called automatically
     """
 
     def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
@@ -54,7 +54,7 @@ class WebSocketConnection(Connection):
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
         except WebSocketConnectionClosedError:
-            logger.error("Cant connect to %s , connection refused", self._base_url)
+            logger.error("Cant connect to %s, connection refused", self._base_url)
             raise SurrealConnectionError(f"Cant connect to {self._base_url}, connection refused.\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
@@ -237,12 +237,12 @@ class WebSocketConnection(Connection):
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Example:
-        websocket_connection.live("article", callback=lambda a_dict: print(a_dict)) # creates live query to check any
+        websocket_connection.live("article", callback=lambda a_dict: print(a_dict)) # creates a live query to check any
         events on article table and just printing all incoming results
 
         :param table_name: name of the table to observe
         :param callback: a function to call on any incoming event. It should take one argument - a dict
-        :param return_diff: True if you want to get only DIFF info on table events, False for standard results
+        :param return_diff: True if you want to get only DIFF info on table events, False for a standard results
         :return: result of request with the live_id in 'result' field
         """
         params = [table_name]
@@ -262,11 +262,11 @@ class WebSocketConnection(Connection):
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
-        Note: all results, DIFF, formats etc. should be specified in query itself
+        Note: all results, DIFF, formats etc. should be specified in the query itself
 
         Example:
         ws.custom_live("LIVE SELECT * FROM person WHERE age > 18;", callback=lambda a_dict: print(a_dict)) # creates
-        live query to check any events on person table with records, where age field is bigger than 18, and just
+        a live query to check any events on person table with records, where age field is bigger than 18, and just
         printing all incoming results
 
         :param custom_query: full LIVE SELECT query text
@@ -339,7 +339,7 @@ class WebSocketConnection(Connection):
         Notice: do not specify id twice: in table name and in record_id, it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to select
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
@@ -369,11 +369,11 @@ class WebSocketConnection(Connection):
         websocket_connection.create("person:my_id", {"name": "John Doe"}) # create one record in person table
         with specified id
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Notice: do not specify id twice, for example, in table name and in data, it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to create
         :param data: dict with data to create
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
         if record_id is not None:
@@ -389,8 +389,8 @@ class WebSocketConnection(Connection):
     def insert(self, table_name: str, data: Union[List, Dict]) -> SurrealResult:
         """
         This method inserts one or more records. If you specify recordID in data and record with that id already
-        exists - no inserts or updates will happen and the content of existing record will be return. If you need to
-        change existing record, please consider **update** or **merge**
+        exists - no inserts or updates will happen and the content of the existing record will be returned. If you need
+        to change existing record, please consider **update** or **merge**
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
 
@@ -414,11 +414,11 @@ class WebSocketConnection(Connection):
     @connected
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
-        This method can be used to update or modify records in the database. So all old fields will be deleted and new
+        This method can be used to update or modify records in the database. So all old fields will be deleted, and new
         will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.If
-        record with specified id does not exist it will be created, if exist - all fields will be replaced
+        record with specified id does not exist it will be created, if it exists - all fields will be replaced
 
-        Note: if you want to create/replace one record you should specify recordID in table_name or in record_id, but
+        Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
         not in data parameters.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
@@ -431,11 +431,11 @@ class WebSocketConnection(Connection):
         websocket_connection.update("person", {"name": "Alex Doe"}, "my_id") # record with specified id will be now
         {"name": "Alex Doe"}, all data stored in record before will be deleted
 
-        Notice: do not specify id twice, for example in table name and in record_id, it will cause error
+        Notice: do not specify id twice, for example, in table name and in record_id, it will cause error
 
         :param table_name: table name or table name with record_id to update
         :param data: dict with data to create
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
@@ -448,7 +448,7 @@ class WebSocketConnection(Connection):
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
         will not be deleted, if you want to replace old data with new - use **update** method.If
-        record with specified id does not exist it will be created.
+        record with specified id does not exist, it will be created.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#merge
 
@@ -459,7 +459,7 @@ class WebSocketConnection(Connection):
 
         :param table_name: table name or table name with record_id to merge
         :param data: dict with data to add
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
@@ -472,7 +472,7 @@ class WebSocketConnection(Connection):
               return_diff: bool = False) -> SurrealResult:
         """
         This method changes specified data in one ar all records. If given table does not exist, new table and record
-        will not be created, if table exist but no such record_id - new record will be created, if no record id -all
+        will not be created if table exists but no such record_id - new record will be created, if no record id-all
         records will be transformed
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#patch
@@ -485,12 +485,12 @@ class WebSocketConnection(Connection):
         websocket_connection.patch("person:my_id", [{"op": "replace", "path": "/active", "value": False}]) # replaces
         active field for one record with specified id to False
 
-        Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
+        Notice: do not specify id twice, for example, in table name and in data, it will cause error on SurrealDB side
 
         :param table_name: table name or table name with record_id to patch
         :param data: list with json-patch data
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
-        :param return_diff: True if you want to get only DIFF info, False for standard results
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :param return_diff: True if you want to get only DIFF info, False for a standard results
         :return: result of request
         """
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
@@ -506,7 +506,7 @@ class WebSocketConnection(Connection):
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method deletes all records in a table or a single record, be careful and don't forget to specify id if you
-        do not want to delete all records. This method do not remove table itself, only records in it.As a result of
+        do not want to delete all records. This method does not remove table itself, only records in it.As a result of
         this method you will get all deleted records or None if no such record or table
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
@@ -519,7 +519,7 @@ class WebSocketConnection(Connection):
         websocket_connection.delete("person") # deletes all records in person table
 
         :param table_name: table name or table name with record_id to delete
-        :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
@@ -529,13 +529,13 @@ class WebSocketConnection(Connection):
 
     def export(self):
         """
-        Websocket transport can not use export operation, so you can use http transport for that, or SurrealDB tools
+        Websocket transport cannot use export operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/export
 
         :raise CompatibilityError: on any use
         """
-        message = "Export is not allowed for websocket transport in current SurrealDB version"
+        message = "Export is not allowed for websocket transport in the current SurrealDB version"
         logger.error(message)
         full_message = f"{message}\nYou can use http transport or abilities of SurrealDb itself\n" \
                        f"Refer to: https://docs.surrealdb.com/docs/cli/export"
@@ -543,13 +543,13 @@ class WebSocketConnection(Connection):
 
     def ml_export(self, _name: str, _version: str):
         """
-        Websocket transport can not use ML export operation, so you can use http transport for that, or SurrealDB tools
+        Websocket transport cannot use ML export operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/ml/export
 
         :raise CompatibilityError: on any use
         """
-        message = "ML export is not allowed for websocket transport in current SurrealDB version"
+        message = "ML export is not allowed for websocket transport in the current SurrealDB version"
         logger.error(message)
         full_message = f"{message}\nYou can use http transport or abilities of SurrealDb itself\n" \
                        f"Refer to: https://docs.surrealdb.com/docs/cli/ml/export"
@@ -557,13 +557,13 @@ class WebSocketConnection(Connection):
 
     def import_data(self, _path: Union[str, Path]):
         """
-        Websocket transport can not use import operation, so you can use http transport for that, or SurrealDB tools
+        Websocket transport cannot use import operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/import
 
         :raise CompatibilityError: on any use
         """
-        message = "Import is not allowed for websocket transport in current SurrealDB version"
+        message = "Import is not allowed for websocket transport in the current SurrealDB version"
         logger.error(message)
         full_message = f"{message}\nYou can use http transport or abilities of SurrealDb itself\n" \
                        f"Refer to: https://docs.surrealdb.com/docs/cli/import"
@@ -571,13 +571,13 @@ class WebSocketConnection(Connection):
 
     def ml_import(self, _path: Union[str, Path]):
         """
-        Websocket transport can not use ML import operation, so you can use http transport for that, or SurrealDB tools
+        Websocket transport cannot use ML import operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/ml/import
 
         :raise CompatibilityError: on any use
         """
-        message = "ML import is not allowed for websocket transport in current SurrealDB version"
+        message = "ML import is not allowed for websocket transport in the current SurrealDB version"
         logger.error(message)
         full_message = f"{message}\nYou can use http transport or abilities of SurrealDb itself\n" \
                        f"Refer to: https://docs.surrealdb.com/docs/cli/ml/import"
