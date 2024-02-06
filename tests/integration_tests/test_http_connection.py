@@ -1,7 +1,6 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-
 from tests.integration_tests.utils import URL, WS_URL, get_random_series
 from surrealist import Surreal, get_uuid
 
@@ -92,9 +91,9 @@ class TestHttpConnection(TestCase):
         connection = db.connect()
         uid = get_uuid()
         res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid})
-        self.assertTrue(res.result != [])
+        self.assertIsNotNone(res.result)
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
+        self.assertEqual(res.result["id"], f"article:⟨{uid}⟩")
         res = connection.select("article", uid)
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
@@ -107,7 +106,7 @@ class TestHttpConnection(TestCase):
         res = connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
+        self.assertEqual(res.result["id"], f"article:⟨{uid}⟩", res)
         res = connection.select("article", uid)
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
@@ -120,7 +119,7 @@ class TestHttpConnection(TestCase):
         res = connection.create("article", {"author": uid, "title": uid, "text": uid})
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
-        self.assertTrue(res.result[0]["id"] != f"article:⟨{uid}⟩", res)
+        self.assertTrue(res.result["id"] != f"article:⟨{uid}⟩", res)
 
     def test_update_one(self):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
@@ -436,7 +435,7 @@ class TestHttpConnection(TestCase):
             res = connection.patch("article", [{"op": "replace", "path": "/active", "value": True}], uid)
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.result, [{"id": f"article:{uid}", "author": uid, "title": uid, "text": uid,
-                                          "active": True}])
+                                           "active": True}])
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.result[0]['author'], uid)

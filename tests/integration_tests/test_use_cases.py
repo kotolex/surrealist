@@ -1,4 +1,6 @@
 import threading
+import time
+from datetime import datetime
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
@@ -118,6 +120,32 @@ class TestUseCases(TestCase):
         self.assertFalse(first[0].is_error())
         self.assertFalse(second[0].is_error())
         self.assertNotEqual(first, second)
+
+    def test_change_feed(self):
+        params = (True, False)
+        for use_http in params:
+            with self.subTest(f"Change feed use_http={use_http}"):
+                surreal = Surreal(URL, 'test', 'test', credentials=('root', 'root'), use_http=use_http)
+                with surreal.connect() as connection:
+                    count = 0
+                    while True:
+                        count += 1
+                        if count == 10:
+                            self.assertTrue(False, "cant wait to changefeed")
+                        tm = f'{datetime.utcnow().isoformat("T")}Z'
+                        res = connection.show_changes('reading', tm)
+                        if not res.is_error():
+                            break
+                        time.sleep(1)
+                    self.assertFalse(res.is_error(), res)
+                    story = get_random_series(5)
+                    connection.query(f'CREATE reading SET story = "{story}";')
+                    res = connection.show_changes('reading', tm)
+                    self.assertFalse(res.is_error(), res)
+                    self.assertTrue(story in str(res.result))
+                    self.assertTrue('changes' in str(res.result))
+                    self.assertTrue('update' in str(res.result))
+                    self.assertTrue('reading' in str(res.result))
 
 
 if __name__ == '__main__':

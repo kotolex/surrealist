@@ -114,7 +114,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.result == [])
             res = connection.select(f"article:⟨{uid}⟩")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result, {"id": f"article:⟨{uid}⟩", **data})
+            self.assertEqual(res.result, [{"id": f"article:⟨{uid}⟩", **data}])
 
     def test_create_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -179,7 +179,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(len(res.result) == 1)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result['author'], "new")
+            self.assertEqual(res.result[0]['author'], "new")
 
     def test_merge_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -191,8 +191,8 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(len(res.result) == 1)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result['author'], uid)
-            self.assertEqual(res.result['active'], True)
+            self.assertEqual(res.result[0]['author'], uid)
+            self.assertEqual(res.result[0]['active'], True)
 
     def test_patch_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -205,8 +205,8 @@ class TestWebSocketConnection(TestCase):
                                           "active": True})
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result['author'], uid)
-            self.assertEqual(res.result['active'], True)
+            self.assertEqual(res.result[0]['author'], uid)
+            self.assertEqual(res.result[0]['active'], True)
 
     def test_patch_with_diff(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -218,8 +218,8 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(res.result, [{'op': 'replace', 'path': '/active', 'value': True}])
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result['author'], uid)
-            self.assertEqual(res.result['active'], True)
+            self.assertEqual(res.result[0]['author'], uid)
+            self.assertEqual(res.result[0]['active'], True)
 
     def test_delete_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -231,7 +231,7 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(res.result, {"id": f"article:{uid}", "author": uid, "title": uid, "text": uid})
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result, None)
+            self.assertEqual(res.result, [])
 
     def test_delete_all(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -378,7 +378,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)
 
-    def test_custom_live(self):
+    def test_z_custom_live(self):
         a_list = []
         function = lambda mess: a_list.append(mess)
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -415,7 +415,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             res = connection.select(f"ws_article:{uid}")
             self.assertFalse(res.is_error())
-            self.assertEqual(res.result, {'id': f"ws_article:{uid}", 'field': 'old'})
+            self.assertEqual(res.result, [{'id': f"ws_article:{uid}", 'field': 'old'}])
 
     def test_merge_creates_if_not_exists(self):
         surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
@@ -425,7 +425,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
-            self.assertEqual(res.result, {'id': f"article:{uid}", 'field': 'old'})
+            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
 
     def test_delete_unexisting(self):
         surreal = Surreal(URL, 'test', 'test', ('root', 'root'))

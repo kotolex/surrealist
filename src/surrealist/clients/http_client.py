@@ -24,6 +24,7 @@ class HttpClient:
         self._credentials = credentials
         self._timeout = timeout
         headers = headers or {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
         if credentials:
             self._user, self._pass = credentials
@@ -79,7 +80,7 @@ class HttpClient:
                     raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
             elif type_of_content == "STR":
                 data_to_send = data.encode(ENCODING)
-            else: # it is a file-like object (BinaryIO)
+            else:  # it is a file-like object (BinaryIO)
                 data_to_send = data
             options['data'] = data_to_send
         try:

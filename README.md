@@ -17,7 +17,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+(including pyt
 
 More to come:
  * connections pool
- * transactions, explain
+ * transactions, explain, QL-constructor
 
 
 ### Installation ###
@@ -331,6 +331,49 @@ in console you will get:
 
 Pay attention - there is no info about Jane in events we get from LQ, cause Jane is younger than 18.
 
+## Change Feeds ##
+Changes in the database, such as creating, updating, or deleting, are recorded and played back in another channel. 
+This channel functions as a stream of messages.
+
+Change Feeds are great for ensuring accurate order and consistent replication of tables or databases. They also provide 
+immediate updates on any changes made.
+
+Read here: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrealdb-live-queries-and-change-feeds
+
+Read here: https://surrealdb.com/products/cf
+
+Under the hood: https://docs.surrealdb.com/docs/surrealql/statements/show
+
+Changes Feed works both for http and websockets!
+
+Let set up everything:
+```
+DEFINE TABLE reading CHANGEFEED 1d;
+DEFINE DATABASE foo CHANGEFEED 1h;
+```
+
+**Note:** date and time of your requests should be strict AFTER date and time of creating `foo` and `reading`
+
+**Example 9**
+
+```python
+from surrealist import Surreal
+
+
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+with surreal.connect() as connection:
+    # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table were created
+    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
+    print(res.result) # it will be [] cause no events happen
+    # now we add one record
+    connection.query('CREATE reading set story = "long long time ago";')    
+    # check again
+    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
+    print(res.result) 
+```
+in console you will see
+`[{'changes': [{'update': {'id': 'reading:w0useg3n9bkne6mei63f', 'story': 'long long time ago'}}], 'versionstamp': 851968}]`
+`
 
 ## Threads and thread-safety ##
 This library were made for using in multithreaded environments, just remember some rules of thumb:
@@ -354,6 +397,13 @@ import sys
 sys.setrecursionlimit(10_000)
 ```
 ## Release Notes ##
+
+**Version 0.1.6 (compatible with SurrealDB version 1.1.1):**
+
+ - add changes feed ability
+ - add examples folder
+ - select now always returns a list
+ - create now always returns a dict (not list)
 
 **Version 0.1.5 (compatible with SurrealDB version 1.1.1):**
 

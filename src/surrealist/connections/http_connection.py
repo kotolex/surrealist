@@ -129,7 +129,10 @@ class HttpConnection(Connection):
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: SELECT. Path: %s", crop_data(url))
         _, text = self._simple_get(url)
-        return to_result(text)
+        result = to_result(text)
+        if not isinstance(result.result, List):
+            result.result = [result.result] if result.result else []
+        return result
 
     @connected
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -165,7 +168,10 @@ class HttpConnection(Connection):
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: CREATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
         _, text = self._simple_request("POST", url, data)
-        return to_result(text)
+        result = to_result(text)
+        if isinstance(result.result, List) and len(result.result) == 1:
+            result.result = result.result[0]
+        return result
 
     @connected
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:

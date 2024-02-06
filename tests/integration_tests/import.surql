@@ -60,6 +60,12 @@ DEFINE TABLE person SCHEMALESS PERMISSIONS NONE;
 DEFINE TABLE product SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
+-- TABLE: reading
+-- ------------------------------
+
+DEFINE TABLE reading SCHEMALESS CHANGEFEED 1d PERMISSIONS NONE;
+
+-- ------------------------------
 -- TABLE: signin
 -- ------------------------------
 
@@ -140,6 +146,13 @@ UPDATE author:lex CONTENT { admin: true, age: 42, id: author:lex, name: { first:
 
 
 -- ------------------------------
+-- TABLE DATA: reading
+-- ------------------------------
+
+UPDATE reading:3cdczxa2rblfyvkupnb4 CONTENT { id: reading:3cdczxa2rblfyvkupnb4, story: 'in a galaxy far far away' };
+UPDATE reading:qf2klhq1j7b8yekmjg7q CONTENT { id: reading:qf2klhq1j7b8yekmjg7q, story: 'long long time ago' };
+
+-- ------------------------------
 -- TABLE DATA: signin
 -- ------------------------------
 
@@ -189,4 +202,3 @@ UPDATE violet:bsrx1nzm3053jlr3hxvs CONTENT { id: violet:bsrx1nzm3053jlr3hxvs };
 -- ------------------------------
 
 COMMIT TRANSACTION;
-

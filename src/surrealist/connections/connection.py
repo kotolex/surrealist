@@ -187,6 +187,25 @@ class Connection(ABC):
         logger.info("Query-Operation: REMOVE. Table name %s", table_name)
         return self.query(f"REMOVE TABLE {table_name};")
 
+    @connected
+    def show_changes(self, table_name: str, since: str, limit: int = 10) -> SurrealResult:
+        """
+        This method can use Changes Feed feature of SurrealDB. You need a predefined CHANGEFEED table and database for
+        using this action.
+
+        Refer to: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrealdb-live-queries-and-change-feeds
+
+        Refer to: url
+
+        :param table_name: name of the table, no record_id expected here
+        :param since: str representation of ISO date-time, for example "2024-02-06T10:48:08.700483Z"
+        :param limit: amount of changes to get
+        :return: result of the query
+        """
+        # TODO url
+        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE "{since}" LIMIT {limit};'
+        return self.query(query)
+
     @abstractmethod
     def use(self, namespace: str, database: str) -> SurrealResult:
         """

@@ -108,7 +108,7 @@ class WebSocketConnection(Connection):
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
             self._params = {"NS": namespace, "DB": database}
-        return self._run(data)
+        return result
 
     @connected
     def signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
@@ -347,7 +347,10 @@ class WebSocketConnection(Connection):
         table_name = table_name if record_id is None else f"{table_name}:{record_id}"
         data = {"method": "select", "params": [table_name]}
         logger.info("Operation: SELECT. Path: %s", crop_data(table_name))
-        return self._run(data)
+        result = self._run(data)
+        if not isinstance(result.result, List):
+            result.result = [result.result] if result.result else []
+        return result
 
     @connected
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -380,7 +383,10 @@ class WebSocketConnection(Connection):
             data["id"] = record_id
         _data = {"method": "create", "params": [table_name, data]}
         logger.info("Operation: CREATE. Path: %s, data: %s", crop_data(table_name), crop_data(str(data)))
-        return self._run(_data)
+        result = self._run(_data)
+        if isinstance(result.result, List) and len(result.result) == 1:
+            result.result = result.result[0]
+        return result
 
     @connected
     def insert(self, table_name: str, data: Union[List, Dict]) -> SurrealResult:
