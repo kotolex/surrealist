@@ -2,11 +2,11 @@ import urllib.parse
 from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
 from typing import Tuple, Optional
 
-from surrealist.errors import HttpClientError, SurrealConnectionError
 from surrealist.clients import HttpClient
 from surrealist.connections.connection import Connection
 from surrealist.connections.http_connection import HttpConnection
 from surrealist.connections.ws_connection import WebSocketConnection
+from surrealist.errors import HttpClientError, SurrealConnectionError
 from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
 
 FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'
