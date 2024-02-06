@@ -1,7 +1,7 @@
 from surrealist import Surreal
 
 # Refer here to use it properly
-# TODO url
+# https://github.com/kotolex/py_surreal?tab=readme-ov-file#change-feeds
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:

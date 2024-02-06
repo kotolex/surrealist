@@ -452,6 +452,13 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 3)
 
+    def test_is_table_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
+        with surreal.connect() as connection:
+            self.assertTrue(connection.is_table_exists("person"))
+            self.assertFalse(connection.is_table_exists("not_exists"))
+
+
 
 # TODO uncomment after bugfix
 # def test_nesting_1000(self):

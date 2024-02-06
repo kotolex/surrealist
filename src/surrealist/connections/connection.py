@@ -166,9 +166,19 @@ class Connection(ABC):
         :return: list of all tables names
         """
         logger.info("Query-Operation: DB_TABLES")
-        res = self.db_info()
+        res: SurrealResult = self.db_info()
         res.result = list(res.result["tables"].keys())
         return res
+
+    @connected
+    def is_table_exists(self, table_name: str) -> bool:
+        """
+        Returns True if table with given name exists in current database. You should have permissions for this action.
+
+        :param table_name: name of the table, we do not expect record_id here
+        :return: True if table exists, False otherwise
+        """
+        return table_name in self.db_tables().result
 
     @connected
     def remove_table(self, table_name: str) -> SurrealResult:
@@ -195,7 +205,7 @@ class Connection(ABC):
 
         Refer to: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrealdb-live-queries-and-change-feeds
 
-        Refer to: url
+        Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#change-feeds
 
         :param table_name: name of the table, no record_id expected here
         :param since: str representation of ISO date-time, for example "2024-02-06T10:48:08.700483Z"

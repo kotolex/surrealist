@@ -454,6 +454,12 @@ class TestHttpConnection(TestCase):
             self.assertEqual(res.result[0]['author'], uid)
             self.assertEqual(res.result[0]['active'], True)
 
+    def test_is_table_exists(self):
+        surreal = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            self.assertTrue(connection.is_table_exists("person"))
+            self.assertFalse(connection.is_table_exists("not_exists"))
+
 
 if __name__ == '__main__':
     main()
