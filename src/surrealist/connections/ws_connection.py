@@ -17,7 +17,7 @@ class WebSocketConnection(Connection):
     """
     Represents websocket transport and abilities to work with SurrealDb. It is recommended connection.
 
-    Refer to surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
+    Refer to surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
     Refer to: https://docs.surrealdb.com/docs/integration/websocket
 
     Each objects create only one websocket connection and can be used in context manager to close properly.
@@ -234,7 +234,7 @@ class WebSocketConnection(Connection):
 
         About DIFF refer to: https://jsonpatch.com
 
-        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+        Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Example:
         websocket_connection.live("article", callback=lambda a_dict: print(a_dict)) # creates live query to check any
@@ -260,7 +260,7 @@ class WebSocketConnection(Connection):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
 
-        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+        Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Note: all results, DIFF, formats etc. should be specified in query itself
 

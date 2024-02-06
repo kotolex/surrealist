@@ -8,7 +8,7 @@ from surrealist.result import SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, crop_data
 
 logger = getLogger("connection")
-LINK = "https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python"
+LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
 
 
 def connected(func):
@@ -205,7 +205,7 @@ class Connection(ABC):
 
         Refer to: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrealdb-live-queries-and-change-feeds
 
-        Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#change-feeds
+        Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#change-feeds
 
         :param table_name: name of the table, no record_id expected here
         :param since: str representation of ISO date-time, for example "2024-02-06T10:48:08.700483Z"
@@ -254,7 +254,7 @@ class Connection(ABC):
 
         About DIFF refer to: https://jsonpatch.com
 
-        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+        Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
         """
 
     @abstractmethod
@@ -265,7 +265,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
 
-        Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+        Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Note: all results, DIFF, formats etc. should be specified in query itself
         """

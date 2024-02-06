@@ -133,7 +133,7 @@ ws_connection.close()  # explicitly close connection
 ## Methods ##
 Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/surrealql/overview)
 
-You can find examples [here](https://github.com/kotolex/py_surreal/tree/master/examples)
+You can find examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
 The best and the most efficient way is to use **query** method, cause it allow you to do all that is possible, if you have permissions.
 All other methods like **create**, **update**, **merge**, **delete** is limited in their abilities and return results. 
@@ -400,7 +400,7 @@ import sys
 sys.setrecursionlimit(10_000)
 ```
 ## Examples ##
-You can find some examples [here](https://github.com/kotolex/py_surreal/tree/master/examples)
+You can find some examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
 ## Release Notes ##
 

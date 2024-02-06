@@ -17,7 +17,7 @@ class HttpConnection(Connection):
     any doubt, this connection exists for compatibility reasons. Some features as live query is not possible on this
     transport, but import and export are.
 
-    Refer to surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
+    Refer to surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
     Refer to: https://docs.surrealdb.com/docs/integration/http
 
     Each method call creates new http short-live connection.

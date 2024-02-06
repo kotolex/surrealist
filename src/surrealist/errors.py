@@ -57,12 +57,12 @@ class CompatibilityError(PySurrealError):
     """
     Raises on attempt to use methods incompatible for that transport (websocket ot http), for example **live** do not
     work on http-connection.
-    More on this here: https://github.com/kotolex/py_surreal?tab=readme-ov-file#transports
+    More on this here: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
     """
 
 
 class TooManyNestedLevelsError(PySurrealError):
     """
     Raises when str or json cant handle the object because of too deep nesting and recursion limit in python
-    See documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#recursion-and-json-in-python
+    See documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python
     """

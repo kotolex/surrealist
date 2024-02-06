@@ -21,7 +21,7 @@ class Surreal:
     of the SurrealDb server
     If you have only one SurrealDB server you need exactly one object of this class!
 
-    Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#connect-to-surrealdb
+    Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#connect-to-surrealdb
     """
 
     def __init__(self, url: str, namespace: Optional[str] = None, database: Optional[str] = None,
@@ -31,7 +31,7 @@ class Surreal:
         Initiating all parameters for connection, this method do not check or validate anything by itself, just save
         data for future use. To make sure your url is valid and accessible - use **is_ready** method of Surreal object.
 
-        About log_level and debug mode: https://github.com/kotolex/py_surreal?tab=readme-ov-file#debug-mode
+        About log_level and debug mode: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
 
         :param url: database url, for local database http://127.0.0.1:8000/
         :param namespace: namespace to use
@@ -101,7 +101,7 @@ class Surreal:
         - DEBUG, when you will see all logs, including requests and responses via transport level. This level is very
         useful for debugging and finding some useful information in logs
 
-        Refer to: https://github.com/kotolex/py_surreal?tab=readme-ov-file#debug-mode
+        Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
 
         Notice: authorization params and passwords cant be seen in logs in any time, if you see it, please report
         an issue

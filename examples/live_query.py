@@ -3,7 +3,7 @@ from time import sleep
 from surrealist import Surreal
 
 
-# Please, reed https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
+# Please, reed https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
 
 # you need callback, a function which will get dictionary and do something with it
