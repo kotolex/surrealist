@@ -60,7 +60,7 @@ class HttpConnection(Connection):
 
 
         :param user: name of the user
-        :param password: user password
+        :param password: password for auth
         :param namespace: name of the namespace to use
         :param database: name of the database to use
         :param scope: name of the scope to use

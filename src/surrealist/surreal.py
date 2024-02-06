@@ -29,7 +29,7 @@ class Surreal:
                  log_level: str = "ERROR"):
         """
         Initiating all parameters for connection, this method do not check or validate anything by itself, just save
-        data for future use. To make sure your url is valid and accessible -use is_ready method of Surreal object.
+        data for future use. To make sure your url is valid and accessible - use **is_ready** method of Surreal object.
 
         About log_level and debug mode: https://github.com/kotolex/py_surreal?tab=readme-ov-file#debug-mode
 
@@ -62,12 +62,11 @@ class Surreal:
     def set_url(self, url: str):
         """
         Setting base and predicted urls to work with. If url starts with http, then both url and predicted url will be
-        the same. If url in ws(s) format, try to create predicted url based on it.
+        the same. If url in ws(s) format, method will try to create predicted url based on it.
 
         For example for wss://127.0.0.1:9000/some/rps predicted http url will be https://127.0.0.1:9000/
 
         :param url: url of the SurrealDb server
-        :return: None
         """
         self._url = url
         self._is_http_url = url.startswith("http")
@@ -89,7 +88,6 @@ class Surreal:
         except when you in the debug mode. Default is 300 chars, which is enough for standard SurrealDB messages.
 
         :param length: new maximum length for one string in logs
-        :return: None
         """
         _set_length(length)
         self._log_data_length = length
@@ -110,10 +108,9 @@ class Surreal:
         Notice: you will see logs of this library(in and out), but not SurrealDb server logs
 
         :param level: one of "DEBUG", "INFO", "ERROR"
-        :return: None
         """
         if level not in ("DEBUG", "INFO", "ERROR"):
-            raise ValueError("Log level shoud be one of (DEBUG, INFO, ERROR), where ERROR is default")
+            raise ValueError("Log level should be one of (DEBUG, INFO, ERROR), where ERROR is default")
         levels = {"DEBUG": DEBUG, "INFO": INFO, "ERROR": ERROR}
         new_level = levels[level]
         logger.setLevel(new_level)
@@ -134,7 +131,7 @@ class Surreal:
     def is_ready(self) -> bool:
         """
         Checks that SurrealDB server is up and running. Under the hood it calls **health** and **status** methods to
-        make sure database web server is running and database server and storage engine are running.
+        make sure database web server is running, database server and storage engine are running.
 
         Notice: Method uses the specified url, but not namespace, database or credentials, so success of this method
         (return True) should not be interpreted as authorization success

@@ -9,10 +9,6 @@ class PySurrealError(Exception):
     """
 
 
-class SurrealPermissionsError(PySurrealError):
-    pass
-
-
 class SurrealConnectionError(PySurrealError):
     """
     Raises on any problem with connection to SurrealDB, check url and other parameters

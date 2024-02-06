@@ -11,9 +11,10 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+(including pyt
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on latest Ubuntu, macOS and Windows 10)
- * fully compatible with latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq)
+ * fully compatible with latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out, if you need
  * http or websocket transport to use
+ * always up to date with SurrealDB features and changes
 
 More to come:
  * connections pool

@@ -9,8 +9,8 @@ from typing import Dict, Callable, Optional
 import websocket
 
 from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
+from surrealist.result import to_result, SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
-from surrealist.result  import to_result, SurrealResult
 
 logger = getLogger("websocket_client")
 
@@ -42,7 +42,6 @@ class WebSocketClient:
 
         :param _ws: connection object
         :param message: string message
-        :return: None
         """
         logger.debug("Get message %s", crop_data(message))
         try:
@@ -105,7 +104,7 @@ class WebSocketClient:
         """
         self._ws = websocket.WebSocketApp(self._base_url, on_open=self.on_open, on_message=self.on_message,
                                           on_error=self.on_error, on_close=self.on_close)
-        self._ws.run_forever(skip_utf8_validation=True)
+        self._ws.run_forever(skip_utf8_validation=True)  # works faster
 
     def send(self, data: Dict, callback: Optional[Callable] = None) -> SurrealResult:
         """
@@ -185,7 +184,7 @@ class WebSocketClient:
 
     def close(self):
         """
-        Close websocket client and close websocket connection, clears all that can, you cant use this object after close
+        Close websocket client and close websocket connection, you can not use this object after close
         """
         self._connected = False
         self._ws.close()

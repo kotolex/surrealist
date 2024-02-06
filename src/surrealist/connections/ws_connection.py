@@ -122,9 +122,8 @@ class WebSocketConnection(Connection):
         websocket_connection.signin('root', 'root') # sign in as root user
         websocket_connection.signin('root', 'root', namespace='test', database='test') # sign in as db user
 
-
         :param user: name of the user
-        :param password: user password
+        :param password: password for auth
         :param namespace: name of the namespace to use
         :param database: name of the database to use
         :param scope: name of the scope to use
@@ -201,7 +200,6 @@ class WebSocketConnection(Connection):
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
-
 
         :param name: name for the variable (without $ sign!)
         :param value: value for the variable
@@ -373,7 +371,6 @@ class WebSocketConnection(Connection):
 
         Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
 
-
         :param table_name: table name or table name with record_id to create
         :param data: dict with data to create
         :param record_id: optional parameter, if exists it will transform table_name to "table_name:record_id"
@@ -536,7 +533,6 @@ class WebSocketConnection(Connection):
 
         Refer to: https://docs.surrealdb.com/docs/cli/export
 
-
         :raise CompatibilityError: on any use
         """
         message = "Export is not allowed for websocket transport in current SurrealDB version"
@@ -550,7 +546,6 @@ class WebSocketConnection(Connection):
         Websocket transport can not use ML export operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/ml/export
-
 
         :raise CompatibilityError: on any use
         """
@@ -566,7 +561,6 @@ class WebSocketConnection(Connection):
 
         Refer to: https://docs.surrealdb.com/docs/cli/import
 
-
         :raise CompatibilityError: on any use
         """
         message = "Import is not allowed for websocket transport in current SurrealDB version"
@@ -580,7 +574,6 @@ class WebSocketConnection(Connection):
         Websocket transport can not use ML import operation, so you can use http transport for that, or SurrealDB tools
 
         Refer to: https://docs.surrealdb.com/docs/cli/ml/import
-
 
         :raise CompatibilityError: on any use
         """

@@ -137,7 +137,7 @@ class Connection(ABC):
         return self._info("ROOT")
 
     def _info(self, type_: str) -> SurrealResult:
-        logger.info(f"Query-Operation: {type_}_INFO")
+        logger.info("Query-Operation: %s_INFO", type_)
         return self.query(f"INFO FOR {type_};")
 
     @connected
@@ -212,7 +212,6 @@ class Connection(ABC):
         :param limit: amount of changes to get
         :return: result of the query
         """
-        # TODO url
         query = f'SHOW CHANGES FOR TABLE {table_name} SINCE "{since}" LIMIT {limit};'
         return self.query(query)
 
@@ -223,7 +222,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
         """
-        pass
 
     @abstractmethod
     def authenticate(self, token: str) -> SurrealResult:
@@ -240,14 +238,12 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
         """
-        pass
 
     @abstractmethod
     def unset(self, name: str) -> SurrealResult:
         """
         This method unsets value, which was previously stored
         """
-        pass
 
     @abstractmethod
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
@@ -260,7 +256,6 @@ class Connection(ABC):
 
         Please see surrealist documentation: https://github.com/kotolex/py_surreal?tab=readme-ov-file#live-query
         """
-        pass
 
     @abstractmethod
     def custom_live(self, custom_query: str, callback: Callable[[Dict], Any]) -> SurrealResult:
@@ -274,7 +269,6 @@ class Connection(ABC):
 
         Note: all results, DIFF, formats etc. should be specified in query itself
         """
-        pass
 
     @abstractmethod
     def kill(self, live_query_id: str) -> SurrealResult:
@@ -283,7 +277,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
         """
-        pass
 
     @abstractmethod
     def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
@@ -292,7 +285,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
         """
-        pass
 
     @abstractmethod
     def signin(self, user: str, password: str, namespace: Optional[str] = None,
@@ -300,7 +292,6 @@ class Connection(ABC):
         """
         This method allows you to sign in a root, namespace, database or scope user against SurrealDB
         """
-        pass
 
     @abstractmethod
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
@@ -311,7 +302,6 @@ class Connection(ABC):
 
         Notice: do not specify id twice: in table name and in record_id, it will cause error on SurrealDB side
         """
-        pass
 
     @abstractmethod
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -323,7 +313,6 @@ class Connection(ABC):
 
         Notice: do not specify id twice, for example in table name and in data, it will cause error on SurrealDB side
         """
-        pass
 
     @abstractmethod
     def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
@@ -336,7 +325,6 @@ class Connection(ABC):
 
         Note: do not use record id in table_name parameter (table:recordID) - it will cause error on SurrealDB side
         """
-        pass
 
     @abstractmethod
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -350,7 +338,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
         """
-        pass
 
     @abstractmethod
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
@@ -359,7 +346,6 @@ class Connection(ABC):
         will not be deleted, if you want to replace old data with new - use **update** method. If record with specified
         id does not exist it will be created.
         """
-        pass
 
     @abstractmethod
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
@@ -370,7 +356,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
         """
-        pass
 
     @abstractmethod
     def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
@@ -384,7 +369,6 @@ class Connection(ABC):
 
         Notice: do not specify id twice, for example in table name and in record_id, it will cause error
         """
-        pass
 
     @abstractmethod
     def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
@@ -393,7 +377,6 @@ class Connection(ABC):
 
         For SurrealQL refer to: https://docs.surrealdb.com/docs/surrealql/overview
         """
-        pass
 
     @abstractmethod
     def import_data(self, path) -> SurrealResult:
