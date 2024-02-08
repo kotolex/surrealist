@@ -14,7 +14,7 @@ class Explain(FinishedStatement):
         return f"{self._statement._clean_str()} EXPLAIN{final}"
 
 
-class SelectFirstLevel:
+class SelectUseExplain:
 
     def explain(self) -> Explain:
         return Explain(self, full=False)
@@ -23,7 +23,7 @@ class SelectFirstLevel:
         return Explain(self, full=True)
 
 
-class Parallel(FinishedStatement, SelectFirstLevel):
+class Parallel(FinishedStatement, SelectUseExplain):
     def __init__(self, statement: Statement):
         super().__init__(statement)
 
@@ -31,12 +31,12 @@ class Parallel(FinishedStatement, SelectFirstLevel):
         return f"{self._statement._clean_str()} PARALLEL"
 
 
-class SelectSecondLevel(SelectFirstLevel):
+class SelectUseParallel(SelectUseExplain):
     def parallel(self) -> Parallel:
         return Parallel(self)
 
 
-class Timeout(FinishedStatement, SelectSecondLevel):
+class Timeout(FinishedStatement, SelectUseParallel):
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration
@@ -52,12 +52,12 @@ class Timeout(FinishedStatement, SelectSecondLevel):
         return f"{self._statement._clean_str()} TIMEOUT {self._duration}"
 
 
-class SelectThirdLevel(SelectSecondLevel):
+class SelectUseTimeout(SelectUseParallel):
     def timeout(self, duration: str) -> Timeout:
         return Timeout(self, duration)
 
 
-class Fetch(FinishedStatement, SelectThirdLevel):
+class Fetch(FinishedStatement, SelectUseTimeout):
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args
@@ -69,12 +69,12 @@ class Fetch(FinishedStatement, SelectThirdLevel):
         return f"{self._statement._clean_str()} FETCH {add}"
 
 
-class SelectFourthLevel(SelectThirdLevel):
+class SelectUseFetch(SelectUseTimeout):
     def fetch(self, *args) -> Fetch:
         return Fetch(self, *args)
 
 
-class Start(FinishedStatement, SelectFourthLevel):
+class Start(FinishedStatement, SelectUseFetch):
     def __init__(self, statement: Statement, offset: int):
         super().__init__(statement)
         self._offset = offset
@@ -88,12 +88,12 @@ class Start(FinishedStatement, SelectFourthLevel):
         return f"{self._statement._clean_str()} START {self._offset}"
 
 
-class SelectFifthLevel(SelectFourthLevel):
+class SelectUseStart(SelectUseFetch):
     def start_at(self, offset: int) -> Start:
         return Start(self, offset)
 
 
-class Limit(FinishedStatement, SelectFifthLevel):
+class Limit(FinishedStatement, SelectUseStart):
     def __init__(self, statement: Statement, limit: int):
         super().__init__(statement)
         self._limit = limit
@@ -107,12 +107,12 @@ class Limit(FinishedStatement, SelectFifthLevel):
         return f"{self._statement._clean_str()} LIMIT {self._limit}"
 
 
-class SelectSixthLevel(SelectFifthLevel):
+class SelectUseLimit(SelectUseStart):
     def limit(self, limit: int) -> Limit:
         return Limit(self, limit)
 
 
-class OrderByRand(FinishedStatement, SelectSixthLevel):
+class OrderByRand(FinishedStatement, SelectUseLimit):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -121,7 +121,7 @@ class OrderByRand(FinishedStatement, SelectSixthLevel):
         return f"{self._statement._clean_str()} ORDER BY RAND()"
 
 
-class OrderBy(FinishedStatement, SelectSixthLevel):
+class OrderBy(FinishedStatement, SelectUseLimit):
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._statement = statement
@@ -134,7 +134,7 @@ class OrderBy(FinishedStatement, SelectSixthLevel):
         return f"{self._statement._clean_str()} ORDER BY {what}"
 
 
-class SelectSeventhLevel(SelectSixthLevel):
+class SelectUseOrder(SelectUseLimit):
     def order_by(self, *args: str) -> OrderBy:
         return OrderBy(self, *args)
 
@@ -142,7 +142,7 @@ class SelectSeventhLevel(SelectSixthLevel):
         return OrderByRand(self)
 
 
-class GroupBy(FinishedStatement, SelectSeventhLevel):
+class GroupBy(FinishedStatement, SelectUseOrder):
     def __init__(self, statement: Statement, *args):
         super().__init__(statement)
         self._statement = statement
@@ -155,7 +155,7 @@ class GroupBy(FinishedStatement, SelectSeventhLevel):
         return f"{self._statement._clean_str()} GROUP BY {what}"
 
 
-class GroupAll(FinishedStatement, SelectSeventhLevel):
+class GroupAll(FinishedStatement, SelectUseOrder):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -164,7 +164,7 @@ class GroupAll(FinishedStatement, SelectSeventhLevel):
         return f"{self._statement._clean_str()} GROUP ALL"
 
 
-class SelectEightLevel(SelectSeventhLevel):
+class SelectUseGroup(SelectUseOrder):
     def group_by(self, *args: str) -> GroupBy:
         return GroupBy(self, *args)
 
@@ -172,7 +172,7 @@ class SelectEightLevel(SelectSeventhLevel):
         return GroupAll(self)
 
 
-class Split(FinishedStatement, SelectEightLevel):
+class Split(FinishedStatement, SelectUseGroup):
     def __init__(self, statement: Statement, field: str):
         super().__init__(statement)
         self._statement = statement
@@ -182,12 +182,12 @@ class Split(FinishedStatement, SelectEightLevel):
         return f"{self._statement._clean_str()} SPLIT {self._field}"
 
 
-class SelectNinthLevel(SelectEightLevel):
+class SelectUseSplit(SelectUseGroup):
     def split(self, field: str) -> Split:
         return Split(self, field)
 
 
-class Or(FinishedStatement, SelectNinthLevel):
+class Or(FinishedStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -203,7 +203,7 @@ class Or(FinishedStatement, SelectNinthLevel):
         return f"{self._statement._clean_str()} OR {self._predicate}"
 
 
-class And(FinishedStatement, SelectNinthLevel):
+class And(FinishedStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -219,7 +219,7 @@ class And(FinishedStatement, SelectNinthLevel):
         return f"{self._statement._clean_str()} AND {self._predicate}"
 
 
-class Where(FinishedStatement, SelectNinthLevel):
+class Where(FinishedStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -235,12 +235,12 @@ class Where(FinishedStatement, SelectNinthLevel):
         return f"{self._statement._clean_str()} WHERE {self._predicate}"
 
 
-class SelectTenthLevel(SelectNinthLevel):
+class SelectUseWhere(SelectUseSplit):
     def where(self, predicate: str) -> Where:
         return Where(self, predicate)
 
 
-class WithIndex(FinishedStatement, SelectTenthLevel):
+class WithIndex(FinishedStatement, SelectUseWhere):
     def __init__(self, statement: Statement, *index_names: str):
         super().__init__(statement)
         self._statement = statement
@@ -253,7 +253,7 @@ class WithIndex(FinishedStatement, SelectTenthLevel):
         return f"{self._statement._clean_str()} WITH INDEX {indexes}"
 
 
-class WithNoIndex(FinishedStatement, SelectTenthLevel):
+class WithNoIndex(FinishedStatement, SelectUseWhere):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -262,7 +262,7 @@ class WithNoIndex(FinishedStatement, SelectTenthLevel):
         return f"{self._statement._clean_str()} WITH NO INDEX"
 
 
-class SelectEleventhLevel(SelectTenthLevel):
+class SelectUseIndex(SelectUseWhere):
     def with_index(self, *args: Tuple[str]) -> WithIndex:
         return WithIndex(self, *args)
 

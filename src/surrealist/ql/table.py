@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 
 from surrealist import Connection
+from surrealist.ql.create import Create
 from surrealist.ql.select import Select
 
 logger = logging.getLogger("tableQL")
@@ -25,3 +27,6 @@ class Table:
 
     def select(self, *args) -> Select:
         return Select(self._connection, self.name, *args)
+
+    def create(self, record_id: Optional[str] = None) -> Create:
+        return Create(self._connection, self.name, record_id)

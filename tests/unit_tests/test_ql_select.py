@@ -129,14 +129,18 @@ class TestSelect(TestCase):
 
     def test_timeout(self):
         sel = Select(None, "person").where("->knows->person->(knows WHERE influencer = true)").timeout("5s")
-        self.assertEqual("SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;", sel.to_str())
+        self.assertEqual("SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;",
+                         sel.to_str())
 
     def test_parallel(self):
-        sel = Select(None, "person", "->purchased->product<-purchased<-person->purchased->product").by_id("tobie").parallel()
-        self.assertEqual("SELECT ->purchased->product<-purchased<-person->purchased->product FROM person:tobie PARALLEL;", sel.to_str())
+        sel = Select(None, "person", "->purchased->product<-purchased<-person->purchased->product").by_id(
+            "tobie").parallel()
+        self.assertEqual(
+            "SELECT ->purchased->product<-purchased<-person->purchased->product FROM person:tobie PARALLEL;",
+            sel.to_str())
 
     def test_explain(self):
-        sel=Select(None, "person").where("email='tobie@surrealdb.com'").explain()
+        sel = Select(None, "person").where("email='tobie@surrealdb.com'").explain()
         self.assertEqual("SELECT * FROM person WHERE email='tobie@surrealdb.com' EXPLAIN;", sel.to_str())
         sel = Select(None, "person").where("email='tobie@surrealdb.com'").explain_full()
         self.assertEqual("SELECT * FROM person WHERE email='tobie@surrealdb.com' EXPLAIN FULL;", sel.to_str())
@@ -147,7 +151,8 @@ class TestSelect(TestCase):
 
     def test_with_index(self):
         sel = Select(None, "person", "name").with_index("idx_name").where("job='engineer' AND genre = 'm'")
-        self.assertEqual("SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm';", sel.to_str())
+        self.assertEqual("SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm';",
+                         sel.to_str())
 
     def test_validate_recursive(self):
         result = Select(None, "user").only().limit(100).validate()
@@ -157,13 +162,18 @@ class TestSelect(TestCase):
         result = Select(None, "user").limit(100).timeout("5 m").validate()
         self.assertEqual(['Wrong duration format, should be like 5s'], result)
         result = Select(None, "user").only().limit(100).timeout("3d").validate()
-        self.assertEqual(['Expected a single result output when using the ONLY keyword', 'Wrong duration 3d, allowed postfix are (ms, s, m)'], result)
+        self.assertEqual(['Expected a single result output when using the ONLY keyword',
+                          'Wrong duration 3d, allowed postfix are (ms, s, m)'], result)
 
     def test_and_or(self):
         sel = Select(None, "person", "name").with_index("idx_name").where("job='engineer'").AND("genre = 'm'")
-        self.assertEqual("SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm';", sel.to_str())
-        sel = Select(None, "person", "name").with_index("idx_name").where("job='engineer'").AND("genre = 'm'").OR("x<100").limit(10)
-        self.assertEqual("SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm' OR x<100 LIMIT 10;", sel.to_str())
+        self.assertEqual("SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm';",
+                         sel.to_str())
+        sel = Select(None, "person", "name").with_index("idx_name").where("job='engineer'").AND("genre = 'm'").OR(
+            "x<100").limit(10)
+        self.assertEqual(
+            "SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm' OR x<100 LIMIT 10;",
+            sel.to_str())
 
 
 if __name__ == '__main__':

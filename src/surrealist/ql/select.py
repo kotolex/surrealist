@@ -1,12 +1,12 @@
 from typing import Optional, Tuple, Union, List
 
 from surrealist import Connection
-from .select_statements import SelectEleventhLevel
+from .select_statements import SelectUseIndex
 from .statement import Statement, FinishedStatement
 from ..utils import OK
 
 
-class Select(Statement, SelectEleventhLevel):
+class Select(Statement, SelectUseIndex):
     def __init__(self, connection: Connection, table_name: Union[str, "Select"], *args,
                  alias: Optional[Tuple[str, Union[str, Statement]]] = None,
                  value: Optional[str] = None):
