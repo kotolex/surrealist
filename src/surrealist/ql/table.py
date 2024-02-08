@@ -4,6 +4,7 @@ from typing import Optional
 from surrealist import Connection
 from surrealist.ql.create import Create
 from surrealist.ql.select import Select
+from surrealist.ql.show import Show
 
 logger = logging.getLogger("tableQL")
 
@@ -30,3 +31,6 @@ class Table:
 
     def create(self, record_id: Optional[str] = None) -> Create:
         return Create(self._connection, self.name, record_id)
+
+    def show_changes(self) -> Show:
+        return Show(self._connection, self._name)

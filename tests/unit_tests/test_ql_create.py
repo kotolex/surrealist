@@ -3,7 +3,7 @@ from unittest import TestCase, main
 from surrealist.ql.create import Create
 
 
-class TestSelect(TestCase):
+class TestCreate(TestCase):
     def test_create_default(self):
         create = Create(None, "person")
         self.assertEqual("CREATE person;", create.to_str())
