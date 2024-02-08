@@ -3,6 +3,7 @@ from typing import Optional
 
 from surrealist import Connection
 from surrealist.ql.create import Create
+from surrealist.ql.delete import Delete
 from surrealist.ql.select import Select
 from surrealist.ql.show import Show
 
@@ -34,3 +35,6 @@ class Table:
 
     def show_changes(self) -> Show:
         return Show(self._connection, self._name)
+
+    def delete(self, record_id: Optional[str] = None) -> Delete:
+        return Delete(self._connection, self._name, record_id)

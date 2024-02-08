@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from surrealist import Connection
 from .delete_statements import DeleteUseWhere
@@ -8,17 +8,19 @@ from ..utils import OK
 
 class Delete(Statement, DeleteUseWhere):
 
-    def __init__(self, connection: Connection, table_name: str):
+    def __init__(self, connection: Connection, table_name: str, record_id:Optional[str]=None):
         super().__init__(connection)
         self._table_name = table_name
         self._only = False
+        self._record_id = record_id
 
     def validate(self) -> List[str]:
         return [OK]
 
     def _clean_str(self):
         only = "" if not self._only else " ONLY"
-        return f"DELETE{only} {self._table_name}"
+        name = self._table_name if not self._record_id else f"{self._table_name}:{self._record_id}"
+        return f"DELETE{only} {name}"
 
     def only(self) -> "Delete":
         self._only = True

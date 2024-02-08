@@ -8,6 +8,10 @@ class TestDelete(TestCase):
         show = Delete(None, "person")
         self.assertEqual("DELETE person;", show.to_str())
 
+    def test_delete_id(self):
+        show = Delete(None, "person", record_id="tobie")
+        self.assertEqual("DELETE person:tobie;", show.to_str())
+
     def test_delete_default_only(self):
         delete = Delete(None, "person:tobie").only()
         self.assertEqual("DELETE ONLY person:tobie;", delete.to_str())
