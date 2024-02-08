@@ -1,9 +1,11 @@
 import logging
 from typing import Optional
 
-from surrealist import Connection
+from surrealist import Connection, SurrealResult
 from surrealist.ql.create import Create
 from surrealist.ql.delete import Delete
+from surrealist.ql.live import Live
+from surrealist.ql.remove import Remove
 from surrealist.ql.select import Select
 from surrealist.ql.show import Show
 
@@ -38,3 +40,18 @@ class Table:
 
     def delete(self, record_id: Optional[str] = None) -> Delete:
         return Delete(self._connection, self._name, record_id)
+
+    def delete_all(self) -> SurrealResult:
+        return Delete(self._connection, self._name).return_none().run()
+
+    def drop(self) -> SurrealResult:
+        return Remove(self._connection, self._name).run()
+
+    def remove(self) -> SurrealResult:
+        return self.drop()
+
+    def live(self, use_diff: bool = False) -> Live:
+        return Live(self._connection, self._name, use_diff)
+
+    def kill(self, live_id: str) -> SurrealResult:
+        return self._connection.kill(live_id)
