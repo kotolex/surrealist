@@ -6,27 +6,56 @@ from surrealist.utils import OK
 
 
 class Statement(ABC):
+    """
+    Parent for all statements(QL operators)
+    """
+
     def __init__(self, connection: Connection):
         self._connection = connection
 
-    def _validate(self):
+    def _validate(self) -> str:
         return OK
 
     @abstractmethod
     def validate(self) -> List[str]:
-        pass
+        """
+        Should check all parts of the query ant returns list of OK or errors
+        :return: list of strings
+        """
 
     def is_valid(self) -> bool:
+        """
+        Checks is whole query is valid
+        :return: True, f query is valid, False otherwise
+        """
         return all(mess == OK for mess in self.validate())
 
     @abstractmethod
-    def _clean_str(self):
-        pass
+    def _clean_str(self) -> str:
+        """
+        Returns query without ";" to work with
+        :return: query text
+        """
 
     def to_str(self):
+        """
+        Returns the whole query with ";" at the end
+        :return: full query text
+        """
         return f"{self._clean_str()};"
 
+    def _drill(self, query) -> SurrealResult:
+        """
+        This method for live queries only
+        :param query: full query text
+        :return: result of the query
+        """
+
     def run(self) -> SurrealResult:
+        """
+        Runs the whole query and returns result from SurrealDB
+        :return: result of the request
+        """
         return self._connection.query(self.to_str())
 
     def __str__(self):

@@ -1,9 +1,9 @@
 from typing import Optional, Tuple, Union, List
 
 from surrealist import Connection
-from .select_statements import SelectUseIndex
-from .statement import Statement, FinishedStatement
 from surrealist.utils import OK
+from .select_statements import SelectUseIndex
+from .statement import Statement
 
 
 class Select(Statement, SelectUseIndex):
@@ -30,7 +30,7 @@ class Select(Statement, SelectUseIndex):
         if self._value:
             self._what = f"VALUE {self._value}"
 
-    def by_id(self, record_id: str) -> FinishedStatement:
+    def by_id(self, record_id: str) -> "Select":
         self._from = f"{self._table_name}:{record_id}"
         return self
 

@@ -219,7 +219,6 @@ class TestHttpConnection(TestCase):
         #     file.write(res)
         self.assertTrue("article" in res)
         self.assertTrue("user_db" in res)
-        # self.assertTrue("user_ns" in res)
         self.assertTrue("user_scope" in res)
         self.assertTrue("OPTION IMPORT;" in res)
 

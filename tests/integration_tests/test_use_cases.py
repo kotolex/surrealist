@@ -3,8 +3,8 @@ import time
 from datetime import datetime
 from unittest import TestCase, main
 
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import OperationOnClosedConnectionError, Surreal, Connection
 
 
 class TestUseCases(TestCase):
@@ -150,6 +150,18 @@ class TestUseCases(TestCase):
                     self.assertTrue('changes' in str(res.result))
                     self.assertTrue('update' in str(res.result))
                     self.assertTrue('reading' in str(res.result))
+
+    def test_z_change_feed(self):
+        with Database(URL, 'test', 'test', credentials=('root', 'root'), use_http=True) as db:
+            tm = f'{datetime.utcnow().isoformat("T")}Z'
+            story = get_random_series(5)
+            db.table("reading").create().set(story=story).run()
+            res = db.table("reading").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result))
+            self.assertTrue('changes' in str(res.result))
+            self.assertTrue('update' in str(res.result))
+            self.assertTrue('reading' in str(res.result))
 
 
 if __name__ == '__main__':

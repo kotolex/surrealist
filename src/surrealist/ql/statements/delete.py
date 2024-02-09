@@ -1,14 +1,14 @@
 from typing import List, Optional
 
 from surrealist import Connection
+from surrealist.utils import OK
 from .common_statements import CanUseWhere
 from .statement import Statement
-from surrealist.utils import OK
 
 
 class Delete(Statement, CanUseWhere):
 
-    def __init__(self, connection: Connection, table_name: str, record_id:Optional[str]=None):
+    def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):
         super().__init__(connection)
         self._table_name = table_name
         self._only = False
