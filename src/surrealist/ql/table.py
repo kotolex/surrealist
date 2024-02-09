@@ -9,6 +9,7 @@ from surrealist.ql.live import Live
 from surrealist.ql.remove import Remove
 from surrealist.ql.select import Select
 from surrealist.ql.show import Show
+from surrealist.ql.update import Update
 
 logger = logging.getLogger("tableQL")
 
@@ -59,3 +60,6 @@ class Table:
 
     def insert_into(self, *args) -> Insert:
         return Insert(self._connection, self._name, *args)
+
+    def update(self, record_id: Optional[str] = None) -> Update:
+        return Update(self._connection, self._name, record_id)

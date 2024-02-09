@@ -95,3 +95,17 @@ class CanUseReturn(CanUseTimeout):
 
     def returns(self, *args: str) -> Return:
         return Return(self, *args)
+
+
+class Where(FinishedStatement, CanUseReturn):
+    def __init__(self, statement: Statement, predicate: str):
+        super().__init__(statement)
+        self._predicate = predicate
+
+    def _clean_str(self):
+        return f"{self._statement._clean_str()} WHERE {self._predicate}"
+
+
+class CanUseWhere(CanUseReturn):
+    def where(self, predicate: str) -> Where:
+        return Where(self, predicate)

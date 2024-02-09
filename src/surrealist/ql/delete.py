@@ -1,12 +1,12 @@
 from typing import List, Optional
 
 from surrealist import Connection
-from .delete_statements import DeleteUseWhere
+from .common_statements import CanUseWhere
 from .statement import Statement
 from ..utils import OK
 
 
-class Delete(Statement, DeleteUseWhere):
+class Delete(Statement, CanUseWhere):
 
     def __init__(self, connection: Connection, table_name: str, record_id:Optional[str]=None):
         super().__init__(connection)
