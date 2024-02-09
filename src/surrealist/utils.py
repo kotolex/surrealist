@@ -5,6 +5,8 @@ from typing import Union
 ENCODING = "UTF-8"
 OK = "OK"
 ERR = "ERR"
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+DATE_FORMAT_NS = "%Y-%m-%dT%H:%M:%S.%fZ"
 HTTP_OK = 200  # status code for success
 DEFAULT_TIMEOUT = 5  # timeout in seconds for basic operations
 DATA_LENGTH_FOR_LOGS = 300  # size of data in logs, data will be cropped if bigger than that
