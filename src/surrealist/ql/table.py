@@ -4,6 +4,7 @@ from typing import Optional
 from surrealist import Connection, SurrealResult
 from surrealist.ql.create import Create
 from surrealist.ql.delete import Delete
+from surrealist.ql.insert import Insert
 from surrealist.ql.live import Live
 from surrealist.ql.remove import Remove
 from surrealist.ql.select import Select
@@ -55,3 +56,6 @@ class Table:
 
     def kill(self, live_id: str) -> SurrealResult:
         return self._connection.kill(live_id)
+
+    def insert_into(self, *args) -> Insert:
+        return Insert(self._connection, self._name, *args)
