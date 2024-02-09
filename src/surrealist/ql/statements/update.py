@@ -7,6 +7,13 @@ from surrealist.utils import OK
 
 
 class Update(Statement, UpdateUseMethods):
+    """
+    Represents UPDATE operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_update_examples.py
+    """
     def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):
         super().__init__(connection)
         self._table_name = table_name

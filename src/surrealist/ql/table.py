@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, Tuple, Union
 
 from surrealist import Connection, SurrealResult
 from surrealist.ql.statements.create import Create
@@ -8,6 +8,7 @@ from surrealist.ql.statements.live import Live
 from surrealist.ql.statements.remove import Remove
 from surrealist.ql.statements.select import Select
 from surrealist.ql.statements.show import Show
+from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update import Update
 
 
@@ -16,7 +17,15 @@ class Table:
     Represents a table of the database including not (yet) existing one.
     Can use only operators of the table level (CRUD).
     If you need a raw query, DEFINE or transactions - you need database level
+
+    Please refer to: url in Readme
+
+    SurrealQL: https://docs.surrealdb.com/docs/surrealql/overview
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/
     """
+
+    # TODO url to readme
 
     def __init__(self, name: str, connection: Connection):
         self._connection = connection
@@ -38,21 +47,22 @@ class Table:
         """
         return self._connection.count(self._name).result
 
-    def select(self, *args) -> Select:
+    def select(self, *args, alias: Optional[Tuple[str, Union[str, Statement]]] = None,
+               value: Optional[str] = None) -> Select:
         """
         Represents SELECT operator and its abilities as refer here:
-        https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/select
+        https://docs.surrealdb.com/docs/surrealql/statements/select
 
-        Example:
-        table.select('id', 'name').run()
+        Example: table.select('id', 'name').run()
 
-        Refer to examples: url
-        Refer to documentation: url
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
 
+        :param alias: pairs of names and values
+        :param value: on exists add VALUE operator
         :param args: which fields to select, if no fields or "*" - selects all
         :return: Select object
         """
-        return Select(self._connection, self.name, *args)
+        return Select(self._connection, self.name, *args, alias=alias, value=value)
 
     def create(self, record_id: Optional[str] = None) -> Create:
         """
@@ -62,8 +72,7 @@ class Table:
         Example:
         db.table("article").create("first").content({"author": "author:john", "title": uid}).run()
 
-        Refer to examples: url
-        Refer to documentation: url
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_create_examples.py
 
         :param record_id: optional, if specified transform to 'table_name:record_id'
         :return: Create object
@@ -78,6 +87,8 @@ class Table:
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#change-feeds
 
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
+
         :return: Show object
         """
         return Show(self._connection, self._name)
@@ -91,7 +102,7 @@ class Table:
         Example:
         db.table("author").delete("john").return_none().run()
 
-        Refer to examples: url
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_delete_examples.py
 
         :param record_id: optional, if specified transform to 'table_name:record_id'
         :return: Delete object
@@ -121,18 +132,20 @@ class Table:
         """
         return self.drop()
 
-    def live(self, callback: Callable, use_diff: bool = False) -> Live:
+    def live(self, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
         """
         Represents LIVE operator for a live query
 
         Example:
         db.person.live(func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/live-select
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
-        :param callback: function to cll on live query event
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
+
+        :param callback: function to call on live query event
         :param use_diff: return result in DIFF format
         :return: Live object
         """
@@ -149,7 +162,7 @@ class Table:
         """
         return self._connection.kill(live_id)
 
-    def insert_into(self, *args) -> Insert:
+    def insert(self, *args) -> Insert:
         """
         Represent INSERT INTO operator.
         Arguments here are:
@@ -160,10 +173,12 @@ class Table:
           - multiple arguments where first are names and other - values
 
         Example:
-        db.person.insert_into(("name", "age"), ("Tobie", 33)).run()
-        db.person.insert_into({("name":"Tobie", "age": 33)}).run()
+        db.person.insert(("name", "age"), ("Tobie", 33)).run()
+        db.person.insert({("name":"Tobie", "age": 33)}).run()
 
         Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/insert
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_insert_examples.py
 
         :param args: args for insert, it can be list of records, one record, one statement or 2 or more tuples of names
         and values
@@ -179,6 +194,8 @@ class Table:
         db.table("user").update("alex").only().merge({"active": True}).run()
 
         Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/update
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_update_examples.py
 
         :param record_id: optional, if specified transform to 'table_name:record_id'
         :return: Update object

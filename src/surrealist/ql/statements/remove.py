@@ -6,6 +6,13 @@ from surrealist.utils import OK
 
 
 class Remove(Statement):
+    """
+    Represents REMOVE operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
+    """
     _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM")
 
     def __init__(self, connection: Connection, table_name: str, type_: str = "TABLE", name: Optional[str] = None):

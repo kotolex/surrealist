@@ -7,6 +7,13 @@ from .statement import Statement
 
 
 class Select(Statement, SelectUseIndex):
+    """
+    Represents SELECT operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
+    """
     def __init__(self, connection: Connection, table_name: Union[str, "Select"], *args,
                  alias: Optional[Tuple[str, Union[str, Statement]]] = None,
                  value: Optional[str] = None):
@@ -26,19 +33,31 @@ class Select(Statement, SelectUseIndex):
             self._what = ", ".join(self._args)
         if self._as:
             what = "" if not self._what else f"{self._what}, "
-            self._what = f"{what}{self._as[1]} AS {self._as[0]}"
+            value = self._as[1] if not isinstance(self._as[1], Statement) else f"({self._as[1]._clean_str()})"
+            self._what = f"{what}{value} AS {self._as[0]}"
         if self._value:
             self._what = f"VALUE {self._value}"
 
     def by_id(self, record_id: str) -> "Select":
+        """
+        Delete table_name:record_id
+        :param record_id: id of the record to delete
+        """
         self._from = f"{self._table_name}:{record_id}"
         return self
 
     def only(self) -> "Select":
+        """
+        Include ONLY operator for the query
+        """
         self._only = True
         return self
 
     def omit(self, *fields: Tuple[str]) -> "Select":
+        """
+        Include OMIT operator for the query
+        :param fields: fields to omit
+        """
         self._omit = fields
         return self
 

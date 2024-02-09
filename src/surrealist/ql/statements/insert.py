@@ -8,9 +8,27 @@ from surrealist.utils import OK
 
 
 class Insert(Statement, InsertUseDuplicate):
+    """
+    Represents INSERT INTO operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_insert_examples.py
+    """
 
     def __init__(self, connection: Connection, table_name: str, *args):
-        """Can use Statement"""
+        """
+        Init for Insert
+
+        Notice: args can contain only one element if it is one of (List, Dict, Select) OR multiple tuples of the same
+        length, representing names and values for insert
+
+        Refer to: https://github.com/kotolex/surrealist/blob/master/examples/ql_insert_examples.py
+
+        :param connection: underlying connection
+        :param table_name: name of the table to operate on
+        :param args: arguments
+        """
         if not args:
             raise ValueError("Insert expects one or more arguments to insert")
         super().__init__(connection)
@@ -18,6 +36,10 @@ class Insert(Statement, InsertUseDuplicate):
         self._args = args
 
     def validate(self) -> List[str]:
+        """
+        Returns error if arguments are not appropriate for INSERT
+        :return: list with OK or errors
+        """
         args = self._args
         if len(args) > 1:
             key_len = len(args[0])

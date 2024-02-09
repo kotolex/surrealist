@@ -13,12 +13,13 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * well tested (on the latest Ubuntu, macOS and Windows 10)
  * fully compatible with the latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need
+ * QL-constructor to explore and use SurrealDB queries
  * http or websocket transport to use
  * always up to date with SurrealDB features and changes
 
 More to come:
  * connections pool
- * transactions, explain, QL-constructor
+ * transactions, iterators, define
 
 
 ### Installation ###
@@ -130,16 +131,47 @@ ws_connection.close()  # explicitly close connection
 # after closing, we cannot use connection anymore, if you need one - create one more connection with a surreal object
 ```
 
-## Methods ##
+## Methods and Query Language ##
 Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/surrealql/overview)
 
-You can find examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
+You can find basic examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
-The most efficient way is to use **query** method, cause it allows you to do all that is possible if you have permissions.
-All other methods like **create**, **update**, **merge**, **delete** is limited in their abilities and return results. 
+QL-constructor is a simple, convenient way to create queries, validate them and run it against SurealDB. 
+It is simple, readable and can be the resource to learn QL
 
-For example, helper **delete** will return all deleted data back to you, if it is not that you want - use query:
-`connection.query("DELETE my_table RETURN NONE;")`
+**Example 5**
+
+```python
+from surrealist import Database
+
+# connects to Database (it is not connection)
+with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db: 
+    table = db.table("person") # switch to table level, no problem if it is not exists
+    print(table.count()) # 0, table is empty or not exists
+    # let's add record
+    # real query CREATE person:john SET status = "ACTIVE" RETURN id;
+    result = table.create("john").set(status="ACTIVE").returns("id").run() 
+    # SurrealResult(id=9eb966a4-02fc-40ea-82ba-825d37254f43, status=OK, result=[{'id': 'person:john'}], 
+    # query=CREATE person:john SET status = "ACTIVE" RETURN id;, code=None, time=110.3µs, additional_info={})
+    print(result)
+    print(table.count()) # now one record
+```
+You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
+
+One of the main features of QL-constructor is that using dot you can see all operators available on each level, 
+any modern IDE will show possible operators, when you type dot. 
+Thanks to this, you can not only study QL but also gain confidence that you are forming a valid query.
+
+for example
+`db.account.select().limit(50).start_at(50)` analog "SELECT * FROM account LIMIT 50 START 50;"
+Pay attention — you can use just table name without using table() method `db.person.select()`, 
+it is readable and shorter, but in that particular case you will not get IDE suggestions.
+
+So, we recommend using table() method `db.table("person").select()` it is not much bigger, but still readable, 
+and you will get help from your IDE
+
+If you cant form your query, you always can use a raw query via `database.raw_query` or `connection.query`
+It is the most efficient way, cause it allows you to do all that is possible if you have permissions.
 
 ## Results and RecordID ##
 If the method of connection is not raised, it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
@@ -190,7 +222,7 @@ As it was said, if you need to debug something, stuck in some problem or just wa
 If you specify "INFO" level, then you will see transport operations, which methods were called, which parameters were used.
 For example
 
-**Example 5**
+**Example 6**
 
 ```python
 from surrealist import Surreal
@@ -251,7 +283,7 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 **Note 3:** LQ is associated with connection, where it was created, if you have 2 or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active
 
-**Example 6**
+**Example 7**
 
 ```python
 from time import sleep
@@ -274,7 +306,7 @@ with surreal.connect() as connection:
 in console, you will get:
 `{'result': {'action': 'CREATE', 'id': 'c2c8952b-b2bc-4d3a-aa68-4609f5818d7c', 'result': {'id': 'person:dik1sm50xr2d5mc7fysi', 'name': 'John', 'surname': 'Doe'}}}`
 
-**Example 7**
+**Example 8**
 
 ```python
 from time import sleep
@@ -303,7 +335,7 @@ If you do not need LQ anymore, call KILL method, with live_id
 
 You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://docs.surrealdb.com/docs/surrealql/statements/live-select#filter-the-live-query)
 
-**Example 8**
+**Example 9**
 
 ```python
 from time import sleep
@@ -357,7 +389,7 @@ DEFINE DATABASE foo CHANGEFEED 1h;
 
 **Note:** date and time of your requests should be strict AFTER date and time of creating `foo` and `reading`
 
-**Example 9**
+**Example 10**
 
 ```python
 from surrealist import Surreal
@@ -400,7 +432,7 @@ import sys
 sys.setrecursionlimit(10_000)
 ```
 ## Examples ##
-You can find some examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
+You can find a lot of examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
 ### Contacts ###
 Mail me at farofwell@gmail.com

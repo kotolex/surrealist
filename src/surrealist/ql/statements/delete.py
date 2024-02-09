@@ -7,6 +7,13 @@ from .statement import Statement
 
 
 class Delete(Statement, CanUseWhere):
+    """
+    Represents DELETE operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_delete_examples.py
+    """
 
     def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):
         super().__init__(connection)
@@ -23,5 +30,8 @@ class Delete(Statement, CanUseWhere):
         return f"DELETE{only} {name}"
 
     def only(self) -> "Delete":
+        """
+        Include ONLY operator for the query
+        """
         self._only = True
         return self

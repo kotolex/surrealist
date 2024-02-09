@@ -7,6 +7,13 @@ from surrealist.utils import OK
 
 
 class Live(Statement, LiveUseWhere):
+    """
+    Represents LIVE SELECT operator, it should be able to use any operators from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
+    """
 
     def __init__(self, connection: Connection, table_name: str, callback: Callable, use_diff: bool = False):
         super().__init__(connection)
@@ -16,6 +23,12 @@ class Live(Statement, LiveUseWhere):
         self._callback = callback
 
     def alias(self, value_name: str, alias: str) -> "Live":
+        """
+
+        :param value_name:
+        :param alias:
+        :return:
+        """
         self._alias = (value_name, alias)
         self._diff = False
         return self

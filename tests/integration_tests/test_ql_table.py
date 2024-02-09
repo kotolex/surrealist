@@ -103,7 +103,7 @@ class TestTable(TestCase):
     def test_insert(self):
         with Database(URL, 'test', 'test', ('root', 'root'), use_http=True) as db:
             uid = get_random_series(10)
-            result = db.person.insert_into(("name", "age"), (uid, 33)).run()
+            result = db.person.insert(("name", "age"), (uid, 33)).run()
             self.assertFalse(result.is_error())
             self.assertEqual(result.result[0]["age"], 33)
             self.assertEqual(result.result[0]["name"], uid)
