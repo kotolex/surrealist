@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Callable
 
-from surrealist import Connection
+from surrealist import Connection, SurrealResult
 from surrealist.ql.statements.live_statements import LiveUseWhere
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
@@ -8,11 +8,12 @@ from surrealist.utils import OK
 
 class Live(Statement, LiveUseWhere):
 
-    def __init__(self, connection: Connection, table_name: str, use_diff: bool = False):
+    def __init__(self, connection: Connection, table_name: str, callback: Callable, use_diff: bool = False):
         super().__init__(connection)
         self._table_name = table_name
         self._alias = None
         self._diff = use_diff
+        self._callback = callback
 
     def alias(self, value_name: str, alias: str) -> "Live":
         self._alias = (value_name, alias)
@@ -21,6 +22,12 @@ class Live(Statement, LiveUseWhere):
 
     def validate(self) -> List[str]:
         return [OK]
+
+    def run(self) -> SurrealResult:
+        return self._drill(self.to_str())
+
+    def _drill(self, query):
+        return self._connection.custom_live(query, self._callback)
 
     def _clean_str(self):
         if self._diff:

@@ -39,6 +39,7 @@ class TestInsert(TestCase):
         insert = Insert(None, "product", ("name", "url"), ('Salesforce', 'salesforce.com')).on_duplicate(
             "tags += 'crm'")
         self.assertEqual(text, insert.to_str())
+        print(insert.validate())
         self.assertTrue(insert.is_valid())
 
     def test_bulk(self):

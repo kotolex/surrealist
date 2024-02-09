@@ -1,5 +1,6 @@
 import json
 from abc import ABC, abstractmethod
+from functools import wraps
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
@@ -19,6 +20,7 @@ def connected(func):
     :raise OperationOnClosedConnectionError: if connection is already closed
     """
 
+    @wraps(func)
     def wrapped(*args, **kwargs):
         # args[0] is a self-argument in methods
         if not args[0].is_connected():

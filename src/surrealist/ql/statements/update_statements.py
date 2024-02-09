@@ -6,7 +6,7 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
 class Set(FinishedStatement, CanUseWhere):
-    def __init__(self, statement: Statement, result:Optional[str] = None, **kwargs):
+    def __init__(self, statement: Statement, result: Optional[str] = None, **kwargs):
         super().__init__(statement)
         self._kw = kwargs
         self._result = result
@@ -49,7 +49,7 @@ class Content(FinishedStatement, CanUseWhere):
 
 
 class UpdateUseMethods(CanUseWhere):
-    def set(self, result:Optional[str]=None, **kwargs) -> Set:
+    def set(self, result: Optional[str] = None, **kwargs) -> Set:
         return Set(self, result, **kwargs)
 
     def content(self, value: Dict) -> Content:
