@@ -18,14 +18,12 @@ class Table:
     Can use only operators of the table level (CRUD).
     If you need a raw query, DEFINE or transactions - you need database level
 
-    Please refer to: url in Readme
+    Please refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#methods-and-query-language
 
     SurrealQL: https://docs.surrealdb.com/docs/surrealql/overview
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/
     """
-
-    # TODO url to readme
 
     def __init__(self, name: str, connection: Connection):
         self._connection = connection

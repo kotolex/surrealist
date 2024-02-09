@@ -14,6 +14,7 @@ class Select(Statement, SelectUseIndex):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
     """
+
     def __init__(self, connection: Connection, table_name: Union[str, "Select"], *args,
                  alias: Optional[Tuple[str, Union[str, Statement]]] = None,
                  value: Optional[str] = None):

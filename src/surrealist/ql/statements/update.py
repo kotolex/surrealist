@@ -24,6 +24,9 @@ class Update(Statement, UpdateUseMethods):
         return [OK]
 
     def only(self) -> "Update":
+        """
+        Include ONLY operator for the query
+        """
         self._only = True
         return self
 

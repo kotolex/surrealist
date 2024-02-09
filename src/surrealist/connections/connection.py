@@ -382,18 +382,58 @@ class Connection(ABC):
 
     @abstractmethod
     def import_data(self, path) -> SurrealResult:
+        """
+        This method imports a SurrealQL script file into a local or remote SurrealDB database server.
+
+        Note: websocket connection cannot use this method
+
+        Refer to:
+        https://docs.surrealdb.com/docs/integration/http#import
+        https://docs.surrealdb.com/docs/cli/import
+        """
         pass
 
     @abstractmethod
     def export(self) -> str:
+        """
+        This method exports all data for a specific namespace and database.
+
+        Note: websocket connection cannot use this method
+
+        Refer to: https://docs.surrealdb.com/docs/integration/http#export
+
+        Refer to: https://docs.surrealdb.com/docs/cli/export/
+        :return:
+        """
         pass
 
     @abstractmethod
     def ml_import(self, path) -> SurrealResult:
+        """
+        This method imports a SurrealQL ML file into a local or remote SurrealDB database server.
+
+        Note: websocket connection cannot use this method
+
+        Refer to:
+        https://docs.surrealdb.com/docs/integration/http#ml-import
+        https://docs.surrealdb.com/docs/cli/ml/import
+        :param path:
+        :return:
+        """
         pass
 
     @abstractmethod
     def ml_export(self, name: str, version: str) -> str:
+        """
+        This method exports a SurrealML machine learning model from a specific namespace and database.
+        As machine learning files can be large, the endpoint outputs a chunked HTTP response.
+
+        Note: websocket connection cannot use this method
+
+        Refer to: https://docs.surrealdb.com/docs/integration/http#ml-export
+
+        Refer to: https://docs.surrealdb.com/docs/cli/ml/export
+        """
         pass
 
     def _get_count(self, res) -> int:
