@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from surrealist import Connection
-from surrealist.ql.statement import Statement
-from surrealist.ql.update_statements import UpdateUseMethods
+from surrealist.ql.statements.statement import Statement
+from surrealist.ql.statements.update_statements import UpdateUseMethods
 from surrealist.utils import OK
 
 

@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from surrealist.ql.statement import Statement, FinishedStatement
+from surrealist.ql.statements.statement import Statement, FinishedStatement
 from surrealist.utils import OK
 
 

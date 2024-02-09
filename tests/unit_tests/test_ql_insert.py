@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
-from surrealist.ql.insert import Insert
-from surrealist.ql.select import Select
+from surrealist.ql.statements.insert import Insert
+from surrealist.ql.statements.select import Select
 
 
 class TestInsert(TestCase):

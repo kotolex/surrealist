@@ -1,17 +1,14 @@
-import logging
 from typing import Optional
 
 from surrealist import Connection, SurrealResult
-from surrealist.ql.create import Create
-from surrealist.ql.delete import Delete
-from surrealist.ql.insert import Insert
-from surrealist.ql.live import Live
-from surrealist.ql.remove import Remove
-from surrealist.ql.select import Select
-from surrealist.ql.show import Show
-from surrealist.ql.update import Update
-
-logger = logging.getLogger("tableQL")
+from surrealist.ql.statements.create import Create
+from surrealist.ql.statements.delete import Delete
+from surrealist.ql.statements.insert import Insert
+from surrealist.ql.statements.live import Live
+from surrealist.ql.statements.remove import Remove
+from surrealist.ql.statements.select import Select
+from surrealist.ql.statements.show import Show
+from surrealist.ql.statements.update import Update
 
 
 class Table:
@@ -24,11 +21,7 @@ class Table:
     def name(self) -> str:
         return self._name
 
-    def is_connected(self):
-        return self._connection.is_connected()
-
     def count(self) -> int:
-        logger.info("Get records count for %s", self._name)
         return self._connection.count(self._name).result
 
     def select(self, *args) -> Select:

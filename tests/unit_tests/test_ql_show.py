@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.show import Show
+from surrealist.ql.statements.show import Show
 
 
 class TestShow(TestCase):

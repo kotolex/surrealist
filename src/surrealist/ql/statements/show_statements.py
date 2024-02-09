@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from surrealist.ql.statement import FinishedStatement, Statement
+from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS
 
 

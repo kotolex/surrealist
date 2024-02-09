@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from surrealist import Connection
-from surrealist.ql.statement import Statement
+from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
 

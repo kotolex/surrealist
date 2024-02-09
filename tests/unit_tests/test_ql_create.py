@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.create import Create
+from surrealist.ql.statements.create import Create
 
 
 class TestCreate(TestCase):

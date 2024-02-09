@@ -36,7 +36,7 @@ class Database:
 
     def close(self):
         """
-        Closes the connection. You cannot and should not use a connection object after that
+        Closes the connection. You cannot and should not use a database object after that
         """
         logger.info("DatabaseQL is down")
         self._connection.close()

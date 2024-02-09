@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union, List
 from surrealist import Connection
 from .select_statements import SelectUseIndex
 from .statement import Statement, FinishedStatement
-from ..utils import OK
+from surrealist.utils import OK
 
 
 class Select(Statement, SelectUseIndex):

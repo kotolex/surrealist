@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.remove import Remove
+from surrealist.ql.statements.remove import Remove
 
 
 class TestRemove(TestCase):

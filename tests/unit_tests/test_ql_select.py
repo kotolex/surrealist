@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.select import Select
+from surrealist.ql.statements.select import Select
 
 
 class TestSelect(TestCase):

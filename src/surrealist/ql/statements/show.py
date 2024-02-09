@@ -3,7 +3,7 @@ from typing import List
 from surrealist import Connection
 from .show_statements import ShowUseSince
 from .statement import Statement
-from ..utils import OK
+from surrealist.utils import OK
 
 
 class Show(Statement, ShowUseSince):

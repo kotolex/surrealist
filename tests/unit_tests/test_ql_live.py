@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.live import Live
+from surrealist.ql.statements.live import Live
 
 
 class TestLive(TestCase):

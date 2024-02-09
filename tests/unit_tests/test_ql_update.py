@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist.ql.update import Update
+from surrealist.ql.statements.update import Update
 
 
 class TestUpdate(TestCase):

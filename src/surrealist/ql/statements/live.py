@@ -1,8 +1,8 @@
 from typing import List
 
 from surrealist import Connection
-from surrealist.ql.live_statements import LiveUseWhere
-from surrealist.ql.statement import Statement
+from surrealist.ql.statements.live_statements import LiveUseWhere
+from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
 

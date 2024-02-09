@@ -1,8 +1,8 @@
 import json
 from typing import Dict, List, Optional
 
-from surrealist.ql.common_statements import CanUseWhere
-from surrealist.ql.statement import FinishedStatement, Statement
+from surrealist.ql.statements.common_statements import CanUseWhere
+from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
 class Set(FinishedStatement, CanUseWhere):
