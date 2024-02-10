@@ -257,6 +257,7 @@ class TestWebSocketConnection(TestCase):
             uid = get_random_series(27)
             opts = {"id": uid, "author": uid, "title": uid, "text": uid}
             connection.create("ws_article", opts)
+            time.sleep(0.1)
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
             self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
 
@@ -282,6 +283,7 @@ class TestWebSocketConnection(TestCase):
             uid = get_random_series(14)
             opts = {"id": uid, "author": uid, "title": uid, "text": uid}
             connection.create("ws_article", opts)
+            time.sleep(0.1)
             a_dict = {**opts, "id": f"ws_article:{uid}"}
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
             self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '/', 'value': a_dict}])
@@ -297,6 +299,7 @@ class TestWebSocketConnection(TestCase):
             opts = {"id": uid, "author": uid, "title": uid, "text": uid}
             connection.create("ws_article", opts)
             connection.create("ws_article2", opts)
+            time.sleep(0.1)
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
             self.assertEqual(a_list[1]['result']['action'], 'CREATE')
             self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
@@ -389,7 +392,7 @@ class TestWebSocketConnection(TestCase):
             token = res.result
             connection.create("ws_person", {"age": 18, "name": "Jane"})
             connection.create("ws_person", {"age": 28, "name": "John"})
-            time.sleep(0.3)
+            time.sleep(0.1)
             self.assertTrue(len(a_list) == 1, a_list)
             self.assertEqual(a_list[0]['result']['action'], "CREATE")
             self.assertEqual(a_list[0]['result']['result']["age"], 28)
