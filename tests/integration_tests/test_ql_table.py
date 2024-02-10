@@ -1,3 +1,4 @@
+import time
 from unittest import TestCase, main
 
 from surrealist import Database
@@ -79,6 +80,7 @@ class TestTable(TestCase):
             self.assertFalse(result.is_error())
             live_uid = result.result
             table.create().content({"title": uid}).run()
+            time.sleep(0.1)
             self.assertFalse(a_list == [])
             result = table.kill(live_uid)
             self.assertFalse(result.is_error())
@@ -94,6 +96,7 @@ class TestTable(TestCase):
             live_uid = result.result
             table.create().content({"title": uid, "age": 22}).run()
             table.create().content({"title": "new", "age": 40}).run()
+            time.sleep(0.1)
             self.assertFalse(a_list == [])
             self.assertTrue("new" in str(a_list))
             self.assertTrue("TITLE" in str(a_list))

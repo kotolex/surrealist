@@ -100,6 +100,7 @@ class TestUseCases(TestCase):
                 uid = get_random_series(27)
                 opts = {"id": uid, "author": uid, "title": uid, "text": uid}
                 connection.create("ws_article", opts)
+                time.sleep(0.2)
                 self.assertEqual(a_list[0]['result']['action'], 'CREATE')
                 self.assertEqual(connection2._client._messages, {})
                 self.assertEqual(connection2._client._callbacks, {})
