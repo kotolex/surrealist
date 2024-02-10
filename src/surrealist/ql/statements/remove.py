@@ -13,7 +13,7 @@ class Remove(Statement):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
     """
-    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM")
+    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER")
 
     def __init__(self, connection: Connection, table_name: str, type_: str = "TABLE", name: Optional[str] = None):
         if type_ not in Remove._variants:
@@ -30,8 +30,12 @@ class Remove(Statement):
         return [OK]
 
     def _clean_str(self):
-        if self._type in ("TABLE", "PARAM"):
+        if self._type in ("TABLE", "PARAM", "USER"):
             what = f"{self._type} {self._name}"
+            if self._type == "USER":
+                what = f"{what} ON DATABASE"
+            if self._type == "PARAM":
+                what = f"{self._type} ${self._name}"
         else:
             what = f"{self._type} {self._name} ON TABLE {self._table_name}"
         return f"REMOVE {what}"

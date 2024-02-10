@@ -1,7 +1,11 @@
 import logging
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Union, Any
 
 from surrealist import Surreal, SurrealResult
+from surrealist.ql.statements import Select, Remove
+from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam
+from surrealist.ql.statements.statement import Statement
+from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
 from surrealist.utils import DEFAULT_TIMEOUT
 
@@ -103,6 +107,101 @@ class Database:
         :return: a table object
         """
         return Table(name, self._connection)
+
+    def transaction(self, statements: List[Statement]) -> Transaction:
+        """
+        Create a transaction object to generate a query or run
+
+        :param statements: list of appropriate statements (select, create, delete. etc.)
+        :return: Transaction object
+        """
+        return Transaction(self._connection, statements)
+
+    def select_from(self, select: Select, *args, alias: Optional[Tuple[str, Union[str, Statement]]] = None,
+                    value: Optional[str] = None) -> Select:
+        """
+        Allow selecting from sub-query (select)
+
+        :param select: Select object
+        :param args: which fields to select, if no fields or "*" - selects all
+        :param alias: pairs of names and values
+        :param value: on exists add VALUE operator
+        :return: Select object
+        """
+        return Select(self._connection, select, *args, alias=alias, value=value)
+
+    def define_event(self, name: str, table_name: str, then: Union[str, Statement]) -> DefineEvent:
+        """
+        Allow defining event on table
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name for the event
+        :param table_name: name of the table
+        :param then: action to perform
+        :return: DefineEvent object
+        """
+        return DefineEvent(self._connection, name, table_name, then)
+
+    def remove_event(self, name: str, table_name: str) -> Remove:
+        """
+        Remove an event linked to table
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+
+        :param name: name of the event
+        :param table_name: name of the table
+        :return: Remove object
+        """
+        return Remove(self._connection, table_name=table_name, type_="EVENT", name=name)
+
+    def define_user(self, user_name: str, password: str) -> DefineUser:
+        """
+        Allow defining user for a current database
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param user_name: name for the new user
+        :param password: password for user
+        :return: DefineUser object
+        """
+        return DefineUser(self._connection, user_name=user_name, password=password)
+
+    def remove_user(self, user_name: str) -> Remove:
+        """
+        Remove user of the database
+
+        :param user_name: name of the user
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="USER", name=user_name)
+
+    def define_param(self, name: str, value: Any) -> DefineParam:
+        """
+        Represents DEFINE PARAM operator
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name of the parameter
+        :param value: value for the parameter
+        :return: DefineParam object
+        """
+        return DefineParam(self._connection, name, value)
+
+    def remove_param(self, name: str) -> Remove:
+        """
+        Remove parameter of the database
+
+        :param name: name of the parameter
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="PARAM", name=name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

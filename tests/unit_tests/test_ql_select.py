@@ -1,5 +1,6 @@
 from unittest import TestCase, main
 
+from surrealist import Database
 from surrealist.ql.statements.select import Select
 
 
@@ -49,7 +50,7 @@ class TestSelect(TestCase):
 
     def test_docs(self):
         """
-        cover https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/select#advanced-expressions
+        cover https://docs.surrealdb.com/docs/surrealql/statements/select#advanced-expressions
         """
         self.assertEqual("SELECT address.city FROM person;", Select(None, "person", "address.city").to_str())
         self.assertEqual("SELECT address.*.coordinates AS coordinates FROM person;",
@@ -79,7 +80,7 @@ class TestSelect(TestCase):
 
     def test_docs2(self):
         """
-        cover https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/select#advanced-expressions
+        cover https://docs.surrealdb.com/docs/surrealql/statements/select#advanced-expressions
         """
 
     def test_omit(self):
@@ -174,6 +175,11 @@ class TestSelect(TestCase):
         self.assertEqual(
             "SELECT name FROM person WITH INDEX idx_name WHERE job='engineer' AND genre = 'm' OR x<100 LIMIT 10;",
             sel.to_str())
+
+    def test_sub_query(self):
+        sub_query = Select(None, "events").where("type = 'active'")
+        text = "SELECT * FROM (SELECT * FROM events WHERE type = 'active') LIMIT 5 PARALLEL;"
+        self.assertEqual(text, Select(None, sub_query).limit(5).parallel().to_str())
 
 
 if __name__ == '__main__':

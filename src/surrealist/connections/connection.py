@@ -100,6 +100,19 @@ class Connection(ABC):
         return result
 
     @connected
+    def table_info(self, table_name: str) -> SurrealResult:
+        """
+        Returns info about specified table. You should have permissions for this action.
+
+        Actually converts to QL "INFO FOR TABLE table_name" to use in **query** method.
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+
+        :return: full table information
+        """
+        return self._info(f"TABLE {table_name}")
+
+    @connected
     def db_info(self) -> SurrealResult:
         """
         Returns info about a current database. You should have permissions for this action.
@@ -161,7 +174,7 @@ class Connection(ABC):
     @connected
     def db_tables(self) -> SurrealResult:
         """
-        Returns all tables names in a current database. You should have permissions for this action.
+        Returns all tables names in the current database. You should have permissions for this action.
 
         Actually call **db_info** and parse tables attribute there.
 

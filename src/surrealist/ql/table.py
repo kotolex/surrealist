@@ -33,9 +33,18 @@ class Table:
     def name(self) -> str:
         """
         Return name of the table
+
         :return: table name
         """
         return self._name
+
+    def info(self) -> Dict:
+        """
+        Returns full table info
+
+        :return: Result of the request
+        """
+        return self._connection.table_info(self._name).result
 
     def count(self) -> int:
         """
@@ -65,7 +74,7 @@ class Table:
     def create(self, record_id: Optional[str] = None) -> Create:
         """
         Represent CREATE operator and its abilities as refer here:
-        https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/create
+        https://docs.surrealdb.com/docs/surrealql/statements/create
 
         Example:
         db.table("article").create("first").content({"author": "author:john", "title": uid}).run()
@@ -81,7 +90,7 @@ class Table:
         """
         Represents SHOW CHANGES operator for the Change Feed
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/show
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/show
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#change-feeds
 
@@ -95,7 +104,7 @@ class Table:
         """
         Represent DELETE operator
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/delete
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
 
         Example:
         db.table("author").delete("john").return_none().run()
@@ -153,7 +162,7 @@ class Table:
         """
         Represents KILL operator, for killing a live query
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/kill
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
 
         :param live_id: id of the query
         :return: result
@@ -174,7 +183,7 @@ class Table:
         db.person.insert(("name", "age"), ("Tobie", 33)).run()
         db.person.insert({("name":"Tobie", "age": 33)}).run()
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/insert
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_insert_examples.py
 
@@ -191,7 +200,7 @@ class Table:
         Example:
         db.table("user").update("alex").only().merge({"active": True}).run()
 
-        Refer to: https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/update
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_update_examples.py
 

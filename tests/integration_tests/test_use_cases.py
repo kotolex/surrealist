@@ -44,6 +44,8 @@ class TestUseCases(TestCase):
             (True, "use", ["some", "some"]),
             (True, "db_info", []),
             (False, "db_info", []),
+            (True, "table_info", ["a"]),
+            (False, "table_info", ["a"]),
             (True, "ns_info", []),
             (False, "ns_info", []),
             (True, "root_info", []),
@@ -163,6 +165,54 @@ class TestUseCases(TestCase):
             self.assertTrue('changes' in str(res.result))
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
+
+    def test_use_transaction(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            author = db.table("t_author")
+            book = db.table("t_book")
+            counter = db.table("t_counter")
+            uid = get_random_series(14)
+            create_author = author.create().content({"name": uid, "id": uid})
+            create_book = book.create().content({"title": "Title", "text": uid, "author": f"author:{uid}"})
+            counter_inc = counter.update("author_count").set("count +=1")
+            transaction = db.transaction([create_author, create_book, counter_inc])
+            res = transaction.run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(res.result) == 3)
+
+    def test_define_event_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            events_count = len(db.user.info()["events"])
+            uid = get_random_series(6)
+            then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).when(
+                "$before.email != $after.email").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["events"]), events_count + 1)
+            res = db.remove_event(f"email_{uid}", table_name="user").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["events"]), events_count)
+
+    def test_define_user_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(8)
+            count = len(db.info()["users"])
+            res = db.define_user(f"user_{uid}", password="123456").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(db.info()["users"]), count + 1)
+            res = db.remove_user(f"user_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(db.info()["users"]), count)
+
+    def test_define_param_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(8)
+            res = db.define_param(f"param_{uid}", 1000).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(1000, db.raw_query(f"RETURN $param_{uid};").result)
+            res = db.remove_param(f"param_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
 
 
 if __name__ == '__main__':

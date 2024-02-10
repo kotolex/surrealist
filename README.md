@@ -13,13 +13,15 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * well tested (on the latest Ubuntu, macOS and Windows 10)
  * fully compatible with the latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need
- * QL-constructor to explore and use SurrealDB queries
+ * QL-constructor to explore, generate and use SurrealDB queries (explain, transaction etc.)
  * http or websocket transport to use
  * always up to date with SurrealDB features and changes
 
 More to come:
  * connections pool
- * transactions, iterators, define
+ * iterators
+ * define - remove analyzer
+ * define - remove table
 
 
 ### Installation ###
