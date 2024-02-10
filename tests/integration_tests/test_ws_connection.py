@@ -455,6 +455,13 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 3)
 
+    def test_info_table(self):
+        surreal = Surreal(URL, 'test', 'test', credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.table_info("author")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 5)
+
     def test_is_table_exists(self):
         surreal = Surreal(URL, 'test', 'test', ('root', 'root'))
         with surreal.connect() as connection:

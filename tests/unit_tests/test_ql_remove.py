@@ -8,7 +8,7 @@ class TestRemove(TestCase):
         self.assertEqual("REMOVE TABLE person;", Remove(None, "person").to_str())
 
     def test_param(self):
-        self.assertEqual("REMOVE PARAM salt;", Remove(None, "person", type_="PARAM", name="salt").to_str())
+        self.assertEqual("REMOVE PARAM $salt;", Remove(None, "person", type_="PARAM", name="salt").to_str())
 
     def test_field(self):
         self.assertEqual("REMOVE FIELD salt ON TABLE person;",

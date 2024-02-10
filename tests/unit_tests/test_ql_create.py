@@ -17,7 +17,7 @@ class TestCreate(TestCase):
         self.assertEqual("CREATE ONLY person:tobie;", create.to_str())
 
     def test_example_1(self):
-        # https://docs.surrealdb.com/docs/1.2.x/surrealql/statements/create#example-usage
+        # https://docs.surrealdb.com/docs/surrealql/statements/create#example-usage
         self.assertEqual(
             'CREATE person SET name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"];',
             Create(None, "person").set(name="Tobie", company="SurrealDB", skills=["Rust", "Go", "JavaScript"]).to_str())
