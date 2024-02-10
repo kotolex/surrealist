@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Union, Dict, List
+from typing import Optional, Union, Dict, List, Any
 
 from surrealist.errors import TooManyNestedLevelsError
 from surrealist.utils import OK, ERR, HTTP_OK
@@ -8,6 +8,7 @@ from surrealist.utils import OK, ERR, HTTP_OK
 class SurrealResult:
     """
     Represents a result of the request both via http or websocket.
+    Contains a few helpers to work with results of different kind: id, ids, get, is_error, is_empty
     """
 
     def __init__(self, **kwargs):
@@ -21,7 +22,7 @@ class SurrealResult:
         time - execution time, only for http requests
         additional_info -all other fields
         """
-        self.id: Optional[Union[int, str]] = kwargs.pop("id", None)
+        self.ws_id: Optional[Union[int, str]] = kwargs.pop("id", None)
         self.result: Optional[Union[str, int, Dict, List]] = kwargs.pop("result", None)
         self.code: Optional[int] = kwargs.pop("code", None)
         self.query: Optional[str] = kwargs.pop("query", None)
@@ -37,8 +38,89 @@ class SurrealResult:
         if self.code and self.code != HTTP_OK:
             self.status = ERR
         self.additional_info: Dict = kwargs
-        if self.result and ":" in self.result:
-            self.result = self.result.split(":")[-1].strip()
+        if self.result and isinstance(self.result, str) and "There was a problem with the database:" in self.result:
+            self.result = (":".join(self.result.split(":")[1:])).strip()
+
+    def count(self) -> int:
+        """
+        Returns number of records in result.
+
+        :return: int value of records in a result
+        """
+        if self.is_empty():
+            return 0
+        if isinstance(self.result, List):
+            return len(self.result)
+        return 1
+
+    def is_empty(self) -> bool:
+        """
+        Return is result is empty
+
+        :return: True, if a result is None, empty list, empty dict or empty string, False otherwise
+        """
+        return self.result in (None, [], {}, '')
+
+    @property
+    def id(self) -> str:
+        """
+        Returns id field from a result.
+        Note: this property raise on any problem with getting id, sometimes it will be more effective to use ids instead
+
+        :return: id from the record in result
+        :raise ValueError: if a result is empty or no id in it
+        """
+        count = self.count()
+        if count != 1:
+            raise ValueError(f"No id at result or more than 1 element, body: {self.result}")
+        if not isinstance(self.result, (List, Dict)):
+            raise ValueError(f"Cant get id, body: {self.result}")
+        value = self.result[0] if isinstance(self.result, List) else self.result
+        if not isinstance(value, Dict) or "id" not in value:
+            raise ValueError(f"No id field, body: {self.result}")
+        return value["id"]
+
+    @property
+    def ids(self) -> List:
+        """
+        Returns list with all found id of records inside.
+        Note: this property is never raise an error, instead it returns [] on an empty result or no id.
+        Note: non-empty list returns None on each element without id, so [1,2,3] returns [None, None, None]
+
+        :return: list with id of records inside
+        """
+        result = []
+        if isinstance(self.result, Dict):
+            if "id" in self.result:
+                result.append(self.result["id"])
+        if isinstance(self.result, List):
+            result = [e.get("id") if isinstance(e, Dict) else None for e in self.result]
+        return result
+
+    def get(self, field_name: str, default: Optional[Any] = None) -> Any:
+        """
+        Tries to get value by field name, will work with dict of only dict in list, in all other cases returns default
+
+        Examples:
+        SurrealResult(result={"a":1}).get("a") == 1
+        SurrealResult(result={"a":1}).get("b") == None
+        SurrealResult(result=[{"a":1}]).get("a") == 1
+        SurrealResult(result=[{"a":1}]).get("b") == None
+        SurrealResult(result=[{"a":1}, {"a":2}]).get("a") == None # more than one dict in a result
+        SurrealResult(result="token").get("a") == None # not a dict
+
+
+        :param field_name: field name to look in a result
+        :param default: value to return, when field not found
+        :return: any result
+        """
+        count = self.count()
+        if count != 1 or not isinstance(self.result, (List, Dict)):
+            return default
+        value = self.result[0] if isinstance(self.result, List) else self.result
+        if not isinstance(value, Dict) or field_name not in value:
+            return default
+        return value[field_name]
 
     def is_error(self):
         """
@@ -48,8 +130,16 @@ class SurrealResult:
         """
         return self.status != OK
 
+    def to_dict(self) -> Dict:
+        """
+        Return all data as dict
+        :return: dict with all fields
+        """
+        return {"ws_id": self.ws_id, "status": self.status, "result": self.result, "query": self.query,
+                "code": self.code, "time": self.time, "additional_info": self.additional_info}
+
     def __repr__(self):
-        return f"SurrealResult(id={self.id}, status={self.status}, result={self.result}, query={self.query}, " \
+        return f"SurrealResult(id={self.ws_id}, status={self.status}, result={self.result}, query={self.query}, " \
                f"code={self.code}, time={self.time}, additional_info={self.additional_info})"
 
     def __eq__(self, other):
@@ -58,10 +148,10 @@ class SurrealResult:
         return self.__dict__ == other.__dict__
 
     def __hash__(self):
-        return hash((self.id, self.result, self.status, self.time, self.code, self.query))
+        return hash((self.ws_id, self.result, self.status, self.time, self.code, self.query))
 
 
-def to_result(content: Union[str, Dict]) -> SurrealResult:
+def to_result(content: Union[str, Dict, List]) -> SurrealResult:
     """
     Converts str or dict response of SurrealDB to a common object for convenient use
 
@@ -79,7 +169,7 @@ def to_result(content: Union[str, Dict]) -> SurrealResult:
         return SurrealResult(result=[SurrealResult(**e) for e in content])
     if _is_result_inside(content):
         res = SurrealResult(**content["result"][0])
-        res.id = content["id"]
+        res.ws_id = content["id"]
         return res
     return SurrealResult(**content)
 

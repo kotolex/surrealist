@@ -137,7 +137,7 @@ Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/su
 You can find basic examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
 QL-constructor is a simple, convenient way to create queries, validate them and run it against SurealDB. 
-It is simple, readable and can be the resource to learn QL
+It is simple, readable and can be the way to learn QL
 
 **Example 5**
 
@@ -159,22 +159,25 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 
 One of the main features of QL-constructor is that using dot you can see all operators available on each level, 
-any modern IDE will show possible operators, when you type dot. 
+any modern IDE will show possible operators when you type dot. 
 Thanks to this, you can not only study QL but also gain confidence that you are forming a valid query.
 
 for example
 `db.account.select().limit(50).start_at(50)` analog "SELECT * FROM account LIMIT 50 START 50;"
+
 Pay attention — you can use just table name without using table() method `db.person.select()`, 
 it is readable and shorter, but in that particular case you will not get IDE suggestions.
 
 So, we recommend using table() method `db.table("person").select()` it is not much bigger, but still readable, 
 and you will get help from your IDE
 
-If you cant form your query, you always can use a raw query via `database.raw_query` or `connection.query`
+If you cannot form your query, you always can use a raw query via `database.raw_query` or `connection.query`
 It is the most efficient way, cause it allows you to do all that is possible if you have permissions.
 
 ## Results and RecordID ##
 If the method of connection is not raised, it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
+
+Please see [examples](https://github.com/kotolex/surrealist/blob/master/examples/result.py)
 
 Here is standard result:
 `SurrealResult(id=None, status=OK, result=[{'author': '51ff5faa-d798-4194-93c6-179ce7525a8c', 'id': 'article:⟨51ff5faa-d798-4194-93c6-179ce7525a8c⟩', 'text': '51ff5faa-d798-4194-93c6-179ce7525a8c', 'title': '51ff5faa-d798-4194-93c6-179ce7525a8c'}], query=None, code=None, time=77.25µs, additional_info={})`
@@ -184,10 +187,13 @@ Here is standard error:
 `
 
 You can always check for error using is_error() method
+
 ```python
 if result.is_error():
     raise ValueError("Got error")
 ```
+
+Besides, a result object has helper methods is_empty, id, ids, get to work with response of SurrealDB.
 
 You need to read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
 
@@ -280,7 +286,7 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 
 **Note 2:** LQ only produces events which happen after the creation of this LQ
 
-**Note 3:** LQ is associated with connection, where it was created, if you have 2 or more connections, LQ will depend only on one, 
+**Note 3:** LQ is associated with connection, where it was created, if you have two or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active
 
 **Example 7**
@@ -411,12 +417,12 @@ in the console, you will see
 `
 
 ## Threads and thread-safety ##
-This library was made for using in multithreaded environments, just remember some rules of thumb:
+This library was made for using in multithreading environments, remember some rules of thumb:
  - if you work with only one server of SurrealDB, you need only one Surreal object
  - one Connection object represents exactly one connection (websocket or http) with DB
  - it is OK to use connection in different threads, but it can be your bottleneck, as there is only one connection to DB
  - with many queries and high load, you should consider using more than one connection, but not too many of them. The number of connections equal to the number of CPU-cores is the best choice
- - do not forget to properly close connections
+ - remember to properly close connections
 
 ## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and
@@ -424,7 +430,7 @@ standard json library (and str function) use recursion to load and dump objects,
 you can get RecursionLimitError. 
 
 The best choice here is to rethink your schema and objects, because you probably do 
-something wrong with such high level of nesting. 
+something wrong with such a high level of nesting. 
 
 Second choice — increase recursion limit in your system with
 ```python

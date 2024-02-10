@@ -130,7 +130,7 @@ class HttpConnection(Connection):
         logger.info("Operation: SELECT. Path: %s", crop_data(url))
         _, text = self._simple_get(url)
         result = to_result(text)
-        if not isinstance(result.result, List):
+        if not isinstance(result.result, List) and not result.is_error():
             result.result = [result.result] if result.result else []
         return result
 

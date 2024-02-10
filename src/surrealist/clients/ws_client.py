@@ -154,7 +154,7 @@ class WebSocketClient:
             raise ValueError(f"Dict returns None on thread-safe pop, {id_=}, {self._messages=}")
         return result
 
-    def _wait_until(self, predicate, timeout, period=0.06):
+    def _wait_until(self, predicate, timeout, period=0.0005):
         must_end = time.time() + timeout
         while time.time() < must_end:
             if self._connected is False:

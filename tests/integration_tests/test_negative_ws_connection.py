@@ -98,14 +98,14 @@ class TestNegativeWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertTrue(res.is_error())
-            self.assertEqual("Not enough permissions to perform this action", res.result)
+            self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
 
     def test_ns_info_failed(self):
         surreal = Surreal(URL, 'test', 'test', ('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.ns_info()
             self.assertTrue(res.is_error())
-            self.assertEqual("Not enough permissions to perform this action", res.result)
+            self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
 
 
 if __name__ == '__main__':

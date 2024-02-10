@@ -346,7 +346,7 @@ class WebSocketConnection(Connection):
         data = {"method": "select", "params": [table_name]}
         logger.info("Operation: SELECT. Path: %s", crop_data(table_name))
         result = self._run(data)
-        if not isinstance(result.result, List):
+        if not isinstance(result.result, List) and not result.is_error():
             result.result = [result.result] if result.result else []
         return result
 
