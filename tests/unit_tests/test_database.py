@@ -1,7 +1,8 @@
 from unittest import TestCase, main
 
-from surrealist.ql.statements import Create, Update
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer
+from surrealist.ql.statements import Create, Update, Select
+from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
+    DefineIndex
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -44,7 +45,19 @@ class TestDatabase(TestCase):
         self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;",
                          DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").to_str())
 
+    def test_define_scope(self):
+        create = Create(None, "user").set("email = $email, pass = crypto::argon2::generate($pass)")
+        select = Select(None, "user").where("email = $email AND crypto::argon2::compare(pass, $pass)")
 
+        text = """DEFINE SCOPE account SESSION 24h 
+SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) 
+SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));"""
+        self.assertEqual(text, DefineScope(None, "account", "24h", signup=create, signin=select).to_str())
+
+    def test_define_index(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
 
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@ from typing import Optional, Tuple, List, Dict, Union, Any
 
 from surrealist import Surreal, SurrealResult
 from surrealist.ql.statements import Select, Remove
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer
+from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
+                                             DefineIndex)
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
@@ -224,6 +225,49 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, '', type_="ANALYZER", name=name)
+
+    def define_scope(self, name: str, duration: str, signup: Union[str, Statement],
+                     signin: Union[str, Statement]) -> DefineScope:
+        """
+        Represents DEFINE SCOPE operator
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name for the new scope
+        :param duration: session duration, like 24h
+        :param signup: Create operator with string or Statement representation
+        :param signin: Select operator with string or Statement representation
+        :return: DefineScope object
+        """
+        return DefineScope(self._connection, name, duration, signup, signin)
+
+    def remove_scope(self, name: str) -> Remove:
+        """
+        Remove the scope
+
+        :param name: name of the scope
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="SCOPE", name=name)
+
+    def define_index(self, name: str, table_name: str) -> DefineIndex:
+        """
+        Represents DEFINE INDEX operator
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name for the index
+        :param table_name: name of table to work with
+        :return: DefineINdex object
+        """
+        return DefineIndex(self._connection, name, table_name)
+
+    def remove_index(self, name: str, table_name: str) -> Remove:
+        return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

@@ -7,7 +7,6 @@ from tests.integration_tests.utils import URL, get_random_series
 from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
 
 
-
 class TestUseCases(TestCase):
     connections = []
 
@@ -225,6 +224,37 @@ class TestUseCases(TestCase):
             res = db.remove_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count)
+
+    def test_define_scope_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(6)
+            count = len(db.info()["scopes"])
+            create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
+            select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
+            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["scopes"]), count + 1)
+            res = db.remove_scope(f"scope_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["scopes"]), count)
+
+    def test_define_index_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            ind_count = len(db.user.info()["indexes"])
+            uid = get_random_series(7)
+            db.define_analyzer("ascii").run()
+            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["indexes"]), ind_count + 1)
+            res = db.remove_index(f"index_{uid}", table_name="user").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["indexes"]), ind_count)
+
+    def test_define_failed_no_analyzer(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(8)
+            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("non-exists").run()
+            self.assertTrue(res.is_error(), res)
 
 
 if __name__ == '__main__':

@@ -11,9 +11,9 @@ class Remove(Statement):
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
 
-    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
-    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER")
+    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "SCOPE")
 
     def __init__(self, connection: Connection, table_name: str, type_: str = "TABLE", name: Optional[str] = None):
         if type_ not in Remove._variants:
@@ -30,7 +30,7 @@ class Remove(Statement):
         return [OK]
 
     def _clean_str(self):
-        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER"):
+        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "SCOPE"):
             what = f"{self._type} {self._name}"
             if self._type == "USER":
                 what = f"{what} ON DATABASE"
