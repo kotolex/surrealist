@@ -249,7 +249,7 @@ As it was said, if you need to debug something, stuck in some problem or just wa
 If you specify "INFO" level, then you will see transport operations, which methods were called, which parameters were used.
 For example
 
-**Example 6**
+**Example 7**
 
 ```python
 from surrealist import Surreal
@@ -310,7 +310,7 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 **Note 3:** LQ is associated with connection, where it was created, if you have two or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active
 
-**Example 7**
+**Example 8**
 
 ```python
 from time import sleep
@@ -333,7 +333,7 @@ with surreal.connect() as connection:
 in console, you will get:
 `{'result': {'action': 'CREATE', 'id': 'c2c8952b-b2bc-4d3a-aa68-4609f5818d7c', 'result': {'id': 'person:dik1sm50xr2d5mc7fysi', 'name': 'John', 'surname': 'Doe'}}}`
 
-**Example 8**
+**Example 9**
 
 ```python
 from time import sleep
@@ -362,7 +362,7 @@ If you do not need LQ anymore, call KILL method, with live_id
 
 You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://docs.surrealdb.com/docs/surrealql/statements/live-select#filter-the-live-query)
 
-**Example 9**
+**Example 10**
 
 ```python
 from time import sleep
@@ -416,7 +416,7 @@ DEFINE DATABASE foo CHANGEFEED 1h;
 
 **Note:** date and time of your requests should be strict AFTER date and time of creating `foo` and `reading`
 
-**Example 10**
+**Example 11**
 
 ```python
 from surrealist import Surreal
