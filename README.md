@@ -13,15 +13,15 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * well tested (on the latest Ubuntu, macOS and Windows 10)
  * fully compatible with the latest version of SurrealDB (1.1.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need
- * QL-constructor to explore, generate and use SurrealDB queries (explain, transaction etc.)
+ * iterator to handle big select queries
+ * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
  * http or websocket transport to use
  * always up to date with SurrealDB features and changes
 
 More to come:
  * connections pool
- * iterators
- * define - remove analyzer
  * define - remove table
+ * define - remove field
 
 
 ### Installation ###
@@ -32,6 +32,8 @@ Via pip:
 
 ### Before you start ###
 Please make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
+
+You can find a lot of examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
 ## Transports ##
 First of all, you should know that SurrealDB can work with websocket or http "transports", we chose to support both transports here, 
@@ -138,7 +140,7 @@ Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/su
 
 You can find basic examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
-QL-constructor is a simple, convenient way to create queries, validate them and run it against SurealDB. 
+QL-builder is a simple, convenient way to create queries, validate them and run it against SurealDB. 
 It is simple, readable and can be the way to learn QL
 
 **Example 5**
@@ -160,7 +162,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 ```
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 
-One of the main features of QL-constructor is that using dot you can see all operators available on each level, 
+One of the main features of QL-builder is that using dot you can see all operators available on each level, 
 any modern IDE will show possible operators when you type dot. 
 Thanks to this, you can not only study QL but also gain confidence that you are forming a valid query.
 
@@ -175,6 +177,23 @@ and you will get help from your IDE
 
 If you cannot form your query, you always can use a raw query via `database.raw_query` or `connection.query`
 It is the most efficient way, cause it allows you to do all that is possible if you have permissions.
+
+### Iteration on Select ###
+
+When you expect a lot of data on your select query via QL-builder, you should consider using iterator, it is a simple, lazy and common way to use in python.
+
+Iterator can be used with **next** method or in **for** statement
+
+**Example 6**
+
+```python
+from surrealist import Database
+
+with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db: # connects to Database
+    iterator = db.table("user").select().iter(limit=20) # get an iterator, nothing executes on this line
+    for result in iterator: # here, where actions actually start
+        print(result.count()) # just print count of results, but you cand do anything here
+```
 
 ## Results and RecordID ##
 If the method of connection is not raised, it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.

@@ -1,10 +1,11 @@
 from typing import Tuple
 
-from surrealist.ql.statements.statement import Statement, FinishedStatement
+from surrealist.ql.statements.statement import Statement, FinishedStatement, IterableStatement
 from surrealist.utils import OK
 
 
 class Explain(FinishedStatement):
+    """ Explain is not a child of IterableStatement because it has always only one result"""
     def __init__(self, statement: Statement, full: bool = False):
         super().__init__(statement)
         self._full = full
@@ -23,7 +24,7 @@ class SelectUseExplain:
         return Explain(self, full=True)
 
 
-class Parallel(FinishedStatement, SelectUseExplain):
+class Parallel(IterableStatement, SelectUseExplain):
     def __init__(self, statement: Statement):
         super().__init__(statement)
 
@@ -36,7 +37,7 @@ class SelectUseParallel(SelectUseExplain):
         return Parallel(self)
 
 
-class Timeout(FinishedStatement, SelectUseParallel):
+class Timeout(IterableStatement, SelectUseParallel):
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration
@@ -57,7 +58,7 @@ class SelectUseTimeout(SelectUseParallel):
         return Timeout(self, duration)
 
 
-class Fetch(FinishedStatement, SelectUseTimeout):
+class Fetch(IterableStatement, SelectUseTimeout):
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args
@@ -74,7 +75,7 @@ class SelectUseFetch(SelectUseTimeout):
         return Fetch(self, *args)
 
 
-class Start(FinishedStatement, SelectUseFetch):
+class Start(IterableStatement, SelectUseFetch):
     def __init__(self, statement: Statement, offset: int):
         super().__init__(statement)
         self._offset = offset
@@ -93,7 +94,7 @@ class SelectUseStart(SelectUseFetch):
         return Start(self, offset)
 
 
-class Limit(FinishedStatement, SelectUseStart):
+class Limit(IterableStatement, SelectUseStart):
     def __init__(self, statement: Statement, limit: int):
         super().__init__(statement)
         self._limit = limit
@@ -112,7 +113,7 @@ class SelectUseLimit(SelectUseStart):
         return Limit(self, limit)
 
 
-class OrderByRand(FinishedStatement, SelectUseLimit):
+class OrderByRand(IterableStatement, SelectUseLimit):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -121,7 +122,7 @@ class OrderByRand(FinishedStatement, SelectUseLimit):
         return f"{self._statement._clean_str()} ORDER BY RAND()"
 
 
-class OrderBy(FinishedStatement, SelectUseLimit):
+class OrderBy(IterableStatement, SelectUseLimit):
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._statement = statement
@@ -142,7 +143,7 @@ class SelectUseOrder(SelectUseLimit):
         return OrderByRand(self)
 
 
-class GroupBy(FinishedStatement, SelectUseOrder):
+class GroupBy(IterableStatement, SelectUseOrder):
     def __init__(self, statement: Statement, *args):
         super().__init__(statement)
         self._statement = statement
@@ -155,7 +156,7 @@ class GroupBy(FinishedStatement, SelectUseOrder):
         return f"{self._statement._clean_str()} GROUP BY {what}"
 
 
-class GroupAll(FinishedStatement, SelectUseOrder):
+class GroupAll(IterableStatement, SelectUseOrder):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -172,7 +173,7 @@ class SelectUseGroup(SelectUseOrder):
         return GroupAll(self)
 
 
-class Split(FinishedStatement, SelectUseGroup):
+class Split(IterableStatement, SelectUseGroup):
     def __init__(self, statement: Statement, field: str):
         super().__init__(statement)
         self._statement = statement
@@ -187,7 +188,7 @@ class SelectUseSplit(SelectUseGroup):
         return Split(self, field)
 
 
-class Or(FinishedStatement, SelectUseSplit):
+class Or(IterableStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -203,7 +204,7 @@ class Or(FinishedStatement, SelectUseSplit):
         return f"{self._statement._clean_str()} OR {self._predicate}"
 
 
-class And(FinishedStatement, SelectUseSplit):
+class And(IterableStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -219,7 +220,7 @@ class And(FinishedStatement, SelectUseSplit):
         return f"{self._statement._clean_str()} AND {self._predicate}"
 
 
-class Where(FinishedStatement, SelectUseSplit):
+class Where(IterableStatement, SelectUseSplit):
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -240,7 +241,7 @@ class SelectUseWhere(SelectUseSplit):
         return Where(self, predicate)
 
 
-class WithIndex(FinishedStatement, SelectUseWhere):
+class WithIndex(IterableStatement, SelectUseWhere):
     def __init__(self, statement: Statement, *index_names: str):
         super().__init__(statement)
         self._statement = statement
@@ -253,7 +254,7 @@ class WithIndex(FinishedStatement, SelectUseWhere):
         return f"{self._statement._clean_str()} WITH INDEX {indexes}"
 
 
-class WithNoIndex(FinishedStatement, SelectUseWhere):
+class WithNoIndex(IterableStatement, SelectUseWhere):
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement

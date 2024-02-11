@@ -3,22 +3,26 @@ from typing import Optional, Tuple, Union, List
 from surrealist import Connection
 from surrealist.utils import OK
 from .select_statements import SelectUseIndex
-from .statement import Statement
+from .statement import Statement, IterableStatement
 
 
-class Select(Statement, SelectUseIndex):
+class Select(IterableStatement, SelectUseIndex):
     """
-    Represents SELECT operator, it should be able to use any operators from documentation
+    Represents SELECT operator, it should be able to use any operators from documentation.
+    It can use iterator to traverse results
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
+
+    Iterator example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
     """
 
     def __init__(self, connection: Connection, table_name: Union[str, Statement], *args,
                  alias: Optional[Tuple[str, Union[str, Statement]]] = None,
                  value: Optional[str] = None):
-        super().__init__(connection)
+        self._connection = connection
+        super().__init__(self)
         self._table_name = table_name if isinstance(table_name, str) else f"({table_name._clean_str()})"
         self._args = args
         self._what = ""
