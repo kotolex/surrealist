@@ -11,6 +11,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     create_book = book.create().content({"title": "Title", "author": "author:john"})  # book will relate to author
     counter_inc = counter.update("author_count").set("count +=1")  # increment counter
 
+    # on transactions see https://docs.surrealdb.com/docs/surrealql/transactions
     transaction = db.transaction([create_author, create_book, counter_inc])
     print(transaction)
     # BEGIN TRANSACTION;

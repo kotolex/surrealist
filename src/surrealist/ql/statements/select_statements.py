@@ -6,6 +6,7 @@ from surrealist.utils import OK
 
 class Explain(FinishedStatement):
     """ Explain is not a child of IterableStatement because it has always only one result"""
+
     def __init__(self, statement: Statement, full: bool = False):
         super().__init__(statement)
         self._full = full
@@ -25,8 +26,6 @@ class SelectUseExplain:
 
 
 class Parallel(IterableStatement, SelectUseExplain):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} PARALLEL"

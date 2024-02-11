@@ -3,8 +3,6 @@ from surrealist.utils import OK
 
 
 class Parallel(FinishedStatement):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} PARALLEL"
@@ -37,32 +35,23 @@ class CanUseTimeout(CanUseParallel):
 
 
 class ReturnNone(FinishedStatement, CanUseTimeout):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
-
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN NONE"
 
 
 class ReturnBefore(FinishedStatement, CanUseTimeout):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN BEFORE"
 
 
 class ReturnAfter(FinishedStatement, CanUseTimeout):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN AFTER"
 
 
 class ReturnDiff(FinishedStatement, CanUseTimeout):
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN DIFF"

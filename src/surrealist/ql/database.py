@@ -18,6 +18,8 @@ class Database:
     Represents connected database(in some namespace) to operate on.
     It has features of the database level, including switch to table level. You can use DEFINE/REMOVE, query or
     transactions here, but for simple CRUD or live queries you need to switch to table level
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
 
     def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
@@ -112,6 +114,8 @@ class Database:
     def transaction(self, statements: List[Statement]) -> Transaction:
         """
         Create a transaction object to generate a query or run
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/transactions
 
         :param statements: list of appropriate statements (select, create, delete. etc.)
         :return: Transaction object
@@ -267,6 +271,13 @@ class Database:
         return DefineIndex(self._connection, name, table_name)
 
     def remove_index(self, name: str, table_name: str) -> Remove:
+        """
+        Remove index by name on the table
+
+        :param name: name og the index
+        :param table_name: name of the table
+        :return: Remove object
+        """
         return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
 
     def __repr__(self):

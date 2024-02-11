@@ -83,9 +83,6 @@ class IterableStatement(FinishedStatement):
     Under the hood transform query to SELECT * FROM (initial_query) LIMIT {limit} START AT {current};
     """
 
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
-
     def iter(self, limit: int = 100) -> Iterator:
         """
         Creates and returns a generator object to iterate on big query results

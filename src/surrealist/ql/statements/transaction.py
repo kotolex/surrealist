@@ -9,7 +9,7 @@ class Transaction(Statement):
     """
     Represents TRANSACTION operation, it generates and can run a transaction query
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/begin
+    Refer to: https://docs.surrealdb.com/docs/surrealql/transactions
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/transaction.py
 
@@ -23,7 +23,7 @@ class Transaction(Statement):
         return [OK]
 
     def _clean_str(self) -> str:
-        text = f"BEGIN TRANSACTION;"
+        text = "BEGIN TRANSACTION;"
         between = "\n".join(statement.to_str() for statement in self._actions)
         end = "COMMIT TRANSACTION"
         return f"{text}\n\n{between}\n\n{end}"
