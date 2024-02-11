@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 from surrealist.ql.statements import Create, Update
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam
+from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -39,6 +39,10 @@ class TestDatabase(TestCase):
 
     def test_define_param(self):
         self.assertEqual("DEFINE PARAM $user VALUE john;", DefineParam(None, "user", "john").to_str())
+
+    def test_define_analyzer(self):
+        self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;",
+                         DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").to_str())
 
 
 

@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List, Dict, Union, Any
 
 from surrealist import Surreal, SurrealResult
 from surrealist.ql.statements import Select, Remove
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam
+from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
@@ -202,6 +202,28 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, "", type_="PARAM", name=name)
+
+    def define_analyzer(self, name: str) -> DefineAnalyzer:
+        """
+        Represents DEFINE ANALYZER operator
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name for the analyzer
+        :return: DefineAnalyzer object
+        """
+        return DefineAnalyzer(self._connection, name)
+
+    def remove_analyzer(self, name: str) -> Remove:
+        """
+        Remove the analyzer
+
+        :param name: name of the analzer
+        :return: Remove object
+        """
+        return Remove(self._connection, '', type_="ANALYZER", name=name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

@@ -3,8 +3,9 @@ import time
 from datetime import datetime
 from unittest import TestCase, main
 
-from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
 from tests.integration_tests.utils import URL, get_random_series
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
+
 
 
 class TestUseCases(TestCase):
@@ -213,6 +214,17 @@ class TestUseCases(TestCase):
             res = db.remove_param(f"param_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
+
+    def test_define_analyzer_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(4)
+            count = len(db.info()["analyzers"])
+            res = db.define_analyzer(f"anal_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["analyzers"]), count + 1)
+            res = db.remove_analyzer(f"anal_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["analyzers"]), count)
 
 
 if __name__ == '__main__':
