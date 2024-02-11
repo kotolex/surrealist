@@ -96,3 +96,127 @@ class DefineParam(Statement):
 
     def _clean_str(self):
         return f"DEFINE PARAM ${self._name} VALUE {self._value}"
+
+
+class DefineAnalyzer(Statement):
+    """
+    Represents DEFINE ANALYZER operator
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
+
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    """
+
+    def __init__(self, connection: Connection, name: str):
+        super().__init__(connection)
+        self._name = name
+        self._tokenizers = None
+        self._filters = None
+
+    def tokenizers(self, value: str) -> "DefineAnalyzer":
+        self._tokenizers = value
+        return self
+
+    def filters(self, value: str) -> "DefineAnalyzer":
+        self._filters = value
+        return self
+
+    def validate(self) -> List[str]:
+        return [OK]
+
+    def _clean_str(self):
+        tok = "" if not self._tokenizers else f" TOKENIZERS {self._tokenizers}"
+        filters = "" if not self._filters else f" FILTERS {self._filters}"
+        return f"DEFINE ANALYZER {self._name}{tok}{filters}"
+
+
+class DefineScope(Statement):
+    """
+    Represents DEFINE SCOPE operator
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
+
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    """
+
+    def __init__(self, connection: Connection, name: str, duration: str, signup: Union[str, Statement],
+                 signin: Union[str, Statement]):
+        super().__init__(connection)
+        self._name = name
+        self._duration = duration
+        self._signup = signup if not isinstance(signup, Statement) else f"({signup._clean_str()})"
+        self._signin = signin if not isinstance(signin, Statement) else f"({signin._clean_str()})"
+
+    def validate(self) -> List[str]:
+        if ' ' in self._duration:
+            return ["Wrong duration format, should be like 24h"]
+        return [OK]
+
+    def _clean_str(self):
+        return f"DEFINE SCOPE {self._name} SESSION {self._duration} \nSIGNUP {self._signup} \nSIGNIN {self._signin}"
+
+
+class DefineIndex(Statement):
+    """
+    Represents DEFINE INDEX operator
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    """
+
+    def __init__(self, connection: Connection, name: str, table_name: str):
+        super().__init__(connection)
+        self._name = name
+        self._table_name = table_name
+        self._fields = None
+        self._uni = False
+        self._analyzer = None
+
+    def fields(self, fields: str) -> "DefineIndex":
+        """
+        Represents fields for index, FIELDS operator
+
+        :param fields: fields to index
+        """
+        self._fields = f"FIELDS {fields}"
+        return self
+
+    def columns(self, columns: str) -> "DefineIndex":
+        """
+        Represents fields for index, COLUMNS operator
+
+        :param columns: fields to index
+        """
+        self._fields = f"COLUMNS {columns}"
+        return self
+
+    def unique(self) -> "DefineIndex":
+        """
+        Represents UNIQUE operator
+        """
+        self._analyzer = None
+        self._uni = True
+        return self
+
+    def search_analyzer(self, name: str, use: str = "BM25", highlights: bool = True) -> "DefineIndex":
+        """
+        Represents SEARCH ANALYZER operator
+        """
+        self._uni = False
+        hl = "" if not highlights else " HIGHLIGHTS"
+        self._analyzer = f" SEARCH ANALYZER {name} {use}{hl}"
+        return self
+
+    def validate(self) -> List[str]:
+        if not self._fields:
+            return ["You need to specify FIELDS or COLUMNS"]
+        return [OK]
+
+    def _clean_str(self):
+        add = ""
+        if self._uni:
+            add = " UNIQUE"
+        elif self._analyzer:
+            add = self._analyzer
+        return f"DEFINE INDEX {self._name} ON TABLE {self._table_name} {self._fields}{add}"

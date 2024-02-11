@@ -52,7 +52,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # If you need to select from other select (sub-query), you need to use database, not table
     # SELECT * FROM (SELECT * FROM events WHERE type = 'active') LIMIT 5 PARALLEL;
     sub_query = db.events.select().where("type = 'active'")
-    print(db.select_from(sub_query).limit(5).parallel().to_str())
+    print(db.select_from(sub_query).limit(5).parallel())
 
 
 
