@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Iterator
 
 from surrealist import Connection, SurrealResult
 from surrealist.utils import OK
@@ -75,3 +75,37 @@ class FinishedStatement(Statement):
 
     def _clean_str(self):
         return self._statement._clean_str()
+
+
+class IterableStatement(FinishedStatement):
+    """
+    Represents a statement which can use iterator to get results in an efficient, lazy way.
+    Under the hood transform query to SELECT * FROM (initial_query) LIMIT {limit} START AT {current};
+    """
+
+    def __init__(self, statement: Statement):
+        super().__init__(statement)
+
+    def iter(self, limit: int = 100) -> Iterator:
+        """
+        Creates and returns a generator object to iterate on big query results
+
+        In documentation: url
+
+        Example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
+
+        :param limit: number of records in each iteration, it cannot be smaller than one
+        :return: generator to use in for-statements or with the next method
+        :raise ValueError: if limit less than one
+        """
+        # TODO url
+        if limit < 1:
+            raise ValueError("The limit cannot be smaller than 1")
+        current = 0
+        while True:
+            query = f"SELECT * FROM ({self._clean_str()}) LIMIT {limit} START AT {current};"
+            res = self._connection.query(query)
+            yield res
+            if res.count() < limit:
+                break
+            current += limit

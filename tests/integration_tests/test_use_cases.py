@@ -7,6 +7,7 @@ from tests.integration_tests.utils import URL, get_random_series
 from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
 
 
+
 class TestUseCases(TestCase):
     connections = []
 
@@ -255,6 +256,17 @@ class TestUseCases(TestCase):
             uid = get_random_series(8)
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("non-exists").run()
             self.assertTrue(res.is_error(), res)
+
+    def test_iterator(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            iterator = db.table("user").select().iter(limit=3)
+            count = db.user.count()
+            total = 0
+            for result in iterator:
+                records = result.count()
+                self.assertTrue(records <= 3)
+                total += records
+            self.assertEqual(total, count)
 
 
 if __name__ == '__main__':
