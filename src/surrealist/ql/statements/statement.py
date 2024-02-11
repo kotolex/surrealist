@@ -90,7 +90,7 @@ class IterableStatement(FinishedStatement):
         """
         Creates and returns a generator object to iterate on big query results
 
-        In documentation: url
+        In documentation: https://github.com/kotolex/surrealist/tree/master?tab=readme-ov-file#iteration-on-select
 
         Example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
 
@@ -98,7 +98,6 @@ class IterableStatement(FinishedStatement):
         :return: generator to use in for-statements or with the next method
         :raise ValueError: if limit less than one
         """
-        # TODO url
         if limit < 1:
             raise ValueError("The limit cannot be smaller than 1")
         current = 0

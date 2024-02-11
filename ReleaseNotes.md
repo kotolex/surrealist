@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.2.2 (compatible with SurrealDB version 1.1.1):**
+ - Select query now can use iterator to traverse results, [see ](https://github.com/kotolex/surrealist/tree/master?tab=readme-ov-file#iteration-on-select)
+ - improve documentation and examples
+
+
 **Version 0.2.1 (compatible with SurrealDB version 1.1.1):**
  - Database now can define/remove index, analyzer and scope
  - improve documentation and examples
