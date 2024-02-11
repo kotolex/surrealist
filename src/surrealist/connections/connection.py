@@ -240,11 +240,17 @@ class Connection(ABC):
 
     @abstractmethod
     def authenticate(self, token: str) -> SurrealResult:
-        pass
+        """
+        This method authenticates user with given token.
+        Http connections cannot use it
+        """
 
     @abstractmethod
     def invalidate(self) -> SurrealResult:
-        pass
+        """
+        This method will invalidate the user's session for the current connection
+        Http connections cannot use it
+        """
 
     @abstractmethod
     def let(self, name: str, value) -> SurrealResult:
@@ -404,7 +410,6 @@ class Connection(ABC):
         https://docs.surrealdb.com/docs/integration/http#import
         https://docs.surrealdb.com/docs/cli/import
         """
-        pass
 
     @abstractmethod
     def export(self) -> str:
@@ -418,7 +423,6 @@ class Connection(ABC):
         Refer to: https://docs.surrealdb.com/docs/cli/export/
         :return:
         """
-        pass
 
     @abstractmethod
     def ml_import(self, path) -> SurrealResult:
@@ -433,7 +437,6 @@ class Connection(ABC):
         :param path:
         :return:
         """
-        pass
 
     @abstractmethod
     def ml_export(self, name: str, version: str) -> str:
@@ -447,7 +450,6 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/cli/ml/export
         """
-        pass
 
     def _get_count(self, res) -> int:
         if not res:

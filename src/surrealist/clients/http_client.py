@@ -68,6 +68,15 @@ class HttpClient:
 
     def request(self, method: str, data: Optional[Union[Dict, str, BinaryIO]], path: str = '',
                 type_of_content: str = "JSON") -> HTTPResponse:
+        """
+        Main method to perform all kinds of requests
+
+        :param method: method name
+        :param data: data to send
+        :param path: endpoint
+        :param type_of_content: flag to handle data
+        :return: response to use
+        """
         response = None
         url = f'{self._base_url}{path}'
         options = {'method': method, 'headers': self._headers}
