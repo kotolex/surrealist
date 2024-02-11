@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.2.1 (compatible with SurrealDB version 1.1.1):**
+ - Database now can define/remove index, analyzer and scope
+ - improve documentation and examples
+
+
 **Version 0.2.0 (compatible with SurrealDB version 1.1.1):**
  - QL-constructor added, you can now generate queries and use all features of QL
  - result now has helpers like is_empty, to_dict, id, ids, get
