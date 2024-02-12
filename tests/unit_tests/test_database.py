@@ -2,7 +2,7 @@ from unittest import TestCase, main
 
 from surrealist.ql.statements import Create, Update, Select
 from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
-    DefineIndex
+    DefineIndex, DefineToken
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -58,6 +58,12 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
+
+    def test_define_token(self):
+        text ="""DEFINE TOKEN token_name ON DATABASE 
+TYPE RS256 
+VALUE "value";"""
+        self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").to_str())
 
 
 if __name__ == '__main__':

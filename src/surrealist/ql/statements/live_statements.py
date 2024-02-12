@@ -1,4 +1,4 @@
-from surrealist import SurrealResult
+from surrealist.result import SurrealResult
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 

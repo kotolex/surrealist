@@ -268,6 +268,18 @@ class TestUseCases(TestCase):
                 total += records
             self.assertEqual(total, count)
 
+    def test_define_token_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(8)
+            count = len(db.info()["tokens"])
+            val = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
+            res = db.define_token(f"token_{uid}", "HS512", value=val).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["tokens"]), count + 1)
+            res = db.remove_token(f"token_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["tokens"]), count)
+
 
 if __name__ == '__main__':
     main()

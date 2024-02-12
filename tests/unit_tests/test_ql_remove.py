@@ -22,6 +22,10 @@ class TestRemove(TestCase):
         self.assertEqual("REMOVE INDEX salt ON TABLE person;",
                          Remove(None, "person", type_="INDEX", name="salt").to_str())
 
+    def test_token(self):
+        self.assertEqual("REMOVE TOKEN token ON DATABASE;",
+                         Remove(None, "", type_="TOKEN", name="token").to_str())
+
     def test_wrong_type_failed(self):
         with self.assertRaises(ValueError):
             Remove(None, "person", type_="WRONG", name="salt")

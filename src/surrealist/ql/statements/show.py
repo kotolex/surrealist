@@ -8,7 +8,7 @@ from .statement import Statement
 
 class Show(Statement, ShowUseSince):
     """
-    Represents SHOW CHANGES operator, it should be able to use any operators from documentation
+    Represents SHOW CHANGES statement, it should be able to use any statements from documentation
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/show
 

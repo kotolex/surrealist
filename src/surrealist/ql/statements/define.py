@@ -7,7 +7,7 @@ from surrealist.utils import OK
 
 class DefineEvent(Statement):
     """
-    Represents DEFINE EVENT operator
+    Represents DEFINE EVENT statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
 
@@ -24,7 +24,7 @@ class DefineEvent(Statement):
 
     def when(self, predicate: str) -> "DefineEvent":
         """
-        Represents condition for event, WHEN operator
+        Represents condition for event, WHEN statement
 
         :param predicate: condition for event
         """
@@ -41,7 +41,7 @@ class DefineEvent(Statement):
 
 class DefineUser(Statement):
     """
-    Represents DEFINE USER operator
+    Represents DEFINE USER statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
 
@@ -79,7 +79,7 @@ class DefineUser(Statement):
 
 class DefineParam(Statement):
     """
-    Represents DEFINE PARAM operator
+    Represents DEFINE PARAM statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
 
@@ -100,7 +100,7 @@ class DefineParam(Statement):
 
 class DefineAnalyzer(Statement):
     """
-    Represents DEFINE ANALYZER operator
+    Represents DEFINE ANALYZER statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
 
@@ -132,7 +132,7 @@ class DefineAnalyzer(Statement):
 
 class DefineScope(Statement):
     """
-    Represents DEFINE SCOPE operator
+    Represents DEFINE SCOPE statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
 
@@ -158,7 +158,7 @@ class DefineScope(Statement):
 
 class DefineIndex(Statement):
     """
-    Represents DEFINE INDEX operator
+    Represents DEFINE INDEX statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
 
@@ -175,7 +175,7 @@ class DefineIndex(Statement):
 
     def fields(self, fields: str) -> "DefineIndex":
         """
-        Represents fields for index, FIELDS operator
+        Represents fields for index, FIELDS statement
 
         :param fields: fields to index
         """
@@ -184,7 +184,7 @@ class DefineIndex(Statement):
 
     def columns(self, columns: str) -> "DefineIndex":
         """
-        Represents fields for index, COLUMNS operator
+        Represents fields for index, COLUMNS statement
 
         :param columns: fields to index
         """
@@ -193,7 +193,7 @@ class DefineIndex(Statement):
 
     def unique(self) -> "DefineIndex":
         """
-        Represents UNIQUE operator
+        Represents UNIQUE statement
         """
         self._analyzer = None
         self._uni = True
@@ -201,7 +201,7 @@ class DefineIndex(Statement):
 
     def search_analyzer(self, name: str, use: str = "BM25", highlights: bool = True) -> "DefineIndex":
         """
-        Represents SEARCH ANALYZER operator
+        Represents SEARCH ANALYZER statement
         """
         self._uni = False
         hl = "" if not highlights else " HIGHLIGHTS"
@@ -220,3 +220,25 @@ class DefineIndex(Statement):
         elif self._analyzer:
             add = self._analyzer
         return f"DEFINE INDEX {self._name} ON TABLE {self._table_name} {self._fields}{add}"
+
+
+class DefineToken(Statement):
+    """
+    Represents DEFINE TOKEN statement
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
+
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    """
+
+    def __init__(self, connection: Connection, name: str, token_type: str, value: str):
+        super().__init__(connection)
+        self._name = name
+        self._type = token_type
+        self._value = value
+
+    def validate(self) -> List[str]:
+        return [OK]
+
+    def _clean_str(self):
+        return f'DEFINE TOKEN {self._name} ON DATABASE \nTYPE {self._type} \nVALUE "{self._value}"'

@@ -8,7 +8,7 @@ from .statement import Statement
 
 class Delete(Statement, CanUseWhere):
     """
-    Represents DELETE operator, it should be able to use any operators from documentation
+    Represents DELETE statement, it should be able to use any statements from documentation
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
 
@@ -31,7 +31,7 @@ class Delete(Statement, CanUseWhere):
 
     def only(self) -> "Delete":
         """
-        Include ONLY operator for the query
+        Include ONLY statement for the query
         """
         self._only = True
         return self

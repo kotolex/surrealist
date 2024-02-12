@@ -11,6 +11,10 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.person)  # Table(name=person)
     print(db.table("person"))  # Table(name=person)
 
+    # database can use RETURN statement
+    # Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
+    print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);
+
     # DEFINE examples below you can see https://docs.surrealdb.com/docs/surrealql/statements/define/overview
 
     # on database object we can use DEFINE EVENT with sub-query
@@ -62,3 +66,13 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 
     # we can remove index
     print(db.remove_index("userNameIndex", table_name="user"))  # REMOVE INDEX userNameIndex ON TABLE user;
+
+    # on database object we can DEFINE TOKEN
+    # DEFINE TOKEN token_name ON DATABASE
+    # TYPE HS512
+    # VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz";
+    token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz"
+    print(db.define_token("token_name", "HS512", value=token_value))
+
+    # we can remove token by name
+    print(db.remove_token("token_name"))  # REMOVE TOKEN token_name ON DATABASE;

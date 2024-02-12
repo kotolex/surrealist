@@ -9,7 +9,7 @@ from surrealist.utils import OK
 
 class Insert(Statement, InsertUseDuplicate):
     """
-    Represents INSERT INTO operator, it should be able to use any operators from documentation
+    Represents INSERT INTO statement, it should be able to use any statements from documentation
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 

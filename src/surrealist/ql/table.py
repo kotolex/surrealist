@@ -1,6 +1,6 @@
 from typing import Optional, Callable, Dict, Tuple, Union
 
-from surrealist import Connection, SurrealResult
+from surrealist.connections import Connection
 from surrealist.ql.statements.create import Create
 from surrealist.ql.statements.delete import Delete
 from surrealist.ql.statements.insert import Insert
@@ -10,12 +10,13 @@ from surrealist.ql.statements.select import Select
 from surrealist.ql.statements.show import Show
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update import Update
+from surrealist.result import SurrealResult
 
 
 class Table:
     """
     Represents a table of the database including not (yet) existing one.
-    Can use only operators of the table level (CRUD).
+    Can use only statements of the table level (CRUD).
     If you need a raw query, DEFINE or transactions - you need database level
 
     Please refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#methods-and-query-language
@@ -57,7 +58,7 @@ class Table:
     def select(self, *args, alias: Optional[Tuple[str, Union[str, Statement]]] = None,
                value: Optional[str] = None) -> Select:
         """
-        Represents SELECT operator and its abilities as refer here:
+        Represents SELECT statement and its abilities as refer here:
         https://docs.surrealdb.com/docs/surrealql/statements/select
 
         Example: table.select('id', 'name').run()
@@ -65,7 +66,7 @@ class Table:
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
 
         :param alias: pairs of names and values
-        :param value: on exists add VALUE operator
+        :param value: on exists an add VALUE statement
         :param args: which fields to select, if no fields or "*" - selects all
         :return: Select object
         """
@@ -73,7 +74,7 @@ class Table:
 
     def create(self, record_id: Optional[str] = None) -> Create:
         """
-        Represent CREATE operator and its abilities as refer here:
+        Represent CREATE statement and its abilities as refer here:
         https://docs.surrealdb.com/docs/surrealql/statements/create
 
         Example:
@@ -88,7 +89,7 @@ class Table:
 
     def show_changes(self) -> Show:
         """
-        Represents SHOW CHANGES operator for the Change Feed
+        Represents SHOW CHANGES statement for the Change Feed
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/show
 
@@ -102,7 +103,7 @@ class Table:
 
     def delete(self, record_id: Optional[str] = None) -> Delete:
         """
-        Represent DELETE operator
+        Represent DELETE statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
 
@@ -141,7 +142,7 @@ class Table:
 
     def live(self, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
         """
-        Represents LIVE operator for a live query
+        Represents LIVE statement for a live query
 
         Example:
         db.person.live(func).alias("first_name", "NAME").where("age > 22").run()
@@ -160,7 +161,7 @@ class Table:
 
     def kill(self, live_id: str) -> SurrealResult:
         """
-        Represents KILL operator, for killing a live query
+        Represents KILL statement, for killing a live query
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
 
@@ -171,7 +172,7 @@ class Table:
 
     def insert(self, *args) -> Insert:
         """
-        Represent INSERT INTO operator.
+        Represent INSERT INTO statement.
         Arguments here are:
           - the only one which is Dict or List or Statement
 

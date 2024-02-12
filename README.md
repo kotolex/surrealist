@@ -162,8 +162,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 ```
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 
-One of the main features of QL-builder is that using dot you can see all operators available on each level, 
-any modern IDE will show possible operators when you type dot. 
+One of the main features of QL-builder is that using dot you can see all statements available on each level, 
+any modern IDE will show possible statements when you type dot. 
 Thanks to this, you can not only study QL but also gain confidence that you are forming a valid query.
 
 for example
@@ -393,6 +393,33 @@ in console, you will get:
 
 Pay attention — there is no info about Jane in events we get from LQ, cause Jane is younger than 18.
 
+Same example with QL-builder:
+
+```python
+from time import sleep
+
+from surrealist import Database
+
+
+# you need callback, a function which will get dictionary and do something with it
+def call_back(response: dict) -> None:
+    print(response)
+
+
+# you need websockets for a live query
+with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+    table = db.table("ws_person")
+    # here we subscribe and specify a custom query for persons
+    result = table.live(callback=call_back).where("age > 18").run()
+    live_uid = result.result # live_id is a LQ id, we need it to kill a query in future
+    # here we create 2 records but only the second one is what we look for
+    table.create().content({"age": 16, "name": "Jane"}).run()  # Jane is too young for us :)
+    table.create().content({"age": 28, "name": "John"}).run()  # John older than 18, so wee need this event
+    sleep(0.1)
+    result = table.kill(live_uid)  # we kill LQ, no more events to come
+```
+
+
 ## Change Feeds ##
 Changes in the database, such as creating, updating, or deleting, are recorded and played back in another channel. 
 This channel functions as a stream of messages.
@@ -435,7 +462,24 @@ with surreal.connect() as connection:
 ```
 in the console, you will see
 `[{'changes': [{'update': {'id': 'reading:w0useg3n9bkne6mei63f', 'story': 'long long time ago'}}], 'versionstamp': 851968}]`
-`
+
+Same example via QL-builder:
+
+**Example 12**
+
+```python
+from surrealist import Database
+
+
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root')) as db:
+    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table was created
+    res = db.table("reading").show_changes().since(tm).run()
+    print(res.result) # it will be [] cause no events happen
+    # now we add one record
+    db.table("reading").create().set(story="long long time ago").run()
+    res = db.table("reading").show_changes().since(tm).run()
+```
+
 
 ## Threads and thread-safety ##
 This library was made for using in multithreading environments, remember some rules of thumb:
@@ -444,6 +488,9 @@ This library was made for using in multithreading environments, remember some ru
  - it is OK to use connection in different threads, but it can be your bottleneck, as there is only one connection to DB
  - with many queries and high load, you should consider using more than one connection, but not too many of them. The number of connections equal to the number of CPU-cores is the best choice
  - remember to properly close connections
+
+All objects, including connections, statements, database are thread-safe,
+so you can use all library features in different threads.
 
 ## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and

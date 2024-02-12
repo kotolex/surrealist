@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.ql.statements.create_statements import CreateUseSetContent
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
@@ -8,7 +8,7 @@ from surrealist.utils import OK
 
 class Create(Statement, CreateUseSetContent):
     """
-    Represents CREATE operator, it should be able to use any operators from documentation
+    Represents CREATE statement, it should be able to use any statements from documentation
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/create
 
@@ -30,7 +30,7 @@ class Create(Statement, CreateUseSetContent):
 
     def only(self) -> "Create":
         """
-        Include ONLY operator for the query
+        Include ONLY statement for the query
         """
         self._only = True
         return self

@@ -1,13 +1,15 @@
 import logging
 from typing import Optional, Tuple, List, Dict, Union, Any
 
-from surrealist import Surreal, SurrealResult
 from surrealist.ql.statements import Select, Remove
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
-                                             DefineIndex)
+                                             DefineIndex, DefineToken)
+from surrealist.ql.statements.returns import Return
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
+from surrealist.result import SurrealResult
+from surrealist.surreal import Surreal
 from surrealist.utils import DEFAULT_TIMEOUT
 
 logger = logging.getLogger("databaseQL")
@@ -94,6 +96,19 @@ class Database:
         logger.info("Query for db %s", self._database)
         return self._connection.query(query)
 
+    def returns(self, query: str) -> Return:
+        """
+        Return result of the query
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param query: string query to execute
+        :return: Return object
+        """
+        return Return(self._connection, query)
+
     def __getattr__(self, item) -> Table:
         """
         We actually need this to use dot as the switch to table level as "db.person" instead of "db.table("person")"
@@ -130,7 +145,7 @@ class Database:
         :param select: Select object
         :param args: which fields to select, if no fields or "*" - selects all
         :param alias: pairs of names and values
-        :param value: on exists add VALUE operator
+        :param value: on exists add VALUE statement
         :return: Select object
         """
         return Select(self._connection, select, *args, alias=alias, value=value)
@@ -187,7 +202,7 @@ class Database:
 
     def define_param(self, name: str, value: Any) -> DefineParam:
         """
-        Represents DEFINE PARAM operator
+        Represents DEFINE PARAM statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
 
@@ -210,7 +225,7 @@ class Database:
 
     def define_analyzer(self, name: str) -> DefineAnalyzer:
         """
-        Represents DEFINE ANALYZER operator
+        Represents DEFINE ANALYZER statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
 
@@ -233,7 +248,7 @@ class Database:
     def define_scope(self, name: str, duration: str, signup: Union[str, Statement],
                      signin: Union[str, Statement]) -> DefineScope:
         """
-        Represents DEFINE SCOPE operator
+        Represents DEFINE SCOPE statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
 
@@ -241,8 +256,8 @@ class Database:
 
         :param name: name for the new scope
         :param duration: session duration, like 24h
-        :param signup: Create operator with string or Statement representation
-        :param signin: Select operator with string or Statement representation
+        :param signup: Create statement with string or Statement representation
+        :param signin: Select statement with string or Statement representation
         :return: DefineScope object
         """
         return DefineScope(self._connection, name, duration, signup, signin)
@@ -258,7 +273,7 @@ class Database:
 
     def define_index(self, name: str, table_name: str) -> DefineIndex:
         """
-        Represents DEFINE INDEX operator
+        Represents DEFINE INDEX statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
 
@@ -279,6 +294,30 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
+
+    def define_token(self, name: str, token_type: str, value: str) -> DefineToken:
+        """
+        Represents DEFINE TOKEN statement
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name for the token
+        :param token_type: type of the token, for example, RS256
+        :param value: value of the token
+        :return: DefineINdex object
+        """
+        return DefineToken(self._connection, name, token_type, value)
+
+    def remove_token(self, name: str) -> Remove:
+        """
+        Remove token by name for the database
+
+        :param name: name of the token
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="TOKEN", name=name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

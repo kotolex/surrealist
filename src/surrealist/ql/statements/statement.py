@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import List, Iterator
 
-from surrealist import Connection, SurrealResult
+from surrealist.connections import Connection
+from surrealist.result import SurrealResult
 from surrealist.utils import OK
 
 
 class Statement(ABC):
     """
-    Parent for all statements(QL operators)
+    Parent for all statements(QL statements)
     """
 
     def __init__(self, connection: Connection):

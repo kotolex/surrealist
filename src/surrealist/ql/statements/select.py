@@ -8,7 +8,7 @@ from .statement import Statement, IterableStatement
 
 class Select(IterableStatement, SelectUseIndex):
     """
-    Represents SELECT operator, it should be able to use any operators from documentation.
+    Represents SELECT statement, it should be able to use any statements from documentation.
     It can use iterator to traverse results
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
@@ -45,22 +45,23 @@ class Select(IterableStatement, SelectUseIndex):
 
     def by_id(self, record_id: str) -> "Select":
         """
-        Delete table_name:record_id
-        :param record_id: id of the record to delete
+        Select table_name:record_id
+
+        :param record_id: id of the record to select
         """
         self._from = f"{self._table_name}:{record_id}"
         return self
 
     def only(self) -> "Select":
         """
-        Include ONLY operator for the query
+        Include ONLY statement for the query
         """
         self._only = True
         return self
 
     def omit(self, *fields: Tuple[str]) -> "Select":
         """
-        Include OMIT operator for the query
+        Include OMIT statement for the query
         :param fields: fields to omit
         """
         self._omit = fields

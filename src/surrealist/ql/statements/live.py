@@ -1,14 +1,15 @@
 from typing import List, Callable
 
-from surrealist import Connection, SurrealResult
+from surrealist.connections import Connection
 from surrealist.ql.statements.live_statements import LiveUseWhere
 from surrealist.ql.statements.statement import Statement
+from surrealist.result import SurrealResult
 from surrealist.utils import OK
 
 
 class Live(Statement, LiveUseWhere):
     """
-    Represents LIVE SELECT operator, it should be able to use any operators from documentation
+    Represents LIVE SELECT statement, it should be able to use any statements from documentation
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
 
