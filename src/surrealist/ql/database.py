@@ -4,6 +4,7 @@ from typing import Optional, Tuple, List, Dict, Union, Any
 from surrealist.ql.statements import Select, Remove
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
                                              DefineIndex, DefineToken)
+from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.transaction import Transaction
@@ -318,6 +319,19 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, "", type_="TOKEN", name=name)
+
+    def relate(self, value: str) -> Relate:
+        """
+        Represents RELATE statement, it should be able to use any statements from documentation
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/relate
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_relate_examples.py
+
+        :param value: relate representation, see examples
+        :return: Relate object
+        """
+        return Relate(self._connection, value=value)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"
