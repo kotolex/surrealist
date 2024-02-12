@@ -3,9 +3,8 @@ import time
 from datetime import datetime
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, get_random_series
 from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
-
+from tests.integration_tests.utils import URL, get_random_series
 
 
 class TestUseCases(TestCase):
@@ -279,6 +278,13 @@ class TestUseCases(TestCase):
             res = db.remove_token(f"token_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["tokens"]), count)
+
+    def test_define_relate(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.relate("author:john->write->ws_article:main").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.get("in"), "author:john")
+            self.assertEqual(res.get("out"), "ws_article:main")
 
 
 if __name__ == '__main__':

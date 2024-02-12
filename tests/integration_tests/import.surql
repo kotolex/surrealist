@@ -196,9 +196,11 @@ UPDATE violet:bsrx1nzm3053jlr3hxvs CONTENT { id: violet:bsrx1nzm3053jlr3hxvs };
 -- TABLE DATA: ws_article
 -- ------------------------------
 
+UPDATE ws_article:main CONTENT { author: author:john, id: ws_article:main, text: 'Text' };
 
 -- ------------------------------
 -- TRANSACTION
 -- ------------------------------
 
 COMMIT TRANSACTION;
+
