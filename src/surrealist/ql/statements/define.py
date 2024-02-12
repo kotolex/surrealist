@@ -114,10 +114,16 @@ class DefineAnalyzer(Statement):
         self._filters = None
 
     def tokenizers(self, value: str) -> "DefineAnalyzer":
+        """
+        Represents TOKENIZERS statement
+        """
         self._tokenizers = value
         return self
 
     def filters(self, value: str) -> "DefineAnalyzer":
+        """
+        Represents FILTERS statement
+        """
         self._filters = value
         return self
 
