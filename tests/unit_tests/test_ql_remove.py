@@ -5,7 +5,7 @@ from surrealist.ql.statements.remove import Remove
 
 class TestRemove(TestCase):
     def test_default(self):
-        self.assertEqual("REMOVE TABLE person;", Remove(None, "person").to_str())
+        self.assertEqual("REMOVE TABLE person IF EXISTS;", Remove(None, "person").to_str())
 
     def test_param(self):
         self.assertEqual("REMOVE PARAM $salt;", Remove(None, "person", type_="PARAM", name="salt").to_str())

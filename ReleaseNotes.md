@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.2.4 (compatible with SurrealDB version 1.2.0):**
+ - using IF EXISTS in all tables removing
+ - improve documentation
+ - add some tests for string::semver
+
 **Version 0.2.3 (compatible with SurrealDB version 1.1.1):**
  - database now can use RELATE, RETURN, DEFINE TOKEN
  - improve documentation and examples

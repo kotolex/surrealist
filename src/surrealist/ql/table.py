@@ -119,8 +119,10 @@ class Table:
 
     def delete_all(self) -> SurrealResult:
         """
-        Deletes all records at the database.
+        Deletes all records at the database and returns nothing.
+        If you need to get back all data ot id's - use query builder or raw_query on database level.
         This action does not remove table, just records in it.
+        If you need to delete table itself - use **drop** method
 
         :return: result with [] as a response
         """
@@ -128,7 +130,9 @@ class Table:
 
     def drop(self) -> SurrealResult:
         """
-        Fully removes table with all records in it
+        Fully removes table with all records in it.
+        If you need to just delete all records and keep table - use **delete_all** method
+
         :return: result of response
         """
         return Remove(self._connection, self._name).run()
@@ -136,6 +140,8 @@ class Table:
     def remove(self) -> SurrealResult:
         """
         Fully removes table with all records in it
+        If you need to just delete all records and keep table - use **delete_all** method
+
         :return: result of response
         """
         return self.drop()
@@ -161,7 +167,7 @@ class Table:
 
     def kill(self, live_id: str) -> SurrealResult:
         """
-        Represents KILL statement, for killing a live query
+        Represents a KILL statement, for killing a live query
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
 

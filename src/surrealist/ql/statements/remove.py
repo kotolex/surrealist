@@ -36,6 +36,8 @@ class Remove(Statement):
                 what = f"{what} ON DATABASE"
             if self._type == "PARAM":
                 what = f"{self._type} ${self._name}"
+            if self._type == "TABLE":
+                what = f"{what} IF EXISTS"
         else:
             what = f"{self._type} {self._name} ON TABLE {self._table_name}"
         return f"REMOVE {what}"
