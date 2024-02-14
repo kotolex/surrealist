@@ -1,8 +1,8 @@
 import logging
 import random
-from string import ascii_lowercase
-from pathlib import Path
 import sys
+from pathlib import Path
+from string import ascii_lowercase
 
 TESTS = Path(__file__).parent.parent
 SRC = TESTS.parent / "src"
@@ -21,8 +21,6 @@ file_path = Path(__file__).parent / "import.surql"
 db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
 with db.connect() as connection:
     connection.import_data(file_path)
-    res = connection.query("DEFINE DATABASE foo CHANGEFEED 1h;")
-    assert not res.is_error()
 
 
 def get_random_series(length: int) -> str:

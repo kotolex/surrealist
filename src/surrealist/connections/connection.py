@@ -210,7 +210,7 @@ class Connection(ABC):
         :return: result of the query
         """
         logger.info("Query-Operation: REMOVE. Table name %s", table_name)
-        return self.query(f"REMOVE TABLE {table_name};")
+        return self.query(f"REMOVE TABLE {table_name} IF EXISTS;")
 
     @connected
     def show_changes(self, table_name: str, since: str, limit: int = 10) -> SurrealResult:
