@@ -2,7 +2,7 @@
 
 Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro)
 
-It is blocking and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
+It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
 Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.12)
 
@@ -237,6 +237,8 @@ ws_connection.select("person", record_id="`8424486b-85b3-4448-ac8d-5d51083391c7`
 ```
 otherwise, you can't find your record
 
+**Important note for UTF-8:** record_id can have only A-Z, a-z letters, if you want to use any other UTF-8 letters you have to use backticks "`"!
+
 **Note:** record_id parameter of methods is only concatenated with table_name and colon, so
 ws_connection.select("person", record_id="john") under the hood became
 ws_connection.select("person:john"), but no other logic performed. Do not expect we specified "`" for you.
@@ -307,6 +309,8 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 
 **Note 3:** LQ is associated with connection, where it was created, if you have two or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active
+
+**Note 4:** LQ is stop working after calling REMOVE TABLE for table it listens on. This will be fixed in future SurrealDB versions
 
 **Example 8**
 

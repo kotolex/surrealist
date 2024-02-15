@@ -17,7 +17,7 @@ logger = getLogger("websocket_client")
 
 class WebSocketClient:
     """
-    Blocking a thread-safe client to work with websockets, always wait a response for message, comparing by id (uuid).
+    Synchronous thread-safe client to work with websockets, always wait a response for message, comparing by id (uuid).
     Every client creates at least two threads (in and out)
     """
 

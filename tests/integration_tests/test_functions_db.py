@@ -1,8 +1,7 @@
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL
 from surrealist import Surreal
-
+from tests.integration_tests.utils import URL
 
 names = [
     ("array::add", '["one", "two"], "three"', ['one', 'two', 'three']),
@@ -274,6 +273,28 @@ variables = [
     "$event",
 ]
 
+constants = [
+    ("MATH::E", 2.718281828459045),
+    ("MATH::FRAC_1_PI", 0.3183098861837907),
+    ("MATH::FRAC_1_SQRT_2", 0.7071067811865476),
+    ("MATH::FRAC_2_PI", 0.6366197723675814),
+    ("MATH::FRAC_2_SQRT_PI", 1.1283791670955126),
+    ("MATH::FRAC_PI_2", 1.5707963267948966),
+    ("MATH::FRAC_PI_3", 1.0471975511965979),
+    ("MATH::FRAC_PI_4", 0.7853981633974483),
+    ("MATH::FRAC_PI_6", 0.5235987755982989),
+    ("MATH::FRAC_PI_8", 0.39269908169872414),
+    ("MATH::LN_10", 2.302585092994046),
+    ("MATH::LN_2", 0.6931471805599453),
+    ("MATH::LOG10_2", 0.3010299956639812),
+    ("MATH::LOG10_E", 0.4342944819032518),
+    ("MATH::LOG2_E", 1.4426950408889634),
+    ("MATH::LOG2_10", 3.321928094887362),
+    ("MATH::PI", 3.141592653589793),
+    # ("MATH::SQRT_2", 1.4142135623730951), TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/3511
+    ("MATH::TAU", 6.283185307179586),
+]
+
 
 class TestInnerFunctions(TestCase):
     def test_functions(self):
@@ -300,6 +321,15 @@ class TestInnerFunctions(TestCase):
                     query = f"RETURN {var};"
                     res = conn.query(query)
                     self.assertFalse(res.is_error(), res)
+
+    def test_constants(self):
+        with Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True).connect() as conn:
+            for const, expected in constants:
+                with self.subTest(f"constant {const}"):
+                    query = f"RETURN {const};"
+                    res = conn.query(query)
+                    self.assertFalse(res.is_error(), res)
+                    self.assertEqual(res.result, expected)
 
 
 if __name__ == '__main__':

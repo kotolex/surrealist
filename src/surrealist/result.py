@@ -1,7 +1,7 @@
 import json
 from typing import Optional, Union, Dict, List, Any
 
-from surrealist.errors import TooManyNestedLevelsError
+from surrealist.errors import TooManyNestedLevelsError, ResultHasNoValuesError
 from surrealist.utils import OK, ERR, HTTP_OK
 
 
@@ -97,9 +97,37 @@ class SurrealResult:
             result = [e.get("id") if isinstance(e, Dict) else None for e in self.result]
         return result
 
+    def first(self):
+        """
+        Returns the first element of the result if it is a list. Otherwise, returns element itself, except when a result
+        is empty
+
+        :return: first element of the result, or result itself
+        :raise ResultHasNoValuesError: if result is empty (None, [], {}, '')
+        """
+        if self.count() < 1:
+            raise ResultHasNoValuesError("Cant get first on an empty result")
+        if isinstance(self.result, List):
+            return self.result[0]
+        return self.result
+
+    def last(self):
+        """
+        Returns the last element of the result if it is a list. Otherwise, returns element itself, except when a result
+        is empty
+
+        :return: last element of the result, or result itself
+        :raise ResultHasNoValuesError: if result is empty (None, [], {}, '')
+        """
+        if self.count() < 1:
+            raise ResultHasNoValuesError("Cant get first on an empty result")
+        if isinstance(self.result, List):
+            return self.result[-1]
+        return self.result
+
     def get(self, field_name: str, default: Optional[Any] = None) -> Any:
         """
-        Tries to get value by field name, will work with dict of only dict in list, in all other cases returns default
+        Tries to get value by field name, will work with dict or only dict in a list, in all other cases returns default
 
         Examples:
         SurrealResult(result={"a":1}).get("a") == 1
