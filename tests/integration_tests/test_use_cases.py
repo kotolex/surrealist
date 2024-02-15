@@ -286,6 +286,18 @@ class TestUseCases(TestCase):
             self.assertEqual(res.get("in"), "author:john")
             self.assertEqual(res.get("out"), "ws_article:main")
 
+    # def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
+    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
+    #         # CREATE a:1;
+    #         # CREATE b:1 SET link = a:1, num = 1;
+    #         # SELECT link.* FROM b;
+    #         # SELECT link.* FROM b WHERE num = 1;
+    #         db.table("a").create(record_id=1).run()
+    #         db.table("b").create(record_id=1).set(link="a:1", num=1).run()
+    #         res1 = db.table("b").select("link.*").run().result
+    #         res2 = db.table("b").select("link.*").where("num = 1").run().result
+    #         self.assertEqual(res1, res2)
+
 
 if __name__ == '__main__':
     main()
