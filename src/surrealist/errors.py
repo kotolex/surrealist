@@ -66,3 +66,9 @@ class TooManyNestedLevelsError(PySurrealError):
     Raises when str or json cant handle the object because of too deep nesting and recursion limit in python
     See documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python
     """
+
+
+class ResultHasNoValuesError(PySurrealError):
+    """
+    Raises on an attempt to get data, but a result is empty or does not contain that data (field)
+    """

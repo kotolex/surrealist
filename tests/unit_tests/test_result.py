@@ -1,5 +1,6 @@
 from unittest import TestCase, main
 
+from surrealist import ResultHasNoValuesError
 from surrealist.result import SurrealResult, to_result
 
 params = (
@@ -141,6 +142,28 @@ class TestResult(TestCase):
         self.assertEqual(SurrealResult(result=[{"a": 1}]).get("b"), None)
         self.assertEqual(SurrealResult(result=[{"a": 1}, {"a": 2}]).get("a"), None)
         self.assertEqual(SurrealResult(result="token").get("a"), None)
+
+    def test_first_failed_no_result(self):
+        with self.assertRaises(ResultHasNoValuesError):
+            SurrealResult(result=[]).first()
+
+    def test_last_failed_no_result(self):
+        with self.assertRaises(ResultHasNoValuesError):
+            SurrealResult(result=None).last()
+
+    def test_first(self):
+        self.assertEqual(1, SurrealResult(result=1).first())
+        self.assertEqual("text", SurrealResult(result="text").first())
+        self.assertEqual({"text": "text"}, SurrealResult(result={"text": "text"}).first())
+        self.assertEqual({"text": "text"}, SurrealResult(result=[{"text": "text"}]).first())
+        self.assertEqual(1, SurrealResult(result=[1, 2]).first())
+
+    def test_last(self):
+        self.assertEqual(1, SurrealResult(result=1).last())
+        self.assertEqual("text", SurrealResult(result="text").last())
+        self.assertEqual({"text": "text"}, SurrealResult(result={"text": "text"}).last())
+        self.assertEqual({"text": "text"}, SurrealResult(result=[{"text": "text"}]).last())
+        self.assertEqual(2, SurrealResult(result=[1, 2]).last())
 
 
 if __name__ == '__main__':
