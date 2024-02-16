@@ -64,6 +64,10 @@ class Statement(ABC):
 
 
 class FinishedStatement(Statement):
+    """
+    Represents specific statement
+    """
+
     def __init__(self, statement: Statement):
         self._connection = statement._connection
         super().__init__(self._connection)

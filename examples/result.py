@@ -30,3 +30,7 @@ print(result.count())  # 2
 # print(result.id)  # will raise exception, cause cant get single id from multiple records
 print(result.ids)  # ['author:john', 'author:jane']
 print(result.get("title"))  # None, cause get method cant handle multiple records
+
+result = SurrealResult(result=[{"id": "author:john", "title": "Book"}, {"id": "author:jane", "title": "Other"}])
+print(result.first()["id"])  # author:john
+print(result.last()["id"])  # author:jane

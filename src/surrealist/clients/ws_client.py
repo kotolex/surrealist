@@ -146,8 +146,8 @@ class WebSocketClient:
     def _get_by_id(self, id_) -> Dict:
         try:
             result = self._messages[id_].get(timeout=self._timeout)
-        except Empty:
-            raise TimeoutError(f"Time exceeded: {self._timeout} seconds, no response received")
+        except Empty as exc:
+            raise TimeoutError(f"Time exceeded: {self._timeout} seconds, no response received") from exc
         finally:
             del self._messages[id_]
         return result

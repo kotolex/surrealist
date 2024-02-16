@@ -67,7 +67,7 @@ class HttpClient:
         return self.request("PATCH", data, path)
 
     def request(self, method: str, data: Optional[Union[Dict, str, BinaryIO]], path: str = '',
-                type_of_content: str = "JSON") -> HTTPResponse:
+                type_of_content: str = "JSON") -> Union[HTTPResponse, HTTPError]:
         """
         Main method to perform all kinds of requests
 

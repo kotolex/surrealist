@@ -212,7 +212,7 @@ if result.is_error():
     raise ValueError("Got error")
 ```
 
-Besides, a result object has helper methods is_empty, id, ids, get to work with response of SurrealDB.
+Besides, a result object has helper methods **is_empty**, **id**, **ids**, **get**, **first**, **last** to work with response of SurrealDB.
 
 You need to read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
 
