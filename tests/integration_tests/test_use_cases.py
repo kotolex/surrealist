@@ -286,6 +286,26 @@ class TestUseCases(TestCase):
             self.assertEqual(res.get("in"), "author:john")
             self.assertEqual(res.get("out"), "ws_article:main")
 
+    # def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
+    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
+    #         db.table("a").create(record_id=1).run()
+    #         db.table("b").create(record_id=1).set(link="a:1", num=1).run()
+    #         res1 = db.table("b").select("link.*").run().result
+    #         res2 = db.table("b").select("link.*").where("num = 1").run().result
+    #         self.assertEqual(res1, res2)
+    #
+    # def test_bug_index_cant_use_datetime(self):  # https://github.com/surrealdb/surrealdb/issues/2939
+    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
+    #         db.define_index("idx_first", table_name="series").columns("f_aired")
+    #         r = db.table("series").select("id, f_aired").where('f_aired > "2024-10-01T00:00:00Z"').explain().run()
+    #         self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
+    #
+    # def test_bug_index_unsupport_uuid(self):  # https://github.com/surrealdb/surrealdb/issues/2939
+    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
+    #         r = db.table("sessions").select().where(
+    #             'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
+    #         self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
+
 
 if __name__ == '__main__':
     main()

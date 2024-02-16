@@ -72,7 +72,7 @@ class Table:
         """
         return Select(self._connection, self.name, *args, alias=alias, value=value)
 
-    def create(self, record_id: Optional[str] = None) -> Create:
+    def create(self, record_id: Optional[Union[str, int]] = None) -> Create:
         """
         Represent CREATE statement and its abilities as refer here:
         https://docs.surrealdb.com/docs/surrealql/statements/create
