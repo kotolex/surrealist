@@ -483,15 +483,17 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'roo
 
 
 ## Threads and thread-safety ##
+Remember, SurrealDB is "surreally" fast, so first make sure you need to use multiple threads to work with it, because in many situations
+one thread is enough to do the job. Do not fall to premature optimizations. 
+
+All objects, including connections, statements, database are thread-safe, so you can use all library features in different threads.
+
 This library was made for using in multithreading environments, remember some rules of thumb:
  - if you work with only one server of SurrealDB, you need only one Surreal object
- - one Connection object represents exactly one connection (websocket or http) with DB
+ - one Connection/Database object represents exactly one connection (websocket or http) with DB
  - it is OK to use connection in different threads, but it can be your bottleneck, as there is only one connection to DB
  - with many queries and high load, you should consider using more than one connection, but not too many of them. The number of connections equal to the number of CPU-cores is the best choice
  - remember to properly close connections
-
-All objects, including connections, statements, database are thread-safe,
-so you can use all library features in different threads.
 
 ## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and

@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.2.6 (compatible with SurrealDB version 1.2.0):**
+
+- websockets became much faster (both for single and multithreading)
+- improve documentation
+
 **Version 0.2.5 (compatible with SurrealDB version 1.2.0):**
 
 - improve documentation about LQ and RecordID

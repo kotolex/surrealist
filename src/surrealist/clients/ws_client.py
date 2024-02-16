@@ -3,7 +3,7 @@ import threading
 import time
 from json import JSONDecodeError
 from logging import getLogger
-from threading import Lock
+from queue import Queue, Empty
 from typing import Dict, Callable, Optional
 
 import websocket
@@ -31,9 +31,8 @@ class WebSocketClient:
         logger.debug("Connecting to %s", base_url)
         self._raise_on_wait(lambda: self._connected is True, timeout=timeout,
                             error_text=f"Not connected to {self._base_url}")
-        self.lock = Lock()
         self._callbacks = {}
-        self._messages = {}
+        self._messages: Dict[str, Queue] = {}
         logger.debug("Connected to %s, timeout is %s seconds", base_url, timeout)
 
     def on_message(self, _ws, message: str):
@@ -55,7 +54,7 @@ class WebSocketClient:
             raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         if "id" in mess:
             id_ = mess["id"]
-            self._messages[id_] = mess
+            self._messages[id_].put_nowait(mess)
         else:
             # no id at top level = live query received
             if 'result' in mess:
@@ -125,6 +124,7 @@ class WebSocketClient:
             logger.error("Cant serialize object, too many nested levels")
             raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
         logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
+        self._messages[id_] = Queue(maxsize=1)
         self._ws.send(data_string)
         res = self._get_by_id(id_)
         if data['method'] in ('live', 'kill') or "additional" in data:
@@ -144,14 +144,12 @@ class WebSocketClient:
             self._callbacks[key] = callback
 
     def _get_by_id(self, id_) -> Dict:
-        self._raise_on_wait(lambda: id_ in self._messages, timeout=self._timeout,
-                            error_text=f"No messages with id {id_} received in {self._timeout} seconds")
-        with self.lock:
-            result = self._messages.pop(id_, None)
-        if result is None:
-            # Should never happen!
-            logger.error("Dict returns None on thread-safe pop, id %s, messages %s", id_, self._messages)
-            raise ValueError(f"Dict returns None on thread-safe pop, {id_=}, {self._messages=}")
+        try:
+            result = self._messages[id_].get(timeout=self._timeout)
+        except Empty:
+            raise TimeoutError(f"Time exceeded: {self._timeout} seconds, no response received")
+        finally:
+            del self._messages[id_]
         return result
 
     def _wait_until(self, predicate, timeout, period=0.0005):
