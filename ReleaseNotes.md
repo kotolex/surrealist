@@ -1,5 +1,9 @@
 ## Release Notes ##
 
+**Version 0.2.7 (compatible with SurrealDB version 1.2.1):**
+
+- support a new version
+
 **Version 0.2.6 (compatible with SurrealDB version 1.2.0):**
 
 - websockets became much faster (both for single and multithreading)

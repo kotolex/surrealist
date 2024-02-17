@@ -286,13 +286,13 @@ class TestUseCases(TestCase):
             self.assertEqual(res.get("in"), "author:john")
             self.assertEqual(res.get("out"), "ws_article:main")
 
-    # def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
-    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
-    #         db.table("a").create(record_id=1).run()
-    #         db.table("b").create(record_id=1).set(link="a:1", num=1).run()
-    #         res1 = db.table("b").select("link.*").run().result
-    #         res2 = db.table("b").select("link.*").where("num = 1").run().result
-    #         self.assertEqual(res1, res2)
+    def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            db.table("a").create(record_id=1).run()
+            db.table("b").create(record_id=1).set(link="a:1", num=1).run()
+            res1 = db.table("b").select("link.*").run().result
+            res2 = db.table("b").select("link.*").where("num = 1").run().result
+            self.assertEqual(res1, res2)
     #
     # def test_bug_index_cant_use_datetime(self):  # https://github.com/surrealdb/surrealdb/issues/2939
     #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
