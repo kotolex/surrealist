@@ -1,7 +1,7 @@
 import logging
-from typing import Optional, Tuple, List, Dict, Union, Any
+from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
-from surrealist.ql.statements import Select, Remove
+from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
                                              DefineIndex, DefineToken)
 from surrealist.ql.statements.relate import Relate
@@ -20,7 +20,7 @@ class Database:
     """
     Represents connected database(in some namespace) to operate on.
     It has features of the database level, including switch to table level. You can use DEFINE/REMOVE, query or
-    transactions here, but for simple CRUD or live queries you need to switch to table level
+    transactions here, but for simple CRUD you need to switch to table level
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
@@ -332,6 +332,37 @@ class Database:
         :return: Relate object
         """
         return Relate(self._connection, value=value)
+
+    def live_query(self, table_name: str, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
+        """
+        Represents LIVE statement for a live query
+
+        Example:
+        db.live_query("person", func).alias("first_name", "NAME").where("age > 22").run()
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+
+        Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
+
+        :param table_name: name od the table to live select
+        :param callback: function to call on live query event, signature is `def callback(arg:Dict) -> None`
+        :param use_diff: return result in DIFF format
+        :return: Live object
+        """
+        return Live(self._connection, table_name, callback, use_diff)
+
+    def kill_query(self, live_id: str) -> SurrealResult:
+        """
+        Represents a KILL statement, for killing a live query by id
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
+
+        :param live_id: id of the query
+        :return: result
+        """
+        return self._connection.kill(live_id)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

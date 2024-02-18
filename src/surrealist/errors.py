@@ -72,3 +72,10 @@ class ResultHasNoValuesError(PySurrealError):
     """
     Raises on an attempt to get data, but a result is empty or does not contain that data (field)
     """
+
+
+class WrongCallError(PySurrealError):
+    """
+    Raises on an attempt to call a Table object, in most cases it is mean you misspelled the method name of Database,
+    for example, **live** instead of **live_query**
+    """
