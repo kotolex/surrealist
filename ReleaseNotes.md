@@ -3,6 +3,8 @@
 **Version 0.2.7 (compatible with SurrealDB version 1.2.1):**
 
 - support a new version
+- Database object now can use and kill a live query
+- readable error on misspell Database object name
 
 **Version 0.2.6 (compatible with SurrealDB version 1.2.0):**
 
