@@ -1,5 +1,6 @@
 from typing import Optional, Callable, Dict, Tuple, Union
 
+from surrealist import WrongCallError
 from surrealist.connections import Connection
 from surrealist.ql.statements.create import Create
 from surrealist.ql.statements.delete import Delete
@@ -74,7 +75,7 @@ class Table:
 
     def create(self, record_id: Optional[Union[str, int]] = None) -> Create:
         """
-        Represent CREATE statement and its abilities as refer here:
+        Represent CREATE a statement and its abilities as refer here:
         https://docs.surrealdb.com/docs/surrealql/statements/create
 
         Example:
@@ -218,3 +219,7 @@ class Table:
 
     def __repr__(self):
         return f"Table(name={self._name})"
+
+    def __call__(self, *args, **kwargs):
+        raise WrongCallError(f"Table object is not callable. \n"
+                             f"It looks like you misspelled the method name of Database({self._name})")

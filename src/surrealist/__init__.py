@@ -7,5 +7,5 @@ from .utils import DATA_LENGTH_FOR_LOGS, get_uuid
 
 __all__ = ("Surreal", "SurrealResult", "WebSocketConnection", "HttpConnection", "PySurrealError", "HttpConnectionError",
            "HttpClientError", "SurrealConnectionError", "WebSocketConnectionError", "WebSocketConnectionClosedError",
-           "ConnectionParametersError", "CompatibilityError", "OperationOnClosedConnectionError",
+           "ConnectionParametersError", "CompatibilityError", "OperationOnClosedConnectionError", "WrongCallError",
            "DATA_LENGTH_FOR_LOGS", "Connection", "get_uuid", "Database", "Table")

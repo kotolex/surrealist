@@ -128,7 +128,7 @@ names = [
     ("string::is::alphanum", "'ABC123'", True),
     ("string::is::alpha", "'ABCDEF'", True),
     ("string::is::ascii", "'ABC123'", True),
-    # ("string::is::format", '"2015-09-05 23:56:04", "%Y-%m-%d %H:%M:%S"', True), # bug
+    ("string::is::datetime", '"2015-09-05 23:56:04", "%Y-%m-%d %H:%M:%S"', True),
     ("string::is::domain", "'surrealdb.com'", True),
     ("string::is::email", "'info@surrealdb.com'", True),
     ("string::is::hexadecimal", "'ff009e'", True),
@@ -291,7 +291,7 @@ constants = [
     ("MATH::LOG2_E", 1.4426950408889634),
     ("MATH::LOG2_10", 3.321928094887362),
     ("MATH::PI", 3.141592653589793),
-    # ("MATH::SQRT_2", 1.4142135623730951), TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/3511
+    ("MATH::SQRT_2", 1.4142135623730951),
     ("MATH::TAU", 6.283185307179586),
 ]
 
