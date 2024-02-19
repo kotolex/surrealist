@@ -1,6 +1,6 @@
 from typing import Optional, Tuple, Union, List
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.utils import OK
 from .select_statements import SelectUseIndex
 from .statement import Statement, IterableStatement

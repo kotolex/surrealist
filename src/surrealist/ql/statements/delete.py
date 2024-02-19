@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.utils import OK
 from .common_statements import CanUseWhere
 from .statement import Statement

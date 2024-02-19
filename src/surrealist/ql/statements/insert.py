@@ -1,7 +1,7 @@
 import json
 from typing import List, Dict
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.ql.statements.insert_statements import InsertUseDuplicate
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK

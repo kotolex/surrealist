@@ -1,6 +1,6 @@
 from typing import List
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.utils import OK
 from .show_statements import ShowUseSince
 from .statement import Statement

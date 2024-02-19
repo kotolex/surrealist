@@ -1,5 +1,11 @@
 ## Release Notes ##
 
+**Version 0.2.8 (compatible with SurrealDB version 1.2.1):**
+
+- database now can use DEFINE FIELD, DEFINE TABLE
+- Select now can use multiple aliases (AS)
+- improve documentation and examples
+
 **Version 0.2.7 (compatible with SurrealDB version 1.2.1):**
 
 - support a new version

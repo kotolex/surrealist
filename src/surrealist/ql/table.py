@@ -1,6 +1,6 @@
 from typing import Optional, Callable, Dict, Tuple, Union, List
 
-from surrealist import WrongCallError
+from surrealist.errors import WrongCallError
 from surrealist.connections import Connection
 from surrealist.ql.statements.create import Create
 from surrealist.ql.statements.delete import Delete

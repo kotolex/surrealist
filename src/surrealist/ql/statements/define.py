@@ -1,6 +1,6 @@
 from typing import List, Union, Any
 
-from surrealist import Connection
+from surrealist.connections import Connection
 from surrealist.ql.statements.permissions import CanUsePermissions
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
