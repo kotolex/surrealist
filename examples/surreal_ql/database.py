@@ -17,6 +17,50 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 
     # DEFINE examples below you can see https://docs.surrealdb.com/docs/surrealql/statements/define/overview
 
+    # on database object we can DEFINE TABLE
+    print(db.define_table("reading"))  # DEFINE TABLE reading;
+    print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
+    print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
+    print(db.define_table("user").schemafull())  # DEFINE TABLE user SCHEMAFULL;
+    print(db.define_table("user").schemaless())  # DEFINE TABLE user SCHEMALESS;
+
+    # DEFINE TABLE temperatures_by_month AS
+    #  SELECT count() AS total, time::month(recorded_at) AS month FROM reading GROUP BY city
+    # ;
+    select = db.table("reading").select(alias=[("total","count()"), ("month", "time::month(recorded_at)")]).group_by("city")
+    print(db.define_table("temperatures_by_month").alias(select))
+
+    print(db.define_table("account").permissions_none()) # DEFINE TABLE account PERMISSIONS NONE;
+    print(db.define_table("account").permissions_full()) # DEFINE TABLE account PERMISSIONS FULL;
+
+    # we can use simple Where to generate statements with permissions
+    from surrealist import Where
+    select = Where(published=True).OR(user="$auth.id")
+    create = Where(user="$auth.id")
+    delete = Where(user="$auth.id").OR("$auth.admin = true")
+    # DEFINE TABLE post SCHEMALESS
+    # PERMISSIONS
+    #  FOR select WHERE published = True OR user = $auth.id
+    #  FOR create, update WHERE user = $auth.id
+    #  FOR delete WHERE user = $auth.id OR $auth.admin = true;
+    print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create, delete=delete))
+
+    # on database object we can DEFINE FIELD
+    print(db.define_field("new_field", "some_table")) # DEFINE FIELD new_fiels ON TABLE some_table;
+    print(db.define_field("field", "user").type("string")) # DEFINE FIELD field ON TABLE user TYPE string;
+    # DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;
+    print(db.define_field("field", "user").type("bool", is_flexible=True))
+    # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;
+    print(db.define_field("locked", "user").type("bool").default("false"))
+    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now();
+    print(db.define_field("updated", "resource").default("time::now()"))
+    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now() READONLY;
+    print(db.define_field("updated", "resource").default("time::now()").read_only())
+    # DEFINE FIELD email ON TABLE resource TYPE string ASSERT string::is::email($value);
+    print(db.define_field("email", "resource").type("string").asserts("string::is::email($value)"))
+    # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;
+    print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full())
+
     # on database object we can use DEFINE EVENT with sub-query
     # DEFINE EVENT email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event SET user = $value.id,
     # time = time::now(), value = $after.email);

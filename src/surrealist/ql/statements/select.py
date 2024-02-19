@@ -19,7 +19,7 @@ class Select(IterableStatement, SelectUseIndex):
     """
 
     def __init__(self, connection: Connection, table_name: Union[str, Statement], *args,
-                 alias: Optional[Tuple[str, Union[str, Statement]]] = None,
+                 alias: Optional[List[Tuple[str, Union[str, Statement]]]] = None,
                  value: Optional[str] = None):
         self._connection = connection
         super().__init__(self)
@@ -38,8 +38,12 @@ class Select(IterableStatement, SelectUseIndex):
             self._what = ", ".join(self._args)
         if self._as:
             what = "" if not self._what else f"{self._what}, "
-            value = self._as[1] if not isinstance(self._as[1], Statement) else f"({self._as[1]._clean_str()})"
-            self._what = f"{what}{value} AS {self._as[0]}"
+            result = []
+            for alias, value in self._as:
+                value = value if not isinstance(value, Statement) else f"({value._clean_str()})"
+                result.append(f"{value} AS {alias}")
+            final_str = ", ".join(result)
+            self._what = f"{what}{final_str}"
         if self._value:
             self._what = f"VALUE {self._value}"
 
