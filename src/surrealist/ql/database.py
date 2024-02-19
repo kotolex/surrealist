@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
-                                             DefineIndex, DefineToken)
+                                             DefineIndex, DefineToken, DefineTable)
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
 from surrealist.ql.statements.statement import Statement
@@ -307,7 +307,7 @@ class Database:
         :param name: name for the token
         :param token_type: type of the token, for example, RS256
         :param value: value of the token
-        :return: DefineINdex object
+        :return: DefineIndex object
         """
         return DefineToken(self._connection, name, token_type, value)
 
@@ -363,6 +363,19 @@ class Database:
         :return: result
         """
         return self._connection.kill(live_id)
+
+    def define_table(self, name: str) -> DefineTable:
+        """
+        Represents DEFINE TABLE statement
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param name: name of the new table
+        :return: DefineTable object
+        """
+        return DefineTable(self._connection, name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

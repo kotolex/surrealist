@@ -54,29 +54,29 @@ class TestSelect(TestCase):
         """
         self.assertEqual("SELECT address.city FROM person;", Select(None, "person", "address.city").to_str())
         self.assertEqual("SELECT address.*.coordinates AS coordinates FROM person;",
-                         Select(None, "person", alias=("coordinates", "address.*.coordinates")).to_str())
+                         Select(None, "person", alias=[("coordinates", "address.*.coordinates")]).to_str())
         self.assertEqual("SELECT address.coordinates[0] AS latitude FROM person;",
-                         Select(None, "person", alias=("latitude", "address.coordinates[0]")).to_str())
+                         Select(None, "person", alias=[("latitude", "address.coordinates[0]")]).to_str())
         self.assertEqual("SELECT array::distinct(tags) FROM article;",
                          Select(None, "article", "array::distinct(tags)").to_str())
         self.assertEqual("SELECT ( ( celsius * 2 ) + 30 ) AS fahrenheit FROM temperature;",
-                         Select(None, "temperature", alias=("fahrenheit", "( ( celsius * 2 ) + 30 )")).to_str())
+                         Select(None, "temperature", alias=[("fahrenheit", "( ( celsius * 2 ) + 30 )")]).to_str())
         self.assertEqual("SELECT rating >= 4 AS positive FROM review;",
-                         Select(None, "review", alias=("positive", "rating >= 4")).to_str())
+                         Select(None, "review", alias=[("positive", "rating >= 4")]).to_str())
         self.assertEqual("SELECT { weekly: false, monthly: true } AS `marketing settings` FROM user;",
                          Select(None, "user",
-                                alias=("`marketing settings`", "{ weekly: false, monthly: true }")).to_str())
+                                alias=[("`marketing settings`", "{ weekly: false, monthly: true }")]).to_str())
         self.assertEqual("SELECT address[WHERE active = true] FROM person;",
                          Select(None, "person", "address[WHERE active = true]").to_str())
         self.assertEqual("SELECT ->likes->friend.name AS friends FROM person:tobie;",
-                         Select(None, "person", alias=("friends", "->likes->friend.name")).by_id("tobie").to_str())
+                         Select(None, "person", alias=[("friends", "->likes->friend.name")]).by_id("tobie").to_str())
         self.assertEqual("SELECT *, (SELECT * FROM events WHERE type = 'activity' LIMIT 5) AS history FROM user;",
                          Select(None, "user", "*",
-                                alias=("history", "(SELECT * FROM events WHERE type = 'activity' LIMIT 5)")).to_str())
+                                alias=[("history", "(SELECT * FROM events WHERE type = 'activity' LIMIT 5)")]).to_str())
         self.assertEqual("SELECT * FROM person WHERE ->(reacted_to WHERE type='celebrate')->post;",
                          Select(None, "person").where("->(reacted_to WHERE type='celebrate')->post").to_str())
         self.assertEqual("SELECT array::group(tags) AS tags FROM article GROUP ALL;",
-                         Select(None, "article", alias=("tags", "array::group(tags)")).group_all().to_str())
+                         Select(None, "article", alias=[("tags", "array::group(tags)")]).group_all().to_str())
 
     def test_docs2(self):
         """
@@ -92,7 +92,7 @@ class TestSelect(TestCase):
                          Select(None, "type::table($table)").where("admin = true").to_str())
 
     def test_inner_query(self):
-        first = Select(None, "user", alias=("adult", "age >= 18"))
+        first = Select(None, "user", alias=[("adult", "age >= 18")])
         second = Select(None, first).where("adult = true")
         self.assertEqual("SELECT * FROM (SELECT age >= 18 AS adult FROM user) WHERE adult = true;", second.to_str())
 
@@ -105,7 +105,7 @@ class TestSelect(TestCase):
         self.assertEqual("SELECT country FROM user GROUP BY country;", sel.to_str())
 
     def test_group_all(self):
-        sel = Select(None, "person", alias=("number_of_records", "count()")).group_all()
+        sel = Select(None, "person", alias=[("number_of_records", "count()")]).group_all()
         self.assertEqual("SELECT count() AS number_of_records FROM person GROUP ALL;", sel.to_str())
 
     def test_order_by_rand(self):

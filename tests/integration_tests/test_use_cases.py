@@ -155,6 +155,7 @@ class TestUseCases(TestCase):
                     self.assertTrue('reading' in str(res.result))
 
     def test_z_change_feed(self):
+        time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('root', 'root'), use_http=True) as db:
             tm = f'{datetime.utcnow().isoformat("T")}Z'
             story = get_random_series(5)
@@ -285,6 +286,16 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.get("in"), "author:john")
             self.assertEqual(res.get("out"), "ws_article:main")
+
+    def test_define_table(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            from surrealist import Where
+            select = Where(published=True).OR(user="$auth.id")
+            create = Where(user="$auth.id")
+            delete = Where(user="$auth.id").OR("$auth.admin = true")
+            res = db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
+                                                                       delete=delete).run()
+            self.assertFalse(res.is_error())
 
     def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
         with Database(URL, 'test', 'test', ('root', 'root')) as db:

@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Dict, Tuple, Union
+from typing import Optional, Callable, Dict, Tuple, Union, List
 
 from surrealist import WrongCallError
 from surrealist.connections import Connection
@@ -56,7 +56,7 @@ class Table:
         """
         return self._connection.count(self._name).result
 
-    def select(self, *args, alias: Optional[Tuple[str, Union[str, Statement]]] = None,
+    def select(self, *args, alias: Optional[List[Tuple[str, Union[str, Statement]]]] = None,
                value: Optional[str] = None) -> Select:
         """
         Represents SELECT statement and its abilities as refer here:
@@ -66,7 +66,7 @@ class Table:
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
 
-        :param alias: pairs of names and values
+        :param alias: list of pairs of names and values for AS statement
         :param value: on exists an add VALUE statement
         :param args: which fields to select, if no fields or "*" - selects all
         :return: Select object

@@ -1,8 +1,9 @@
 from unittest import TestCase, main
 
+from surrealist import Where
 from surrealist.ql.statements import Create, Update, Select
 from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
-    DefineIndex, DefineToken
+    DefineIndex, DefineToken, DefineTable
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -64,6 +65,38 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
 TYPE RS256 
 VALUE "value";"""
         self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").to_str())
+
+    def test_define_table(self):
+        text ="DEFINE TABLE table_name;"
+        self.assertEqual(text, DefineTable(None, "table_name").to_str())
+
+        text = "DEFINE TABLE table_name DROP CHANGEFEED 1s;"
+        self.assertEqual(text, DefineTable(None, "table_name").drop().changefeed("1s").to_str())
+
+        text = "DEFINE TABLE table_name SCHEMALESS PERMISSIONS NONE;"
+        self.assertEqual(text, DefineTable(None, "table_name").schemaless().permissions_none().to_str())
+
+        text = "DEFINE TABLE table_name SCHEMAFULL PERMISSIONS FULL;"
+        self.assertEqual(text, DefineTable(None, "table_name").schemafull().permissions_full().to_str())
+
+        text="""DEFINE TABLE post 
+PERMISSIONS 
+ FOR select WHERE published = True OR user = $auth.id
+ FOR create, update WHERE user = $auth.id
+ FOR delete WHERE user = $auth.id OR $auth.admin = true;"""
+        select = Where(published=True).OR(user="$auth.id")
+        create = Where(user="$auth.id")
+        delete = Where(user="$auth.id").OR("$auth.admin = true")
+        self.assertEqual(text, DefineTable(None, "post").permissions_for(select=select, create=create,
+                                                                         update=create, delete=delete).to_str())
+        text = """DEFINE TABLE temperatures_by_month AS
+ SELECT count() AS total, time::month(recorded_at) AS month FROM reading GROUP BY city
+;"""
+        select = Select(None, "reading", alias=[("total", "count()"), ("month", "time::month(recorded_at)")]).group_by("city")
+        self.assertEqual(text, DefineTable(None, "temperatures_by_month").alias(select).to_str())
+
+
+
 
 
 if __name__ == '__main__':

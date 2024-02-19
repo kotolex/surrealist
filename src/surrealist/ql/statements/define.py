@@ -1,6 +1,7 @@
 from typing import List, Union, Any
 
 from surrealist import Connection
+from surrealist.ql.statements.permissions import CanUsePermissions
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
@@ -248,3 +249,80 @@ class DefineToken(Statement):
 
     def _clean_str(self):
         return f'DEFINE TOKEN {self._name} ON DATABASE \nTYPE {self._type} \nVALUE "{self._value}"'
+
+
+class DefineTable(Statement, CanUsePermissions):
+    """
+    Represents DEFINE TABLE statement
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    """
+
+    def __init__(self, connection: Connection, name: str):
+        super().__init__(connection)
+        self._name = name
+        self._drop = False
+        self._less = False
+        self._full = False
+        self._alias = None
+        self._changefeed = None
+
+    def drop(self) -> "DefineTable":
+        """
+        Represents DROP statement
+        """
+        self._drop = True
+        return self
+
+    def schemafull(self) -> "DefineTable":
+        """
+        Represents SCHEMAFULL statement
+        """
+        self._full = True
+        self._less = False
+        return self
+
+    def schemaless(self) -> "DefineTable":
+        """
+        Represents SCHEMALESS statement
+        """
+        self._full = False
+        self._less = True
+        return self
+
+    def changefeed(self, duration: str) -> "DefineTable":
+        """
+        Represents CHANGEFEED statement
+        """
+        self._changefeed = duration
+        return self
+
+    def alias(self, select: Union[str, Statement]) -> "DefineTable":
+        """
+        Represents AS statements, Select statement or raw string expected
+        :param select: Select statement or string
+        """
+        if isinstance(select, Statement):
+            self._alias = select._clean_str()
+        else:
+            self._alias = select
+        return self
+
+    def validate(self) -> List[str]:
+        durations = ('w', 'y', 'd', 'h', 'ms', 's', 'm')
+        if self._changefeed and not any(self._changefeed.endswith(letter) for letter in durations):
+            return [f"Wrong duration {self._changefeed}, allowed postfix are (ms, s, m, h, d, w, y)"]
+        return [OK]
+
+    def _clean_str(self):
+        drop = "" if not self._drop else " DROP"
+        schema = ""
+        if self._less:
+            schema = " SCHEMALESS"
+        elif self._full:
+            schema = " SCHEMAFULL"
+        alias = "" if not self._alias else f" AS\n {self._alias}\n"
+        feed = "" if not self._changefeed else f" CHANGEFEED {self._changefeed}"
+        return f'DEFINE TABLE {self._name}{drop}{schema}{alias}{feed}'
