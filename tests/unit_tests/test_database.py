@@ -3,7 +3,7 @@ from unittest import TestCase, main
 from surrealist import Where
 from surrealist.ql.statements import Create, Update, Select
 from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
-    DefineIndex, DefineToken, DefineTable
+    DefineIndex, DefineToken, DefineTable, DefineField
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -94,6 +94,24 @@ PERMISSIONS
 ;"""
         select = Select(None, "reading", alias=[("total", "count()"), ("month", "time::month(recorded_at)")]).group_by("city")
         self.assertEqual(text, DefineTable(None, "temperatures_by_month").alias(select).to_str())
+
+    def test_define_field(self):
+        text =  "DEFINE FIELD new_field ON TABLE some_table;"
+        self.assertEqual(text, DefineField(None, "new_field", "some_table").to_str())
+        text = "DEFINE FIELD field ON TABLE user TYPE string;"
+        self.assertEqual(text, DefineField(None,"field", "user").type("string").to_str())
+        text = "DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;"
+        self.assertEqual(text, DefineField(None,"field", "user").type("bool", is_flexible=True).to_str())
+        text = "DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;"
+        self.assertEqual(text, DefineField(None,"locked", "user").type("bool").default("false").to_str())
+        text = "DEFINE FIELD updated ON TABLE resource DEFAULT time::now();"
+        self.assertEqual(text, DefineField(None,"updated", "resource").default("time::now()").to_str())
+        text = "DEFINE FIELD updated ON TABLE resource DEFAULT time::now() READONLY;"
+        self.assertEqual(text, DefineField(None,"updated", "resource").default("time::now()").read_only().to_str())
+        text = "DEFINE FIELD email ON TABLE resource TYPE string ASSERT string::is::email($value);"
+        self.assertEqual(text, DefineField(None,"email", "resource").type("string").asserts("string::is::email($value)").to_str())
+        text = "DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;"
+        self.assertEqual(text, DefineField(None,"comment", "resource").type("string", is_flexible=True).permissions_full().to_str())
 
 
 

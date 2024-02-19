@@ -45,6 +45,22 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     #  FOR delete WHERE user = $auth.id OR $auth.admin = true;
     print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create, delete=delete))
 
+    # on database object we can DEFINE FIELD
+    print(db.define_field("new_field", "some_table")) # DEFINE FIELD new_fiels ON TABLE some_table;
+    print(db.define_field("field", "user").type("string")) # DEFINE FIELD field ON TABLE user TYPE string;
+    # DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;
+    print(db.define_field("field", "user").type("bool", is_flexible=True))
+    # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;
+    print(db.define_field("locked", "user").type("bool").default("false"))
+    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now();
+    print(db.define_field("updated", "resource").default("time::now()"))
+    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now() READONLY;
+    print(db.define_field("updated", "resource").default("time::now()").read_only())
+    # DEFINE FIELD email ON TABLE resource TYPE string ASSERT string::is::email($value);
+    print(db.define_field("email", "resource").type("string").asserts("string::is::email($value)"))
+    # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;
+    print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full())
+
     # on database object we can use DEFINE EVENT with sub-query
     # DEFINE EVENT email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event SET user = $value.id,
     # time = time::now(), value = $after.email);

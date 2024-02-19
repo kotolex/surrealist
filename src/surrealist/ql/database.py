@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
-                                             DefineIndex, DefineToken, DefineTable)
+                                             DefineIndex, DefineToken, DefineTable, DefineField)
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
 from surrealist.ql.statements.statement import Statement
@@ -376,6 +376,30 @@ class Database:
         :return: DefineTable object
         """
         return DefineTable(self._connection, name)
+
+    def define_field(self, field_name: str, table_name: str) -> DefineField:
+        """
+        Represents DEFINE FIELD statement
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param field_name: name of the field
+        :param table_name: name of the table
+        :return: DefineField object
+        """
+        return DefineField(self._connection, field_name, table_name)
+
+    def remove_field(self, field_name: str, table_name: str) -> Remove:
+        """
+        Remove field by name for the table
+
+        :param field_name: name of the field
+        :param table_name: name of the table
+        :return: Remove object
+        """
+        return Remove(self._connection, table_name, type_="FIELD", name=field_name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"
