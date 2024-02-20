@@ -328,6 +328,25 @@ class TestUseCases(TestCase):
     #             'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
     #         self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
 
+    # def test_bug_index(self): # https://github.com/surrealdb/surrealdb/issues/3530
+    #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
+    #         # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
+    #         r = db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
+    #         self.assertFalse(r.is_error())
+    #         # DEFINE INDEX book_idx ON book FIELDS title, content SEARCH ANALYZER custom_analyzer BM25;
+    #         r = db.define_index("book_idx", "book").fields("title, content").search_analyzer("custom_analyzer",
+    #                                                                                          highlights=False).run()
+    #         self.assertFalse(r.is_error())
+    #         # SELECT * FROM book WHERE content @@ 'tools';
+    #         r = db.book.select().where("content @@ 'tools'").run()
+    #         self.assertFalse(r.is_error())
+    #         self.assertEqual([], r.result)
+    #         db.table("book").create().set(title="Some tools", content="A book about tools in programming").run()
+    #         r = db.book.select().where("content @@ 'tools'").run()
+    #         self.assertFalse(r.is_error(), r)
+    #         self.assertEqual([], r.result)
+
+
 
 if __name__ == '__main__':
     main()

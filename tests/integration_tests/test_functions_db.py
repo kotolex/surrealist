@@ -195,7 +195,7 @@ names = [
     ("type::is::null", 'NULL', True),
     ("type::is::datetime", 'time::now()', True),
     ("type::is::decimal", '<decimal> 13.5719384719', True),
-    # ("type::is::duration", '<datetime> "1970-01-01T00:00:00"', True), # bug
+    ("type::is::duration", '"1970-01-01T00:00:00"', False),
     ("type::is::float", '<float> 41.5', True),
     ("type::is::int", '41', True),
     ("type::is::geometry", '(-0.118092, 51.509865)', True),
