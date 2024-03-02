@@ -331,7 +331,8 @@ class TestUseCases(TestCase):
     # def test_bug_index(self): # https://github.com/surrealdb/surrealdb/issues/3530
     #     with Database(URL, 'test', 'test', ('root', 'root')) as db:
     #         # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
-    #         r = db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
+    #         r = db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase,
+    #         snowball(english)").run()
     #         self.assertFalse(r.is_error())
     #         # DEFINE INDEX book_idx ON book FIELDS title, content SEARCH ANALYZER custom_analyzer BM25;
     #         r = db.define_index("book_idx", "book").fields("title, content").search_analyzer("custom_analyzer",

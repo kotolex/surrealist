@@ -66,7 +66,7 @@ class Database:
         """
         Closes the connection. You cannot and should not use a database object after that
         """
-        logger.info("DatabaseQL is down")
+        logger.info("DatabaseQL is closed")
         self._connection.close()
         self._connected = False
 

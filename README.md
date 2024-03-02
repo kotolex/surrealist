@@ -15,11 +15,9 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * debug mode to see all that goes in and out if you need
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
+ * connections pool for use at a high load
  * http or websocket transport to use
  * always up to date with SurrealDB features and changes
-
-More to come:
- * connections pool
 
 
 ### Installation ###
@@ -494,6 +492,35 @@ This library was made for using in multithreading environments, remember some ru
  - it is OK to use connection in different threads, but it can be your bottleneck, as there is only one connection to DB
  - with many queries and high load, you should consider using more than one connection, but not too many of them. The number of connections equal to the number of CPU-cores is the best choice
  - remember to properly close connections
+
+## Connections Pool ##
+And again, please, do not fall to premature optimizations, when working with SurrealDB. But if you consider or expect a high load and/or a lot of 
+threads, which are use SurrealDB, you can use DatabaseConnectionsPool. It can be used exactly like a Database object, the main difference — you 
+can specify minimum and maximum connections to use. Under high load, when a lot of data goes in and out in a lot of threads - a pool object can 
+make job faster and effectively, than one common connection.
+
+On start pool will create minimum number of connections, and on a big load will be creating more and more connections until reach the maximum of them.
+By default, the minimum number is equal to CPU cores count for the system. 
+So any incoming request from your application will use the first non-busy connection it gets from the pool.
+
+Pay attention — new connections can be created, but old connections never be closed until the pool will be closed, so the number of connections can grow, 
+but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection will be closed, LQ stop working.
+
+**Example 13**
+
+```python
+from surrealist import DatabaseConnectionsPool
+
+
+with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'), min_connections=10, 
+                             max_connections=40) as db: # create pool, it creates 10 connections on start
+    make_something_with_a_lot_of_threads_or_data(db) # use pool everywhere we need as a simple Database object
+```
+
+**Note:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
+It is your job as a developer to limit number of pools created in your application
+
+**Important note:** for many and maybe the most cases, one shared connection is enough to do the job. Test it and make sure you really need a connection pool.
 
 ## Recursion and JSON in Python ##
 SurrealDb has _"no limit to the depth of any nested objects or values within"_, but in Python we have a recursion limit and

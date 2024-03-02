@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.2.9 (compatible with SurrealDB version 1.2.1):**
+
+- create DatabaseConnectionsPool for use at a high load
+- improve documentation and examples
+
 **Version 0.2.8 (compatible with SurrealDB version 1.2.1):**
 
 - database now can use DEFINE FIELD, DEFINE TABLE
