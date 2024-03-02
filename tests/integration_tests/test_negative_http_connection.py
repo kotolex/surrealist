@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL
-from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError
+from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError, DatabaseConnectionsPool
 from surrealist import Surreal, get_uuid
 
 PARAMS = (
@@ -277,6 +277,10 @@ class TestHttpConnectionNegative(TestCase):
             res = connection.ns_info()
             self.assertTrue(res.is_error())
             self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
+
+    def test_connect_failed_on_invalid_url_pool(self):
+        with self.assertRaises(SurrealConnectionError):
+            DatabaseConnectionsPool("http://127.0.0.1:8001", 'test', 'test', ('root', 'root'), use_http=True, timeout=1)
 
 
     # TODO uncomment after bugfix
