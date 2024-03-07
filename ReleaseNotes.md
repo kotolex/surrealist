@@ -1,5 +1,9 @@
 ## Release Notes ##
 
+**Version 0.2.10 (compatible with SurrealDB version 1.2.2):**
+
+- minor improvements for documentation and tests
+
 **Version 0.2.9 (compatible with SurrealDB version 1.2.1):**
 
 - create DatabaseConnectionsPool for use at a high load
