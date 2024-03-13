@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import List, Union, Any
 
 from surrealist.connections import Connection
@@ -6,7 +7,24 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
 
-class DefineEvent(Statement):
+class Define(Statement, ABC):
+    """
+    Parent for all DEFINE statements, can use IF NOT EXISTS statement
+    """
+
+    def __init__(self, connection: Connection):
+        super().__init__(connection)
+        self._if_not_exists = False
+
+    def _exists(self) -> str:
+        return " IF NOT EXISTS" if self._if_not_exists else ""
+
+    def if_not_exists(self) -> "Define":
+        self._if_not_exists = True
+        return self
+
+
+class DefineEvent(Define):
     """
     Represents DEFINE EVENT statement
 
@@ -23,6 +41,10 @@ class DefineEvent(Statement):
         self._when = None
         self._then = then if not isinstance(then, Statement) else f"({then._clean_str()})"
 
+    def if_not_exists(self) -> "DefineEvent":
+        self._if_not_exists = True
+        return self
+
     def when(self, predicate: str) -> "DefineEvent":
         """
         Represents condition for event, WHEN statement
@@ -37,10 +59,10 @@ class DefineEvent(Statement):
 
     def _clean_str(self):
         when = f"WHEN {self._when} " if self._when else ""
-        return f"DEFINE EVENT {self._name} ON TABLE {self._table_name} {when}THEN {self._then}"
+        return f"DEFINE EVENT{self._exists()} {self._name} ON TABLE {self._table_name} {when}THEN {self._then}"
 
 
-class DefineUser(Statement):
+class DefineUser(Define):
     """
     Represents DEFINE USER statement
 
@@ -54,6 +76,10 @@ class DefineUser(Statement):
         self._name = user_name
         self._pass = password
         self._role = "VIEWER"
+
+    def if_not_exists(self) -> "DefineUser":
+        self._if_not_exists = True
+        return self
 
     def role_owner(self) -> "DefineUser":
         """
@@ -75,10 +101,10 @@ class DefineUser(Statement):
         return [OK]
 
     def _clean_str(self):
-        return f"DEFINE USER {self._name} ON DATABASE PASSWORD '{self._pass}' ROLES {self._role}"
+        return f"DEFINE USER{self._exists()} {self._name} ON DATABASE PASSWORD '{self._pass}' ROLES {self._role}"
 
 
-class DefineParam(Statement):
+class DefineParam(Define):
     """
     Represents DEFINE PARAM statement
 
@@ -92,14 +118,18 @@ class DefineParam(Statement):
         self._name = param_name
         self._value = value
 
+    def if_not_exists(self) -> "DefineParam":
+        self._if_not_exists = True
+        return self
+
     def validate(self) -> List[str]:
         return [OK]
 
     def _clean_str(self):
-        return f"DEFINE PARAM ${self._name} VALUE {self._value}"
+        return f"DEFINE PARAM{self._exists()} ${self._name} VALUE {self._value}"
 
 
-class DefineAnalyzer(Statement):
+class DefineAnalyzer(Define):
     """
     Represents DEFINE ANALYZER statement
 
@@ -113,6 +143,10 @@ class DefineAnalyzer(Statement):
         self._name = name
         self._tokenizers = None
         self._filters = None
+
+    def if_not_exists(self) -> "DefineAnalyzer":
+        self._if_not_exists = True
+        return self
 
     def tokenizers(self, value: str) -> "DefineAnalyzer":
         """
@@ -134,10 +168,10 @@ class DefineAnalyzer(Statement):
     def _clean_str(self):
         tok = "" if not self._tokenizers else f" TOKENIZERS {self._tokenizers}"
         filters = "" if not self._filters else f" FILTERS {self._filters}"
-        return f"DEFINE ANALYZER {self._name}{tok}{filters}"
+        return f"DEFINE ANALYZER{self._exists()} {self._name}{tok}{filters}"
 
 
-class DefineScope(Statement):
+class DefineScope(Define):
     """
     Represents DEFINE SCOPE statement
 
@@ -154,16 +188,21 @@ class DefineScope(Statement):
         self._signup = signup if not isinstance(signup, Statement) else f"({signup._clean_str()})"
         self._signin = signin if not isinstance(signin, Statement) else f"({signin._clean_str()})"
 
+    def if_not_exists(self) -> "DefineScope":
+        self._if_not_exists = True
+        return self
+
     def validate(self) -> List[str]:
         if ' ' in self._duration:
             return ["Wrong duration format, should be like 24h"]
         return [OK]
 
     def _clean_str(self):
-        return f"DEFINE SCOPE {self._name} SESSION {self._duration} \nSIGNUP {self._signup} \nSIGNIN {self._signin}"
+        return f"DEFINE SCOPE{self._exists()} {self._name} SESSION {self._duration} \nSIGNUP {self._signup} " \
+               f"\nSIGNIN {self._signin}"
 
 
-class DefineIndex(Statement):
+class DefineIndex(Define):
     """
     Represents DEFINE INDEX statement
 
@@ -179,6 +218,10 @@ class DefineIndex(Statement):
         self._fields = None
         self._uni = False
         self._analyzer = None
+
+    def if_not_exists(self) -> "DefineIndex":
+        self._if_not_exists = True
+        return self
 
     def fields(self, fields: str) -> "DefineIndex":
         """
@@ -226,10 +269,10 @@ class DefineIndex(Statement):
             add = " UNIQUE"
         elif self._analyzer:
             add = self._analyzer
-        return f"DEFINE INDEX {self._name} ON TABLE {self._table_name} {self._fields}{add}"
+        return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}{add}"
 
 
-class DefineToken(Statement):
+class DefineToken(Define):
     """
     Represents DEFINE TOKEN statement
 
@@ -244,14 +287,18 @@ class DefineToken(Statement):
         self._type = token_type
         self._value = value
 
+    def if_not_exists(self) -> "DefineToken":
+        self._if_not_exists = True
+        return self
+
     def validate(self) -> List[str]:
         return [OK]
 
     def _clean_str(self):
-        return f'DEFINE TOKEN {self._name} ON DATABASE \nTYPE {self._type} \nVALUE "{self._value}"'
+        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type} \nVALUE "{self._value}"'
 
 
-class DefineTable(Statement, CanUsePermissions):
+class DefineTable(Define, CanUsePermissions):
     """
     Represents DEFINE TABLE statement
 
@@ -268,6 +315,10 @@ class DefineTable(Statement, CanUsePermissions):
         self._full = False
         self._alias = None
         self._changefeed = None
+
+    def if_not_exists(self) -> "DefineTable":
+        self._if_not_exists = True
+        return self
 
     def drop(self) -> "DefineTable":
         """
@@ -325,9 +376,10 @@ class DefineTable(Statement, CanUsePermissions):
             schema = " SCHEMAFULL"
         alias = "" if not self._alias else f" AS\n {self._alias}\n"
         feed = "" if not self._changefeed else f" CHANGEFEED {self._changefeed}"
-        return f'DEFINE TABLE {self._name}{drop}{schema}{alias}{feed}'
+        return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{alias}{feed}'
 
-class DefineField(Statement, CanUsePermissions):
+
+class DefineField(Define, CanUsePermissions):
     """
     Represents DEFINE FIELD statement
 
@@ -336,7 +388,7 @@ class DefineField(Statement, CanUsePermissions):
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
 
-    def __init__(self, connection: Connection, field_name: str, table_name:str):
+    def __init__(self, connection: Connection, field_name: str, table_name: str):
         super().__init__(connection)
         self._field_name = field_name
         self._table_name = table_name
@@ -347,25 +399,29 @@ class DefineField(Statement, CanUsePermissions):
         self._value = None
         self._assert = None
 
-    def type(self, type_name:str, is_flexible:bool=False) ->"DefineField":
+    def if_not_exists(self) -> "DefineField":
+        self._if_not_exists = True
+        return self
+
+    def type(self, type_name: str, is_flexible: bool = False) -> "DefineField":
         self._flex = is_flexible
         self._type = type_name
         return self
 
-    def default(self, value:str) ->"DefineField":
+    def default(self, value: str) -> "DefineField":
         self._default = value
         return self
 
-    def read_only(self) ->"DefineField":
-        self._readonly= True
+    def read_only(self) -> "DefineField":
+        self._readonly = True
         return self
 
-    def value(self, value:str) ->"DefineField":
-        self._value= value
+    def value(self, value: str) -> "DefineField":
+        self._value = value
         return self
 
-    def asserts(self, value:str) ->"DefineField":
-        self._assert= value
+    def asserts(self, value: str) -> "DefineField":
+        self._assert = value
         return self
 
     def validate(self) -> List[str]:
@@ -379,4 +435,5 @@ class DefineField(Statement, CanUsePermissions):
         ro = "" if not self._readonly else " READONLY"
         value = "" if not self._value else f" VALUE {self._value}"
         asserts = "" if not self._assert else f" ASSERT {self._assert}"
-        return f'DEFINE FIELD {self._field_name} ON TABLE {self._table_name}{type_}{default}{ro}{value}{asserts}'
+        return f'DEFINE FIELD{self._exists()} {self._field_name} ' \
+               f'ON TABLE {self._table_name}{type_}{default}{ro}{value}{asserts}'
