@@ -196,21 +196,26 @@ class Connection(ABC):
         return table_name in self.db_tables().result
 
     @connected
-    def remove_table(self, table_name: str) -> SurrealResult:
+    def remove_table(self, table_name: str, if_exists: bool = True) -> SurrealResult:
         """
         Fully removes table, even if it contains some records, analog of SQL "DROP table". You should have permissions
         for this action.This method cannot remove any other resource, if you need to remove db, ns or scope -
         use **query**
 
+        If if_exists parameter is False and the table does not exist - error will be returned at a result.
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
 
         Note: only name of the table allowed here, do not use record_id
 
+
         :param table_name: name of the table
+        :param if_exists: if True, will use IF EXISTS statement for query
         :return: result of the query
         """
         logger.info("Query-Operation: REMOVE. Table name %s", table_name)
-        return self.query(f"REMOVE TABLE {table_name} IF EXISTS;")
+        add = "" if not if_exists else "IF EXISTS"
+        return self.query(f"REMOVE TABLE {add} {table_name};")
 
     @connected
     def show_changes(self, table_name: str, since: str, limit: int = 10) -> SurrealResult:

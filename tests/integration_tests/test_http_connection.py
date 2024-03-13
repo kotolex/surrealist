@@ -366,7 +366,7 @@ class TestHttpConnection(TestCase):
             res = connection.delete(tb_name, record_id="john")
             self.assertFalse(res.is_error())
             res = connection.remove_table(tb_name)
-            self.assertFalse(res.is_error())
+            self.assertFalse(res.is_error(), res.result)
             res = connection.db_tables()
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)

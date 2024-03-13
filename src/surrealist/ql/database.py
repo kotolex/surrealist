@@ -401,5 +401,14 @@ class Database:
         """
         return Remove(self._connection, table_name, type_="FIELD", name=field_name)
 
+    def remove_table(self, table_name: str) -> Remove:
+        """
+        Remove table by name for the database
+
+        :param table_name: name of the table to remove
+        :return: Remove object
+        """
+        return Remove(self._connection, table_name, type_="TABLE", name="")
+
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

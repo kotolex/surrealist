@@ -23,21 +23,25 @@ class Remove(Statement):
         self._only = False
         self._type = type_
         self._name = name
+        self._on_exists = False
         if type_ == "TABLE":
             self._name = table_name
 
     def validate(self) -> List[str]:
         return [OK]
 
+    def if_exists(self) -> "Remove":
+        self._on_exists = True
+        return self
+
     def _clean_str(self):
+        add = "" if not self._on_exists else " IF EXISTS"
         if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN"):
-            what = f"{self._type} {self._name}"
+            what = f"{self._type}{add} {self._name}"
             if self._type in ("USER", "TOKEN"):
                 what = f"{what} ON DATABASE"
             if self._type == "PARAM":
-                what = f"{self._type} ${self._name}"
-            if self._type == "TABLE":
-                what = f"{what} IF EXISTS"
+                what = f"{self._type}{add} ${self._name}"
         else:
-            what = f"{self._type} {self._name} ON TABLE {self._table_name}"
+            what = f"{self._type}{add} {self._name} ON TABLE {self._table_name}"
         return f"REMOVE {what}"
