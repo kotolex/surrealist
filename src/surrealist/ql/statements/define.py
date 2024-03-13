@@ -20,6 +20,10 @@ class Define(Statement, ABC):
         return " IF NOT EXISTS" if self._if_not_exists else ""
 
     def if_not_exists(self) -> "Define":
+        """
+        Adds IF NOT EXISTS statement to the query
+        :return: self
+        """
         self._if_not_exists = True
         return self
 
@@ -404,23 +408,38 @@ class DefineField(Define, CanUsePermissions):
         return self
 
     def type(self, type_name: str, is_flexible: bool = False) -> "DefineField":
+        """
+        Represents TYPE statement and FLEXIBLE statement
+        """
         self._flex = is_flexible
         self._type = type_name
         return self
 
     def default(self, value: str) -> "DefineField":
+        """
+        Represents DEFAULT statement
+        """
         self._default = value
         return self
 
     def read_only(self) -> "DefineField":
+        """
+        Represents READONLY statement
+        """
         self._readonly = True
         return self
 
     def value(self, value: str) -> "DefineField":
+        """
+        Represents VALUE statement
+        """
         self._value = value
         return self
 
     def asserts(self, value: str) -> "DefineField":
+        """
+        Represents ASSERT statement
+        """
         self._assert = value
         return self
 

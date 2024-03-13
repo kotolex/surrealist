@@ -434,6 +434,19 @@ class TestUseCases(TestCase):
                 'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
             self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
 
+    def test_for_full_text_search(self):  # https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
+            db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
+            # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
+            # DEFINE INDEX book_content ON book FIELDS content SEARCH ANALYZER custom_analyzer BM25;
+            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer",
+                                                                                  highlights=False).run()
+            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer",
+                                                                                      highlights=False).run()
+            res = db.book.select().where("content @@ 'tools'").run()
+            self.assertFalse(res.is_error(), res)
+
 
 if __name__ == '__main__':
     main()

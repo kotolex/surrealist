@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 0.3.0 (compatible with SurrealDB version 1.3.0):**
+- add IF NOT EXISTS for all DEFINE statements
+- add IF EXISTS for all REMOVE statements
+- improvements for documentation, examples and tests
+
 **Version 0.2.10 (compatible with SurrealDB version 1.2.2):**
 
 - minor improvements for documentation and tests
