@@ -190,9 +190,23 @@ class TestUseCases(TestCase):
                 "$before.email != $after.email").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count + 1)
+            # now define if exists
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).if_not_exists().when(
+                "$before.email != $after.email").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The event 'email_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.user.info()["events"]), events_count + 1)
             res = db.remove_event(f"email_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count)
+
+    def test_remove_non_existent_event(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_event("not_exists", table_name="user").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_event("not_exists", table_name="user").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The event 'not_exists' does not exist", res.result)
 
     def test_define_user_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -201,9 +215,22 @@ class TestUseCases(TestCase):
             res = db.define_user(f"user_{uid}", password="123456").run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(len(db.info()["users"]), count + 1)
+            # now define if exists
+            res = db.define_user(f"user_{uid}", password="123456").if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The user 'user_{uid}' already exists in the database 'test'", res.result, res)
+            self.assertTrue(len(db.info()["users"]), count + 1)
             res = db.remove_user(f"user_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(len(db.info()["users"]), count)
+
+    def test_remove_non_existent_user(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_user("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_user("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The user 'not_exists' does not exist in the database 'test'", res.result)
 
     def test_define_param_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -211,9 +238,20 @@ class TestUseCases(TestCase):
             res = db.define_param(f"param_{uid}", 1000).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(1000, db.raw_query(f"RETURN $param_{uid};").result)
+            res = db.define_param(f"param_{uid}", 1000).if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The param '$param_{uid}' already exists", res.result, res)
             res = db.remove_param(f"param_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
+
+    def test_remove_non_existent_param(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_param("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_param("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The param '$not_exists' does not exist", res.result)
 
     def test_define_analyzer_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -222,9 +260,21 @@ class TestUseCases(TestCase):
             res = db.define_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count + 1)
+            res = db.define_analyzer(f"anal_{uid}").if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The analyzer 'anal_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.info()["analyzers"]), count + 1)
             res = db.remove_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count)
+
+    def test_remove_non_existent_analyzer(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_analyzer("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_analyzer("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The analyzer 'not_exists' does not exist", res.result)
 
     def test_define_scope_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -235,9 +285,21 @@ class TestUseCases(TestCase):
             res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["scopes"]), count + 1)
+            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The scope 'scope_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.info()["scopes"]), count + 1)
             res = db.remove_scope(f"scope_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["scopes"]), count)
+
+    def test_remove_non_existent_scope(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_scope("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_scope("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The scope 'not_exists' does not exist", res.result)
 
     def test_define_index_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -247,9 +309,21 @@ class TestUseCases(TestCase):
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count + 1)
+            res = db.define_index(f"index_{uid}", "user").if_not_exists().columns("name").search_analyzer("ascii").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The index 'index_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.user.info()["indexes"]), ind_count + 1)
             res = db.remove_index(f"index_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
+
+    def test_remove_non_existent_index(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_index("not_exists", table_name="user").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_index("not_exists", table_name="user").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The index 'not_exists' does not exist", res.result)
 
     def test_define_failed_no_analyzer(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -276,9 +350,21 @@ class TestUseCases(TestCase):
             res = db.define_token(f"token_{uid}", "HS512", value=val).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["tokens"]), count + 1)
+            res = db.define_token(f"token_{uid}", "HS512", value=val).if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The database token 'token_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.info()["tokens"]), count + 1)
             res = db.remove_token(f"token_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["tokens"]), count)
+
+    def test_remove_non_existent_token(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_token("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_token("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The database token 'not_exists' does not exist", res.result)
 
     def test_define_relate(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -304,9 +390,29 @@ class TestUseCases(TestCase):
             res = db.define_field(f"field_{uid}", "user").type("bool").read_only().run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["fields"]), ind_count + 1)
+            res = db.define_field(f"field_{uid}", "user").type("bool").read_only().if_not_exists().run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The field 'field_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.user.info()["fields"]), ind_count + 1)
             res = db.remove_field(f"field_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["fields"]), ind_count)
+
+    def test_remove_non_existent_field(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_field("not_exists", table_name="user").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_field("not_exists", table_name="user").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The field 'not_exists' does not exist", res.result)
+
+    def test_remove_non_existent_table(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.remove_table("not_exists").if_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_table("not_exists").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The table 'not_exists' does not exist", res.result)
 
     def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -327,6 +433,19 @@ class TestUseCases(TestCase):
             r = db.table("sessions").select().where(
                 'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
             self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
+
+    def test_for_full_text_search(self):  # https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
+            db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
+            # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
+            # DEFINE INDEX book_content ON book FIELDS content SEARCH ANALYZER custom_analyzer BM25;
+            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer",
+                                                                                  highlights=False).run()
+            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer",
+                                                                                      highlights=False).run()
+            res = db.book.select().where("content @@ 'tools'").run()
+            self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

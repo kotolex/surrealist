@@ -131,16 +131,20 @@ class Table:
 
     def drop(self) -> SurrealResult:
         """
-        Fully removes table with all records in it.
+        Fully removes table with all records in it if table exists.
+        This method never returns error, use IF EXISTS query
+
         If you need to just delete all records and keep table - use **delete_all** method
 
         :return: result of response
         """
-        return Remove(self._connection, self._name).run()
+        return Remove(self._connection, self._name).if_exists().run()
 
     def remove(self) -> SurrealResult:
         """
-        Fully removes table with all records in it
+        Fully removes table with all records in it if table exists.
+        This method never returns error, use IF EXISTS query
+
         If you need to just delete all records and keep table - use **delete_all** method
 
         :return: result of response

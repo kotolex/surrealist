@@ -65,10 +65,19 @@ class TestTable(TestCase):
             table2.create().content({"title": uid}).return_none().run()
             result = table.drop()
             result2 = table2.remove()
-            self.assertFalse(result.is_error())
-            self.assertFalse(result2.is_error())
+            self.assertFalse(result.is_error(), result.result)
+            self.assertFalse(result2.is_error(), result2.result)
             self.assertTrue(f"test_{uid}" not in db.tables())
             self.assertTrue(f"test_{uid}2" not in db.tables())
+
+    def test_remove_via_db(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(13)
+            table = db.table(f"test_{uid}")
+            table.create().content({"title": uid}).return_none().run()
+            result = db.remove_table(f"test_{uid}").run()
+            self.assertFalse(result.is_error(), result.result)
+            self.assertTrue(f"test_{uid}" not in db.tables())
 
     def test_live_and_kill(self):
         a_list = []

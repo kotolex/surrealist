@@ -19,6 +19,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
 
     # on database object we can DEFINE TABLE
     print(db.define_table("reading"))  # DEFINE TABLE reading;
+    print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
     print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
     print(db.define_table("user").schemafull())  # DEFINE TABLE user SCHEMAFULL;
@@ -27,14 +28,16 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # DEFINE TABLE temperatures_by_month AS
     #  SELECT count() AS total, time::month(recorded_at) AS month FROM reading GROUP BY city
     # ;
-    select = db.table("reading").select(alias=[("total","count()"), ("month", "time::month(recorded_at)")]).group_by("city")
+    select = db.table("reading").select(alias=[("total", "count()"), ("month", "time::month(recorded_at)")]). \
+        group_by("city")
     print(db.define_table("temperatures_by_month").alias(select))
 
-    print(db.define_table("account").permissions_none()) # DEFINE TABLE account PERMISSIONS NONE;
-    print(db.define_table("account").permissions_full()) # DEFINE TABLE account PERMISSIONS FULL;
+    print(db.define_table("account").permissions_none())  # DEFINE TABLE account PERMISSIONS NONE;
+    print(db.define_table("account").permissions_full())  # DEFINE TABLE account PERMISSIONS FULL;
 
     # we can use simple Where to generate statements with permissions
     from surrealist import Where
+
     select = Where(published=True).OR(user="$auth.id")
     create = Where(user="$auth.id")
     delete = Where(user="$auth.id").OR("$auth.admin = true")
@@ -43,11 +46,14 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     #  FOR select WHERE published = True OR user = $auth.id
     #  FOR create, update WHERE user = $auth.id
     #  FOR delete WHERE user = $auth.id OR $auth.admin = true;
-    print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create, delete=delete))
+    print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
+                                                               delete=delete))
 
     # on database object we can DEFINE FIELD
-    print(db.define_field("new_field", "some_table")) # DEFINE FIELD new_fiels ON TABLE some_table;
-    print(db.define_field("field", "user").type("string")) # DEFINE FIELD field ON TABLE user TYPE string;
+    print(db.define_field("new_field", "some_table"))  # DEFINE FIELD new_field ON TABLE some_table;
+    # DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;
+    print(db.define_field("new_field", "some_table").if_not_exists())
+    print(db.define_field("field", "user").type("string"))  # DEFINE FIELD field ON TABLE user TYPE string;
     # DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;
     print(db.define_field("field", "user").type("bool", is_flexible=True))
     # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;
@@ -73,18 +79,22 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # on database object we can DEFINE USER
     # DEFINE USER new_user ON DATABASE PASSWORD '123456' ROLES OWNER;
     print(db.define_user("new_user", "123456").role_owner())
+    # DEFINE USER IF NOT EXISTS new_user ON DATABASE PASSWORD '123456' ROLES OWNER;
+    print(db.define_user("new_user", "123456").if_not_exists().role_owner())
     # we can remove user
     print(db.remove_user("new_user"))  # REMOVE USER new_user ON DATABASE;
 
     # on database object we can DEFINE PARAM
-    # DEFINE PARAM $key VALUE 1000;
-    print(db.define_param("key", 1000))
+    print(db.define_param("key", 1000))  # DEFINE PARAM $key VALUE 1000;
+    print(db.define_param("key", 1000).if_not_exists())  # DEFINE PARAM IF NOT EXISTS $key VALUE 1000;
     # we can remove parameter
     print(db.remove_param("key"))  # REMOVE PARAM $key;
 
     # on database object we can DEFINE ANALYZER
     # DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;
     print(db.define_analyzer("example_ascii").tokenizers("class").filters("ascii"))
+    # DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;
+    print(db.define_analyzer("example_ascii").if_not_exists().tokenizers("class").filters("ascii"))
     # we can remove analyzer
     print(db.remove_analyzer("example_ascii"))  # REMOVE ANALYZER example_ascii;
 
@@ -103,6 +113,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # on database object we can DEFINE INDEX
     # DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
     print(db.define_index("userEmailIndex", "user").columns("email").unique())
+    # DEFINE INDEX IF NOT EXISTS userEmailIndex ON TABLE user COLUMNS email UNIQUE;
+    print(db.define_index("userEmailIndex", "user").if_not_exists().columns("email").unique())
     # DEFINE INDEX userAgeIndex ON TABLE user COLUMNS age;
     print(db.define_index("userAgeIndex", "user").columns("age"))
     # DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;
