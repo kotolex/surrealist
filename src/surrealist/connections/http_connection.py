@@ -454,7 +454,7 @@ class HttpConnection(Connection):
               return_diff: bool = False) -> SurrealResult:
         """
         This method changes specified data in one ar all records. If given table does not exist, new table and record
-        will not be created if table exists but no such record_id - new record will be created, if no record id-all
+        will not be created if table exists, but no such record_id - new record will be created, if no record id-all
         records will be transformed.
         Http transport use **query** method under the hood with "UPDATE {table_name} PATCH {data} RETURN DIFF"
 
@@ -473,7 +473,7 @@ class HttpConnection(Connection):
         :param table_name: table name or table name with record_id to patch
         :param data: list with json-patch data
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
-        :param return_diff: True if you want to get only DIFF info, False for standard results
+        :param return_diff: True if you want to get only DIFF info, False for a standard results
         :return: result of request
         """
         data = self._in_out_json(data, is_loads=False)
@@ -515,7 +515,7 @@ class HttpConnection(Connection):
 
     def authenticate(self, token: str):
         """
-        Http transport cannot use authenticate, you should use websocket for that
+        Http transport cannot use authenticate method, you should use websocket for that
 
         :raise CompatibilityError: on any use
         """
@@ -525,7 +525,7 @@ class HttpConnection(Connection):
 
     def invalidate(self):
         """
-        Http transport cannot use invalidate, you should use websocket for that
+        Http transport cannot use invalidate method, you should use websocket for that
 
         :raise CompatibilityError: on any use
         """

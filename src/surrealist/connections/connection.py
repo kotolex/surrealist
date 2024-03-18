@@ -199,7 +199,7 @@ class Connection(ABC):
     def remove_table(self, table_name: str, if_exists: bool = True) -> SurrealResult:
         """
         Fully removes table, even if it contains some records, analog of SQL "DROP table". You should have permissions
-        for this action.This method cannot remove any other resource, if you need to remove db, ns or scope -
+        for this action.This method cannot remove any other resource if you need to remove db, ns or scope -
         use **query**
 
         If if_exists parameter is False and the table does not exist - error will be returned at a result.
@@ -208,8 +208,7 @@ class Connection(ABC):
 
         Note: only name of the table allowed here, do not use record_id
 
-
-        :param table_name: name of the table
+        :param table_name: the name of the table,
         :param if_exists: if True, will use IF EXISTS statement for query
         :return: result of the query
         """
@@ -426,7 +425,6 @@ class Connection(ABC):
         Refer to: https://docs.surrealdb.com/docs/integration/http#export
 
         Refer to: https://docs.surrealdb.com/docs/cli/export/
-        :return:
         """
 
     @abstractmethod
@@ -439,8 +437,6 @@ class Connection(ABC):
         Refer to:
         https://docs.surrealdb.com/docs/integration/http#ml-import
         https://docs.surrealdb.com/docs/cli/ml/import
-        :param path:
-        :return:
         """
 
     @abstractmethod

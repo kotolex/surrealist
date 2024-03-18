@@ -215,8 +215,6 @@ class TestHttpConnection(TestCase):
         db = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
         connection = db.connect()
         res = connection.export()
-        # with open("import.surql", "wt", encoding="UTF-8") as file:
-        #     file.write(res)
         self.assertTrue("article" in res)
         self.assertTrue("user_db" in res)
         self.assertTrue("user_scope" in res)

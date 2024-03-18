@@ -1,5 +1,9 @@
 ## Release Notes ##
 
+**Version 0.3.1 (compatible with SurrealDB version 1.3.1):**
+- increment default timeout to 15 seconds
+- minor improvements for documentation
+
 **Version 0.3.0 (compatible with SurrealDB version 1.3.0):**
 - add IF NOT EXISTS for all DEFINE statements
 - add IF EXISTS for all REMOVE statements

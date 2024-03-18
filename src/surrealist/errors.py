@@ -76,6 +76,6 @@ class ResultHasNoValuesError(PySurrealError):
 
 class WrongCallError(PySurrealError):
     """
-    Raises on an attempt to call a Table object, in most cases it is mean you misspelled the method name of Database,
+    Raises on an attempt to call a Table object; in most cases it is mean you misspelled the method name of Database,
     for example, **live** instead of **live_query**
     """

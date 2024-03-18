@@ -8,7 +8,7 @@ ERR = "ERR"
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 DATE_FORMAT_NS = "%Y-%m-%dT%H:%M:%S.%fZ"
 HTTP_OK = 200  # status code for success
-DEFAULT_TIMEOUT = 5  # timeout in seconds for basic operations
+DEFAULT_TIMEOUT = 15  # timeout in seconds for basic operations
 DATA_LENGTH_FOR_LOGS = 300  # size of data in logs, data will be cropped if bigger than that
 
 
@@ -41,7 +41,7 @@ def crop_data(data: Union[str, bytes], is_str: bool = True) -> Union[str, bytes]
 
     :param data: str or bytes of data to put it in the logs
     :param is_str: a flag to use correct operation
-    :return: data of a same type, but cropped if it is bigger than DATA_LENGTH_FOR_LOGS
+    :return: data of the same type, but cropped if it is bigger than DATA_LENGTH_FOR_LOGS
     """
     if len(data) > DATA_LENGTH_FOR_LOGS:
         return f"{data[:DATA_LENGTH_FOR_LOGS]}..." if is_str else data[:DATA_LENGTH_FOR_LOGS] + b'...'
