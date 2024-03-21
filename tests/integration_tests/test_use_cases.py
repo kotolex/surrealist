@@ -492,6 +492,50 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
+#     def test_break(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/break
+#         text = """
+#         FOR $num IN [1, 2, 3, 4, 5, 6, 7, 8, 9] {
+# 	IF ($num > 5) {
+# 		BREAK;
+# 	};
+#
+# 	CREATE person:$num;
+# };
+#         """
+#         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+#         with surreal.connect() as connection:
+#             res = connection.query(text)
+#             self.assertFalse(res.is_error(), res)
+
+    def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
+        text = """
+            FOR $person IN (SELECT id, age FROM person) {
+	IF ($person.age < 18) {
+		CONTINUE;
+	};
+
+	UPDATE $person.id SET can_vote = true;
+};
+   """
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.create("person", {"id": "John", "age": 16, "name": "John"})
+            connection.create("person", {"id": "Jane", "age": 20, "name": "Jane"})
+            res = connection.query(text)
+            self.assertFalse(res.is_error(), res)
+            res = connection.select("person:Jane")
+            self.assertEqual(res.result[0]["can_vote"], True, res)
+            res = connection.select("person:John")
+            self.assertTrue("can_vote" not in res.result[0], res)
+
+    def test_throw(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/throw
+        text = 'THROW "some error message";'
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.query(text)
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(res.result, "An error occurred: some error message", res)
+
 
 if __name__ == '__main__':
     main()
