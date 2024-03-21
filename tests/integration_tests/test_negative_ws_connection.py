@@ -31,16 +31,16 @@ class TestNegativeWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.authenticate("wrong")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result['message'], 'There was a problem with authentication')
-            self.assertEqual(res.result['code'], -32000)
+            self.assertEqual(res.result, 'There was a problem with authentication')
+            self.assertEqual(res.code, -32000)
 
     def test_signin_failed_root(self):
         surreal = Surreal(URL, namespace="test", database="test")
         with surreal.connect() as connection:
             res = connection.signin('wrong', 'wrong')
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result['message'], 'There was a problem with authentication')
-            self.assertEqual(res.result['code'], -32000)
+            self.assertEqual(res.result, 'There was a problem with authentication')
+            self.assertEqual(res.code, -32000)
 
     def test_live_failed_on_id(self):
         a_list = []
@@ -49,16 +49,22 @@ class TestNegativeWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.live(f"ws_article:some_id", callback=function)
             self.assertTrue(res.is_error(), res)
-            self.assertEqual({'code': -32602, 'message': 'Invalid params'}, res.result)
+            self.assertEqual(res.result, "Can not execute LIVE statement using value 'ws_article:some_id'")
+            self.assertEqual(res.code, -32000)
 
     def test_kill(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        err = "KILL received a parameter that could not be converted to a UUID"
         with surreal.connect() as connection:
             res = connection.kill("wrong")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result['message'],
-                             "There was a problem with the database: Can not execute KILL statement using id '$id'")
-            self.assertEqual(res.result['code'], -32000)
+            self.assertEqual(res.result, f"Can not execute KILL statement using id '{err}'")
+            self.assertEqual(res.code, -32000)
+            res = connection.kill("0189d6e3-8eac-703a-9a48-d9faa78b44b9")
+            self.assertTrue(res.is_error(), res)
+            err = "KILL statement uuid did not exist"
+            self.assertEqual(res.result, f"Can not execute KILL statement using id '{err}'")
+            self.assertEqual(res.code, -32000)
 
     def test_export_failed(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))

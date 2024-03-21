@@ -1,5 +1,13 @@
 ## Release Notes ##
 
+**Version 0.4.0 (compatible with SurrealDB version 1.4.0):**
+- code attribute of a result is now containing http status code or error code for websocket
+- DEFINE...RELATE
+- INCLUDE ORIGINAL
+- highlight
+- http /rpc
+- minor improvements for documentation and tests
+
 **Version 0.3.1 (compatible with SurrealDB version 1.3.1):**
 - increment default timeout to 15 seconds
 - minor improvements for documentation

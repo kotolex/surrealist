@@ -16,7 +16,7 @@ class SurrealResult:
         Expected fields:
         id - only from websocket requests
         result - error text or any other result of the request
-        code - only from http requests
+        code - http status code from http requests or error code from websocket
         query - text of the query if available
         status - OK or ERR, if ERR then result contains error text
         time - execution time, only for http requests
@@ -38,8 +38,11 @@ class SurrealResult:
         if self.code and self.code != HTTP_OK:
             self.status = ERR
         self.additional_info: Dict = kwargs
+        if self.status == ERR and isinstance(self.result, dict) and "code" in self.result and "message" in self.result:
+            self.code = self.result["code"]
+            self.result = self.result["message"]
         if self.result and isinstance(self.result, str) and "There was a problem with the database:" in self.result:
-            self.result = (":".join(self.result.split(":")[1:])).strip()
+            self.result = self.result.split(":", 1)[1].strip()
 
     def count(self) -> int:
         """
