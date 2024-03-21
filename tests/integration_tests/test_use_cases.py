@@ -447,6 +447,51 @@ class TestUseCases(TestCase):
             res = db.book.select().where("content @@ 'tools'").run()
             self.assertFalse(res.is_error(), res)
 
+    # def test_live_no_results_on_transaction_fail(self):  # https://github.com/surrealdb/surrealdb/issues/3742
+    #     """
+    #     We test here live query is not getting updates on transaction fail.
+    #
+    #     """
+    #     # TODO add cancel transaction
+    #     a_list = []
+    #     function = lambda mess: a_list.append(mess)
+    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #     with surreal.connect() as connection:
+    #         res = connection.live("player", callback=function)
+    #         self.assertFalse(res.is_error(), res)
+    #         tr = """
+    #             BEGIN TRANSACTION;
+    #
+    #   LET $p = (CREATE player CONTENT {
+    #     name: "barbar",
+    #   } RETURN id)[0];
+    #
+    #   THROW $p.id;
+    #   COMMIT TRANSACTION;
+    #             """
+    #         res = connection.query(tr)
+    #         time.sleep(0.2)
+    #         self.assertEqual(res.result[0]["status"], "ERR", res)
+    #         self.assertEqual(a_list, [], a_list)
+
+    def test_insert_bulk_checked_by_lq(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.live("article", callback=function)
+            self.assertFalse(res.is_error(), res)
+            uid = get_random_series(21)
+            uid2 = get_random_series(33)
+            res = connection.insert("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
+                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
+            self.assertFalse(res.is_error(), res)
+            time.sleep(0.2)
+            self.assertEqual(a_list[0]["result"]["action"], "CREATE", a_list)
+            self.assertEqual(a_list[1]["result"]["action"], "CREATE", a_list)
+            self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
+            self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
+
 
 if __name__ == '__main__':
     main()
