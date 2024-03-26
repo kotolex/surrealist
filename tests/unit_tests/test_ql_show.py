@@ -6,7 +6,7 @@ from surrealist.ql.statements.show import Show
 class TestShow(TestCase):
     def test_create_default(self):
         show = Show(None, "person")
-        self.assertEqual("SHOW CHANGES FOR TABLE person;", show.to_str())
+        self.assertTrue("SHOW CHANGES FOR TABLE person SINCE " in show.to_str())
 
     def test_create_since(self):
         show = Show(None, "person").since("2023-09-07T01:23:52Z")

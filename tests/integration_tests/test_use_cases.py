@@ -492,20 +492,20 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
-#     def test_break(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/break
-#         text = """
-#         FOR $num IN [1, 2, 3, 4, 5, 6, 7, 8, 9] {
-# 	IF ($num > 5) {
-# 		BREAK;
-# 	};
-#
-# 	CREATE person:$num;
-# };
-#         """
-#         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
-#         with surreal.connect() as connection:
-#             res = connection.query(text)
-#             self.assertFalse(res.is_error(), res)
+    #     def test_break(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/break
+    #         text = """
+    #         FOR $num IN [1, 2, 3, 4, 5, 6, 7, 8, 9] {
+    # 	IF ($num > 5) {
+    # 		BREAK;
+    # 	};
+    #
+    # 	CREATE person:$num;
+    # };
+    #         """
+    #         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #         with surreal.connect() as connection:
+    #             res = connection.query(text)
+    #             self.assertFalse(res.is_error(), res)
 
     def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
         text = """
@@ -535,6 +535,13 @@ class TestUseCases(TestCase):
             res = connection.query(text)
             self.assertTrue(res.is_error(), res)
             self.assertEqual(res.result, "An error occurred: some error message", res)
+
+    # def test_array_clump_fails(self):  # TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/3757
+    #     text = 'RETURN array::clump([0, 1, 2, 3], 0);'
+    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #     with surreal.connect() as connection:
+    #         res = connection.query(text)
+    #         self.assertTrue(res.is_error(), res)
 
 
 if __name__ == '__main__':

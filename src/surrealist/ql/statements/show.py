@@ -1,12 +1,12 @@
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 from surrealist.connections import Connection
-from surrealist.utils import OK
-from .show_statements import ShowUseSince
+from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS
 from .statement import Statement
 
 
-class Show(Statement, ShowUseSince):
+class Show(Statement):
     """
     Represents SHOW CHANGES statement, it should be able to use any statements from documentation
 
@@ -15,12 +15,34 @@ class Show(Statement, ShowUseSince):
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
     """
 
-    def __init__(self, connection: Connection, table_name: str):
+    def __init__(self, connection: Connection, table_name: str, since: Optional[str] = None):
         super().__init__(connection)
         self._table_name = table_name
+        self._since = since
+        self._limit = None
 
     def validate(self) -> List[str]:
-        return [OK]
+        result = []
+        if self._since:
+            try:
+                format_ = DATE_FORMAT if "." not in self._since else DATE_FORMAT_NS
+                datetime.strptime(self._since, format_)
+            except ValueError:
+                result.append("Timestamp in wrong format, you need iso-date like 2024-01-01T10:10:10.000001Z")
+        if self._limit and self._limit < 1:
+            result.append("Limit should not be less than 1")
+        return [OK] if not result else result
+
+    def limit(self, limit: int) -> "Show":
+        self._limit = limit
+        return self
+
+    def since(self, timestamp: str) -> "Show":
+        self._since = timestamp
+        return self
 
     def _clean_str(self):
-        return f"SHOW CHANGES FOR TABLE {self._table_name}"
+        if not self._since:
+            self._since = f'{datetime.utcnow().isoformat("T")}Z'  # default value
+        limit = f" LIMIT {self._limit}" if self._limit else ""
+        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE "{self._since}"{limit}'

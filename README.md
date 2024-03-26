@@ -440,7 +440,7 @@ Let's set up everything:
 DEFINE TABLE reading CHANGEFEED 1d;
 ```
 
-**Note:** date and time of your requests should be strict AFTER date and time of creating `foo` and `reading`
+**Note:** date and time of your requests should be strict AFTER date and time of creating `reading`
 
 **Example 11**
 
@@ -450,7 +450,7 @@ from surrealist import Surreal
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
-    # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table was created
+    # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
     res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
     print(res.result) # it will be [] cause no events happen
     # now we add one record
@@ -471,7 +471,7 @@ from surrealist import Database
 
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root')) as db:
-    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table was created
+    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
     res = db.table("reading").show_changes().since(tm).run()
     print(res.result) # it will be [] cause no events happen
     # now we add one record

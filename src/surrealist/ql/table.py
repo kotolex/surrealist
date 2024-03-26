@@ -88,7 +88,7 @@ class Table:
         """
         return Create(self._connection, self.name, record_id)
 
-    def show_changes(self) -> Show:
+    def show_changes(self, since: Optional[str] = None) -> Show:
         """
         Represents SHOW CHANGES statement for the Change Feed
 
@@ -100,7 +100,7 @@ class Table:
 
         :return: Show object
         """
-        return Show(self._connection, self._name)
+        return Show(self._connection, self._name, since=since)
 
     def delete(self, record_id: Optional[str] = None) -> Delete:
         """
