@@ -3,6 +3,8 @@
 **Version 0.4.0 (compatible with SurrealDB version 1.4.0):**
 - code attribute of a result is now containing http status code or error code for websocket
 - SHOW CHANGES uses current date-time if not specified, because SHOW does not work without SINCE
+- fix live queries url links
+- live query for QL is now can use VALUE and custom query
 - DEFINE...RELATE
 - INCLUDE ORIGINAL
 - highlight

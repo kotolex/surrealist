@@ -10,6 +10,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.person.live(print))  # LIVE SELECT * FROM person;
     print(db.person.live(print, use_diff=True))  # LIVE SELECT DIFF FROM person;
     print(db.person.live(print).where("x > 10").fetch("id"))  # LIVE SELECT * FROM person WHERE x > 10 FETCH id;
+    print(db.table("person").live(print).value("name"))  # LIVE SELECT VALUE name FROM person;
+    print(db.table("person").live(print, select="*, name as author"))  # LIVE SELECT *, name as author FROM person;
 
     # LIVE SELECT author.id AS auth FROM person WHERE x > 10;
     print(db.person.live(print).alias("author.id", "auth").where("x > 10"))

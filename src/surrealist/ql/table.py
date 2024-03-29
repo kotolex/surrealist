@@ -151,7 +151,7 @@ class Table:
         """
         return self.drop()
 
-    def live(self, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
+    def live(self, callback: Callable[[Dict], None], select: Optional[str] = None, use_diff: bool = False) -> Live:
         """
         Represents LIVE statement for a live query
 
@@ -165,10 +165,13 @@ class Table:
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
 
         :param callback: function to call on live query event
+        :param select: raw query to insert between LIVE SELECT and FROM {table}, so the result will be
+        LIVE SELECT {select} FROM {table_name}.
+        If it is provided, other parameters (diff, alias, value) will be ignored
         :param use_diff: return result in DIFF format
         :return: Live object
         """
-        return Live(self._connection, self._name, callback, use_diff)
+        return Live(self._connection, self._name, callback, select, use_diff)
 
     def kill(self, live_id: str) -> SurrealResult:
         """
