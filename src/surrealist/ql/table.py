@@ -158,7 +158,7 @@ class Table:
         Example:
         db.person.live(func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 

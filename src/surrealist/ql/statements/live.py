@@ -11,7 +11,7 @@ class Live(Statement, LiveUseWhere):
     """
     Represents LIVE SELECT statement, it should be able to use any statements from documentation
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+    Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
     """
@@ -24,12 +24,6 @@ class Live(Statement, LiveUseWhere):
         self._callback = callback
 
     def alias(self, value_name: str, alias: str) -> "Live":
-        """
-
-        :param value_name:
-        :param alias:
-        :return:
-        """
         self._alias = (value_name, alias)
         self._diff = False
         return self

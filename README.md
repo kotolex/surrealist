@@ -293,7 +293,7 @@ Live queries let you subscribe to events of desired table when changes happen—
 
 About live query: https://surrealdb.com/products/lq
 
-Using live select: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+Using live select: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
 About DIFF (jsonpatch): https://jsonpatch.com
 
@@ -360,7 +360,7 @@ in console, you will get:
 
 If you do not need LQ anymore, call KILL method, with live_id
 
-You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://docs.surrealdb.com/docs/surrealql/statements/live-select#filter-the-live-query)
+You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query)
 
 **Example 10**
 

@@ -15,7 +15,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
     print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);
 
-    # DEFINE examples below you can see https://docs.surrealdb.com/docs/surrealql/statements/define/overview
+    # DEFINE examples below you can see https://surrealdb.com/docs/surrealdb/surrealql/statements/define/
 
     # on database object we can DEFINE TABLE
     print(db.define_table("reading"))  # DEFINE TABLE reading;
