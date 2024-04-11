@@ -115,6 +115,9 @@ VALUE "value";"""
         text = "DEFINE TABLE table_name DROP CHANGEFEED 1s;"
         self.assertEqual(text, DefineTable(None, "table_name").drop().changefeed("1s").to_str())
 
+        text = "DEFINE TABLE table_name DROP CHANGEFEED 1s INCLUDE ORIGINAL;"
+        self.assertEqual(text, DefineTable(None, "table_name").drop().changefeed("1s", include_original=True).to_str())
+
         text = "DEFINE TABLE table_name SCHEMALESS PERMISSIONS NONE;"
         self.assertEqual(text, DefineTable(None, "table_name").schemaless().permissions_none().to_str())
 

@@ -351,11 +351,11 @@ class DefineTable(Define, CanUsePermissions):
         self._less = True
         return self
 
-    def changefeed(self, duration: str) -> "DefineTable":
+    def changefeed(self, duration: str, include_original: bool = False) -> "DefineTable":
         """
         Represents CHANGEFEED statement
         """
-        self._changefeed = duration
+        self._changefeed = (duration, include_original)
         return self
 
     def alias(self, select: Union[str, Statement]) -> "DefineTable":
@@ -418,7 +418,11 @@ class DefineTable(Define, CanUsePermissions):
         elif self._full:
             schema = " SCHEMAFULL"
         alias = "" if not self._alias else f" AS\n {self._alias}\n"
-        feed = "" if not self._changefeed else f" CHANGEFEED {self._changefeed}"
+        feed = ""
+        if self._changefeed:
+            feed = f" CHANGEFEED {self._changefeed[0]}"
+            if self._changefeed[1]:
+                feed = f"{feed} INCLUDE ORIGINAL"
         type_ = "" if not self._type else f" TYPE {self._type}"
         return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{type_}{alias}{feed}'
 

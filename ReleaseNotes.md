@@ -5,11 +5,10 @@
 - SHOW CHANGES uses current date-time if not specified, because SHOW does not work without SINCE
 - fix live queries url links
 - live query for QL is now can use VALUE and custom query
-- DEFINE TABLE now can use TYPE
-- INCLUDE ORIGINAL
+- DEFINE TABLE now can use TYPE and INCLUDE ORIGINAL
 - highlight
 - http /rpc
-- minor improvements for documentation and tests
+- minor improvements for documentation, examples and tests
 
 **Version 0.3.1 (compatible with SurrealDB version 1.3.1):**
 - increment default timeout to 15 seconds

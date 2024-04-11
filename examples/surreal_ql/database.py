@@ -22,6 +22,9 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
     print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
+
+    # DEFINE TABLE reading CHANGEFEED 1h INCLUDE ORIGINAL;
+    print(db.define_table("reading").changefeed("1h", include_original=True))
     print(db.define_table("user").schemafull())  # DEFINE TABLE user SCHEMAFULL;
     print(db.define_table("user").schemaless())  # DEFINE TABLE user SCHEMALESS;
     print(db.define_table("person").type_any())  # DEFINE TABLE person TYPE ANY;

@@ -167,6 +167,21 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
+    def test_z_change_feed_include_original(self):
+        with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
+            res = db.define_table("include_original").changefeed("1s", include_original=True).run()
+            self.assertFalse(res.is_error(), res)
+            time.sleep(1)  # wait for changefeed to create
+            tm = f'{datetime.utcnow().isoformat("T")}Z'
+            story = get_random_series(7)
+            db.table("include_original").create().set(story=story).run()
+            time.sleep(2)
+            res = db.table("include_original").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result))
+            self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
+            self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
+
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             author = db.table("t_author")
