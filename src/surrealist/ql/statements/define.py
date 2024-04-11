@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional, Tuple
 
 from surrealist.connections import Connection
 from surrealist.ql.statements.permissions import CanUsePermissions
@@ -319,8 +319,12 @@ class DefineTable(Define, CanUsePermissions):
         self._full = False
         self._alias = None
         self._changefeed = None
+        self._type = None
 
     def if_not_exists(self) -> "DefineTable":
+        """
+        Represents IF NOT EXISTS statement
+        """
         self._if_not_exists = True
         return self
 
@@ -365,6 +369,41 @@ class DefineTable(Define, CanUsePermissions):
             self._alias = select
         return self
 
+    def type_any(self) -> "DefineTable":
+        """
+        Represents TYPE ANY statement
+        """
+        self._type = "ANY"
+        return self
+
+    def type_normal(self) -> "DefineTable":
+        """
+        Represents TYPE NORMAL statement
+        """
+        self._type = "NORMAL"
+        return self
+
+    def type_relation(self, from_to: Optional[Tuple] = None, use_from_to: bool = True) -> "DefineTable":
+        """
+        Represents TYPE RELATE statement
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table#table-with-specialized-type-clause-since-140
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+        :param from_to: optional pair of source and target table, both must be provided(not None)
+        :param use_from_to: if True, FROM TO syntax will be used, if False, IN OUT syntax will be used
+        """
+        if from_to and from_to[0] and from_to[1]:
+            if use_from_to:
+                self._type = f"RELATION FROM {from_to[0]} TO {from_to[1]}"
+            else:
+                self._type = f"RELATION IN {from_to[0]} OUT {from_to[1]}"
+        else:
+            self._type = "RELATION"
+        return self
+
     def validate(self) -> List[str]:
         durations = ('w', 'y', 'd', 'h', 'ms', 's', 'm')
         if self._changefeed and not any(self._changefeed.endswith(letter) for letter in durations):
@@ -380,7 +419,8 @@ class DefineTable(Define, CanUsePermissions):
             schema = " SCHEMAFULL"
         alias = "" if not self._alias else f" AS\n {self._alias}\n"
         feed = "" if not self._changefeed else f" CHANGEFEED {self._changefeed}"
-        return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{alias}{feed}'
+        type_ = "" if not self._type else f" TYPE {self._type}"
+        return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{type_}{alias}{feed}'
 
 
 class DefineField(Define, CanUsePermissions):

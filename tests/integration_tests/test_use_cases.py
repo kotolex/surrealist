@@ -149,7 +149,7 @@ class TestUseCases(TestCase):
                     connection.query(f'CREATE reading SET story = "{story}";')
                     res = connection.show_changes('reading', tm)
                     self.assertFalse(res.is_error(), res)
-                    self.assertTrue(story in str(res.result))
+                    self.assertTrue(story in str(res.result), res.result)
                     self.assertTrue('changes' in str(res.result))
                     self.assertTrue('update' in str(res.result))
                     self.assertTrue('reading' in str(res.result))
@@ -381,6 +381,19 @@ class TestUseCases(TestCase):
             delete = Where(user="$auth.id").OR("$auth.admin = true")
             res = db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
                                                                        delete=delete).run()
+            self.assertFalse(res.is_error())
+
+    def test_define_tables_with_types(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.define_table("any_type").type_any().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("normal_type").type_normal().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type").type_relation().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type_from_to").type_relation(("user", "post")).run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type_in_out").type_relation(("user", "post"), use_from_to=False).run()
             self.assertFalse(res.is_error())
 
     def test_define_field_and_remove(self):

@@ -24,6 +24,14 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
     print(db.define_table("user").schemafull())  # DEFINE TABLE user SCHEMAFULL;
     print(db.define_table("user").schemaless())  # DEFINE TABLE user SCHEMALESS;
+    print(db.define_table("person").type_any())  # DEFINE TABLE person TYPE ANY;
+    print(db.define_table("person").type_normal())  # DEFINE TABLE person TYPE NORMAL;
+    print(db.define_table("likes").type_relation())  # DEFINE TABLE likes TYPE RELATION;
+
+    # DEFINE TABLE likes TYPE RELATION FROM user TO post;
+    print(db.define_table("likes").type_relation(from_to=("user", "post")))
+    # DEFINE TABLE likes TYPE RELATION IN user OUT post;
+    print(db.define_table("likes").type_relation(from_to=("user", "post"), use_from_to=False))
 
     # DEFINE TABLE temperatures_by_month AS
     #  SELECT count() AS total, time::month(recorded_at) AS month FROM reading GROUP BY city

@@ -5,7 +5,7 @@
 - SHOW CHANGES uses current date-time if not specified, because SHOW does not work without SINCE
 - fix live queries url links
 - live query for QL is now can use VALUE and custom query
-- DEFINE...RELATE
+- DEFINE TABLE now can use TYPE
 - INCLUDE ORIGINAL
 - highlight
 - http /rpc
