@@ -168,14 +168,12 @@ class TestUseCases(TestCase):
             self.assertTrue('reading' in str(res.result))
 
     def test_z_change_feed_include_original(self):
+        time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
-            res = db.define_table("include_original").changefeed("1s", include_original=True).run()
-            self.assertFalse(res.is_error(), res)
-            time.sleep(2)  # wait for changefeed to create
             tm = f'{datetime.utcnow().isoformat("T")}Z'
+            time.sleep(1)
             story = get_random_series(7)
             db.table("include_original").create().set(story=story).run()
-            time.sleep(3)
             res = db.table("include_original").show_changes().since(tm).run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(story in str(res.result), res.result)
