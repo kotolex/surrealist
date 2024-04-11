@@ -171,14 +171,14 @@ class TestUseCases(TestCase):
         with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
             res = db.define_table("include_original").changefeed("1s", include_original=True).run()
             self.assertFalse(res.is_error(), res)
-            time.sleep(1)  # wait for changefeed to create
+            time.sleep(2)  # wait for changefeed to create
             tm = f'{datetime.utcnow().isoformat("T")}Z'
             story = get_random_series(7)
             db.table("include_original").create().set(story=story).run()
-            time.sleep(2)
+            time.sleep(3)
             res = db.table("include_original").show_changes().since(tm).run()
             self.assertFalse(res.is_error(), res)
-            self.assertTrue(story in str(res.result))
+            self.assertTrue(story in str(res.result), res.result)
             self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
             self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
