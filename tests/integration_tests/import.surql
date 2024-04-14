@@ -21,85 +21,91 @@ DEFINE SCOPE user_scope SESSION 1d SIGNUP (CREATE user SET email = $email, pass 
 -- TABLE: account
 -- ------------------------------
 
-DEFINE TABLE account SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE account TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: article
 -- ------------------------------
 
-DEFINE TABLE article SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE article TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: artist
 -- ------------------------------
 
-DEFINE TABLE artist SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE artist TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: author
 -- ------------------------------
 
-DEFINE TABLE author SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE author TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: create
 -- ------------------------------
 
-DEFINE TABLE create SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE create TYPE ANY SCHEMALESS PERMISSIONS NONE;
+
+-- ------------------------------
+-- TABLE: include_original
+-- ------------------------------
+
+DEFINE TABLE include_original TYPE ANY SCHEMALESS CHANGEFEED 1ns INCLUDE ORIGINAL PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: person
 -- ------------------------------
 
-DEFINE TABLE person SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE person TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: product
 -- ------------------------------
 
-DEFINE TABLE product SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE product TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: reading
 -- ------------------------------
 
-DEFINE TABLE reading SCHEMALESS CHANGEFEED 1d PERMISSIONS NONE;
+DEFINE TABLE reading TYPE ANY SCHEMALESS CHANGEFEED 1d PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: signin
 -- ------------------------------
 
-DEFINE TABLE signin SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE signin TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: signup
 -- ------------------------------
 
-DEFINE TABLE signup SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE signup TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: temperature
 -- ------------------------------
 
-DEFINE TABLE temperature SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE temperature TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: user
 -- ------------------------------
 
-DEFINE TABLE user SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE user TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: violet
 -- ------------------------------
 
-DEFINE TABLE violet SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE violet TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: ws_article
 -- ------------------------------
 
-DEFINE TABLE ws_article SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE ws_article TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TRANSACTION
@@ -132,6 +138,11 @@ UPDATE author:lex CONTENT { admin: true, age: 42, id: author:lex, name: { first:
 
 -- ------------------------------
 -- TABLE DATA: create
+-- ------------------------------
+
+
+-- ------------------------------
+-- TABLE DATA: include_original
 -- ------------------------------
 
 

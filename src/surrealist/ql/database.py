@@ -333,14 +333,15 @@ class Database:
         """
         return Relate(self._connection, value=value)
 
-    def live_query(self, table_name: str, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
+    def live_query(self, table_name: str, callback: Callable[[Dict], None], select: Optional[str] = None,
+                   use_diff: bool = False) -> Live:
         """
         Represents LIVE statement for a live query
 
         Example:
         db.live_query("person", func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
@@ -348,10 +349,13 @@ class Database:
 
         :param table_name: name od the table to live select
         :param callback: function to call on live query event, signature is `def callback(arg:Dict) -> None`
+        :param select: raw query to insert between LIVE SELECT and FROM {table}, so the result will be
+        LIVE SELECT {select} FROM {table_name}.
+        If it is provided, other parameters (diff, alias, value) will be ignored
         :param use_diff: return result in DIFF format
         :return: Live object
         """
-        return Live(self._connection, table_name, callback, use_diff)
+        return Live(self._connection, table_name, callback, select, use_diff)
 
     def kill_query(self, live_id: str) -> SurrealResult:
         """

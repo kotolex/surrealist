@@ -149,7 +149,7 @@ class TestUseCases(TestCase):
                     connection.query(f'CREATE reading SET story = "{story}";')
                     res = connection.show_changes('reading', tm)
                     self.assertFalse(res.is_error(), res)
-                    self.assertTrue(story in str(res.result))
+                    self.assertTrue(story in str(res.result), res.result)
                     self.assertTrue('changes' in str(res.result))
                     self.assertTrue('update' in str(res.result))
                     self.assertTrue('reading' in str(res.result))
@@ -166,6 +166,19 @@ class TestUseCases(TestCase):
             self.assertTrue('changes' in str(res.result))
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
+
+    def test_z_change_feed_include_original(self):
+        time.sleep(0.2)
+        with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
+            tm = f'{datetime.utcnow().isoformat("T")}Z'
+            time.sleep(1)
+            story = get_random_series(7)
+            db.table("include_original").create().set(story=story).run()
+            res = db.table("include_original").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result), res.result)
+            self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
+            self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -383,6 +396,19 @@ class TestUseCases(TestCase):
                                                                        delete=delete).run()
             self.assertFalse(res.is_error())
 
+    def test_define_tables_with_types(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            res = db.define_table("any_type").type_any().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("normal_type").type_normal().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type").type_relation().run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type_from_to").type_relation(("user", "post")).run()
+            self.assertFalse(res.is_error())
+            res = db.define_table("relation_type_in_out").type_relation(("user", "post"), use_from_to=False).run()
+            self.assertFalse(res.is_error())
+
     def test_define_field_and_remove(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             ind_count = len(db.user.info()["fields"])
@@ -446,6 +472,102 @@ class TestUseCases(TestCase):
                                                                                       highlights=False).run()
             res = db.book.select().where("content @@ 'tools'").run()
             self.assertFalse(res.is_error(), res)
+
+    # def test_live_no_results_on_transaction_fail(self):  # https://github.com/surrealdb/surrealdb/issues/3742
+    #     """
+    #     We test here live query is not getting updates on transaction fail.
+    #
+    #     """
+    #     # TODO add cancel transaction
+    #     a_list = []
+    #     function = lambda mess: a_list.append(mess)
+    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #     with surreal.connect() as connection:
+    #         res = connection.live("player", callback=function)
+    #         self.assertFalse(res.is_error(), res)
+    #         tr = """
+    #             BEGIN TRANSACTION;
+    #
+    #   LET $p = (CREATE player CONTENT {
+    #     name: "barbar",
+    #   } RETURN id)[0];
+    #
+    #   THROW $p.id;
+    #   COMMIT TRANSACTION;
+    #             """
+    #         res = connection.query(tr)
+    #         time.sleep(0.2)
+    #         self.assertEqual(res.result[0]["status"], "ERR", res)
+    #         self.assertEqual(a_list, [], a_list)
+
+    def test_insert_bulk_checked_by_lq(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.live("article", callback=function)
+            self.assertFalse(res.is_error(), res)
+            uid = get_random_series(21)
+            uid2 = get_random_series(33)
+            res = connection.insert("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
+                                                {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
+            self.assertFalse(res.is_error(), res)
+            time.sleep(0.2)
+            self.assertEqual(a_list[0]["result"]["action"], "CREATE", a_list)
+            self.assertEqual(a_list[1]["result"]["action"], "CREATE", a_list)
+            self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
+            self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
+
+    #     def test_break(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/break
+    #         text = """
+    #         FOR $num IN [1, 2, 3, 4, 5, 6, 7, 8, 9] {
+    # 	IF ($num > 5) {
+    # 		BREAK;
+    # 	};
+    #
+    # 	CREATE person:$num;
+    # };
+    #         """
+    #         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #         with surreal.connect() as connection:
+    #             res = connection.query(text)
+    #             self.assertFalse(res.is_error(), res)
+
+    def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
+        text = """
+            FOR $person IN (SELECT id, age FROM person) {
+	IF ($person.age < 18) {
+		CONTINUE;
+	};
+
+	UPDATE $person.id SET can_vote = true;
+};
+   """
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.create("person", {"id": "John", "age": 16, "name": "John"})
+            connection.create("person", {"id": "Jane", "age": 20, "name": "Jane"})
+            res = connection.query(text)
+            self.assertFalse(res.is_error(), res)
+            res = connection.select("person:Jane")
+            self.assertEqual(res.result[0]["can_vote"], True, res)
+            res = connection.select("person:John")
+            self.assertTrue("can_vote" not in res.result[0], res)
+
+    def test_throw(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/throw
+        text = 'THROW "some error message";'
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.query(text)
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(res.result, "An error occurred: some error message", res)
+
+    # def test_array_clump_fails(self):  # TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/3757
+    #     text = 'RETURN array::clump([0, 1, 2, 3], 0);'
+    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #     with surreal.connect() as connection:
+    #         res = connection.query(text)
+    #         self.assertTrue(res.is_error(), res)
 
 
 if __name__ == '__main__':

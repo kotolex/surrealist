@@ -11,7 +11,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (1.3.0), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (1.4.0), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -293,7 +293,7 @@ Live queries let you subscribe to events of desired table when changes happen—
 
 About live query: https://surrealdb.com/products/lq
 
-Using live select: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+Using live select: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
 About DIFF (jsonpatch): https://jsonpatch.com
 
@@ -360,7 +360,7 @@ in console, you will get:
 
 If you do not need LQ anymore, call KILL method, with live_id
 
-You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://docs.surrealdb.com/docs/surrealql/statements/live-select#filter-the-live-query)
+You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query)
 
 **Example 10**
 
@@ -440,7 +440,7 @@ Let's set up everything:
 DEFINE TABLE reading CHANGEFEED 1d;
 ```
 
-**Note:** date and time of your requests should be strict AFTER date and time of creating `foo` and `reading`
+**Note:** date and time of your requests should be strict AFTER date and time of creating `reading`
 
 **Example 11**
 
@@ -450,7 +450,7 @@ from surrealist import Surreal
 
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
-    # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table was created
+    # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
     res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
     print(res.result) # it will be [] cause no events happen
     # now we add one record
@@ -471,7 +471,7 @@ from surrealist import Database
 
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root')) as db:
-    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER db and table was created
+    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
     res = db.table("reading").show_changes().since(tm).run()
     print(res.result) # it will be [] cause no events happen
     # now we add one record

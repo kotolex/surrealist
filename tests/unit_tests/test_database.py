@@ -90,7 +90,6 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
 
-
     def test_define_index_exists(self):
         text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii " \
                "BM25 HIGHLIGHTS;"
@@ -104,10 +103,10 @@ VALUE "value";"""
         self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").to_str())
 
     def test_define_token_exists(self):
-            text = """DEFINE TOKEN IF NOT EXISTS token_name ON DATABASE 
+        text = """DEFINE TOKEN IF NOT EXISTS token_name ON DATABASE 
 TYPE RS256 
 VALUE "value";"""
-            self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").if_not_exists().to_str())
+        self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").if_not_exists().to_str())
 
     def test_define_table(self):
         text = "DEFINE TABLE table_name;"
@@ -115,6 +114,9 @@ VALUE "value";"""
 
         text = "DEFINE TABLE table_name DROP CHANGEFEED 1s;"
         self.assertEqual(text, DefineTable(None, "table_name").drop().changefeed("1s").to_str())
+
+        text = "DEFINE TABLE table_name DROP CHANGEFEED 1s INCLUDE ORIGINAL;"
+        self.assertEqual(text, DefineTable(None, "table_name").drop().changefeed("1s", include_original=True).to_str())
 
         text = "DEFINE TABLE table_name SCHEMALESS PERMISSIONS NONE;"
         self.assertEqual(text, DefineTable(None, "table_name").schemaless().permissions_none().to_str())
@@ -166,6 +168,17 @@ PERMISSIONS
     def test_define_field_exists(self):
         text = "DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;"
         self.assertEqual(text, DefineField(None, "new_field", "some_table").if_not_exists().to_str())
+
+    def test_define_table_type(self):
+        self.assertEqual(DefineTable(None, "person").type_any().to_str(), "DEFINE TABLE person TYPE ANY;")
+        self.assertEqual(DefineTable(None, "person").type_normal().to_str(), "DEFINE TABLE person TYPE NORMAL;")
+        self.assertEqual(DefineTable(None, "likes").type_relation().to_str(), "DEFINE TABLE likes TYPE RELATION;")
+
+        text = "DEFINE TABLE likes TYPE RELATION FROM user TO post;"
+        self.assertEqual(DefineTable(None, "likes").type_relation(from_to=("user", "post")).to_str(), text)
+        text = "DEFINE TABLE likes TYPE RELATION IN user OUT post;"
+        self.assertEqual(DefineTable(None, "likes").type_relation(from_to=("user", "post"), use_from_to=False).to_str(),
+                         text)
 
 
 if __name__ == '__main__':

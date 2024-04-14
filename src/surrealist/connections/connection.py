@@ -209,7 +209,7 @@ class Connection(ABC):
         Note: only name of the table allowed here, do not use record_id
 
         :param table_name: the name of the table,
-        :param if_exists: if True, will use IF EXISTS statement for query
+        :param if_exists: if True, will use IF EXISTS statement for the query
         :return: result of the query
         """
         logger.info("Query-Operation: REMOVE. Table name %s", table_name)
@@ -275,7 +275,7 @@ class Connection(ABC):
         """
         This method can be used to initiate live query - a real-time selection from a table. Works only for websockets.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -288,7 +288,7 @@ class Connection(ABC):
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query. Works only for websockets.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 

@@ -15,15 +15,26 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
     print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);
 
-    # DEFINE examples below you can see https://docs.surrealdb.com/docs/surrealql/statements/define/overview
+    # DEFINE examples below you can see https://surrealdb.com/docs/surrealdb/surrealql/statements/define/
 
     # on database object we can DEFINE TABLE
     print(db.define_table("reading"))  # DEFINE TABLE reading;
     print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
     print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
+
+    # DEFINE TABLE reading CHANGEFEED 1h INCLUDE ORIGINAL;
+    print(db.define_table("reading").changefeed("1h", include_original=True))
     print(db.define_table("user").schemafull())  # DEFINE TABLE user SCHEMAFULL;
     print(db.define_table("user").schemaless())  # DEFINE TABLE user SCHEMALESS;
+    print(db.define_table("person").type_any())  # DEFINE TABLE person TYPE ANY;
+    print(db.define_table("person").type_normal())  # DEFINE TABLE person TYPE NORMAL;
+    print(db.define_table("likes").type_relation())  # DEFINE TABLE likes TYPE RELATION;
+
+    # DEFINE TABLE likes TYPE RELATION FROM user TO post;
+    print(db.define_table("likes").type_relation(from_to=("user", "post")))
+    # DEFINE TABLE likes TYPE RELATION IN user OUT post;
+    print(db.define_table("likes").type_relation(from_to=("user", "post"), use_from_to=False))
 
     # DEFINE TABLE temperatures_by_month AS
     #  SELECT count() AS total, time::month(recorded_at) AS month FROM reading GROUP BY city

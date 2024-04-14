@@ -18,6 +18,7 @@ class WebSocketConnection(Connection):
     Represents websocket transport and abilities to work with SurrealDb. It is a recommended connection.
 
     Refer to surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
+
     Refer to: https://docs.surrealdb.com/docs/integration/websocket
 
     Each object creates only one websocket connection and can be used in the context manager to close properly.
@@ -230,7 +231,7 @@ class WebSocketConnection(Connection):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#live
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -258,7 +259,7 @@ class WebSocketConnection(Connection):
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 

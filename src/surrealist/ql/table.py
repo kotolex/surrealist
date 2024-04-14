@@ -88,7 +88,7 @@ class Table:
         """
         return Create(self._connection, self.name, record_id)
 
-    def show_changes(self) -> Show:
+    def show_changes(self, since: Optional[str] = None) -> Show:
         """
         Represents SHOW CHANGES statement for the Change Feed
 
@@ -100,7 +100,7 @@ class Table:
 
         :return: Show object
         """
-        return Show(self._connection, self._name)
+        return Show(self._connection, self._name, since=since)
 
     def delete(self, record_id: Optional[str] = None) -> Delete:
         """
@@ -151,24 +151,27 @@ class Table:
         """
         return self.drop()
 
-    def live(self, callback: Callable[[Dict], None], use_diff: bool = False) -> Live:
+    def live(self, callback: Callable[[Dict], None], select: Optional[str] = None, use_diff: bool = False) -> Live:
         """
         Represents LIVE statement for a live query
 
         Example:
         db.person.live(func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/live-select
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
 
         :param callback: function to call on live query event
+        :param select: raw query to insert between LIVE SELECT and FROM {table}, so the result will be
+        LIVE SELECT {select} FROM {table_name}.
+        If it is provided, other parameters (diff, alias, value) will be ignored
         :param use_diff: return result in DIFF format
         :return: Live object
         """
-        return Live(self._connection, self._name, callback, use_diff)
+        return Live(self._connection, self._name, callback, select, use_diff)
 
     def kill(self, live_id: str) -> SurrealResult:
         """

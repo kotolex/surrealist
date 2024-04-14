@@ -165,6 +165,15 @@ class TestResult(TestCase):
         self.assertEqual({"text": "text"}, SurrealResult(result=[{"text": "text"}]).last())
         self.assertEqual(2, SurrealResult(result=[1, 2]).last())
 
+    def test_ws_error(self):
+        res = SurrealResult(**{'error': {'code': -32000, 'message': 'There was a problem with the database: '
+                                                                  'There was a problem with authentication'},
+                             'id': '80a0d6cf-d5ff-41ce-a29a-27f04fb2e3df'})
+        self.assertEqual(-32000, res.code)
+        self.assertTrue(res.is_error())
+        self.assertEqual("80a0d6cf-d5ff-41ce-a29a-27f04fb2e3df", res.ws_id)
+        self.assertEqual('There was a problem with authentication', res.result)
+
 
 if __name__ == '__main__':
     main()
