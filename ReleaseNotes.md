@@ -6,8 +6,6 @@
 - fix live queries url links
 - live query for QL is now can use VALUE and custom query
 - DEFINE TABLE now can use TYPE and INCLUDE ORIGINAL
-- highlight
-- http /rpc
 - minor improvements for documentation, examples and tests
 
 **Version 0.3.1 (compatible with SurrealDB version 1.3.1):**
