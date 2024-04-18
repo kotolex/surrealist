@@ -1,3 +1,4 @@
+import datetime
 import re
 import uuid
 from typing import Union
@@ -46,3 +47,21 @@ def crop_data(data: Union[str, bytes], is_str: bool = True) -> Union[str, bytes]
     if len(data) > DATA_LENGTH_FOR_LOGS:
         return f"{data[:DATA_LENGTH_FOR_LOGS]}..." if is_str else data[:DATA_LENGTH_FOR_LOGS] + b'...'
     return data
+
+
+def to_surreal_datetime_str(dt: datetime.datetime) -> str:
+    """
+    Convert datetime to string in Surreal format, for example: 2024-04-18T11:34:41.665249Z
+    :param dt: datetime object
+    :return: string representation of the datetime
+    """
+    return dt.strftime(DATE_FORMAT_NS)
+
+
+def to_datetime(dt_str: str) -> datetime.datetime:
+    """
+    Convert string in Surreal format to datetime object
+    :param dt_str: string datetime representation in Surreal format (e.g. 2024-04-18T11:34:41.665249Z)
+    :return: datetime object
+    """
+    return datetime.datetime.strptime(dt_str, DATE_FORMAT_NS)

@@ -467,11 +467,12 @@ Same example via QL-builder:
 **Example 12**
 
 ```python
-from surrealist import Database
+from datetime import datetime, timezone
+from surrealist import Database, to_surreal_datetime_str
 
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root')) as db:
-    tm = "2024-02-06T10:48:08.700483Z" # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
+    tm = to_surreal_datetime_str(datetime.now(timezone.utc)) # Again, here is a moment AFTER the table was created
     res = db.table("reading").show_changes().since(tm).run()
     print(res.result) # it will be [] cause no events happen
     # now we add one record
