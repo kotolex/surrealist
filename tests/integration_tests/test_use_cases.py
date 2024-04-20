@@ -1,9 +1,9 @@
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest import TestCase, main
 
-from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str
 from tests.integration_tests.utils import URL, get_random_series
 
 
@@ -139,7 +139,7 @@ class TestUseCases(TestCase):
                         count += 1
                         if count == 10:
                             self.assertTrue(False, "cant wait to changefeed")
-                        tm = f'{datetime.utcnow().isoformat("T")}Z'
+                        tm = to_surreal_datetime_str(datetime.now(timezone.utc))
                         res = connection.show_changes('reading', tm)
                         if not res.is_error():
                             break
@@ -157,7 +157,7 @@ class TestUseCases(TestCase):
     def test_z_change_feed(self):
         time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('root', 'root'), use_http=True) as db:
-            tm = f'{datetime.utcnow().isoformat("T")}Z'
+            tm = to_surreal_datetime_str(datetime.now())
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
@@ -170,7 +170,7 @@ class TestUseCases(TestCase):
     def test_z_change_feed_include_original(self):
         time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
-            tm = f'{datetime.utcnow().isoformat("T")}Z'
+            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
             time.sleep(1)
             story = get_random_series(7)
             db.table("include_original").create().set(story=story).run()

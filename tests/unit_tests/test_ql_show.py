@@ -33,7 +33,7 @@ class TestShow(TestCase):
     def test_full_invalid(self):
         show = Show(None, "person").since("2023-09-07").limit(-1)
         self.assertFalse(show.is_valid())
-        self.assertEqual(['Timestamp in wrong format, you need iso-date like 2024-01-01T10:10:10.000001Z',
+        self.assertEqual(['Timestamp in the wrong format, you need iso-date like 2024-01-01T10:10:10.000001Z',
                           "Limit should not be less than 1"], show.validate())
 
 

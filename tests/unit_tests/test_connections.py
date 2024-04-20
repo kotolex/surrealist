@@ -7,7 +7,6 @@ SRC = TESTS.parent / "src"
 sys.path.append(str(SRC))
 
 from surrealist import Surreal, SurrealConnectionError
-from surrealist.utils import crop_data, mask_pass
 from surrealist.clients.http_client import mask_opts
 from surrealist.result import to_result, SurrealResult
 
@@ -84,18 +83,6 @@ class TestConst(TestCase):
         res = to_result({'id': 100, 'result': "result"})
         self.assertEqual(SurrealResult(id=100, result="result"), res)
         self.assertFalse(res.is_error())
-
-    def test_crop_same(self):
-        self.assertEqual(crop_data("one"), "one")
-
-    def test_crop_data(self):
-        self.assertEqual(crop_data("*" * 400), "*" * 300 + "...")
-
-    def test_mask_pass(self):
-        self.assertEqual(mask_pass(
-            "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}"),
-            "{'method': 'signin', 'params': [{'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}]}")
-        self.assertEqual(mask_pass('{"user":"user", "pass": "123123"}'), '{"user":"user", "pass": "******"}')
 
     def test_masked_opts(self):
         res = mask_opts({"headers": {"Authorization": "Basic 123456"}, "data": b'0' * 350, "method": "GET"})

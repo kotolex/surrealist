@@ -1,4 +1,7 @@
 ## Release Notes ##
+**Version 0.4.1 (compatible with SurrealDB version 1.4.2):**
+- add to_surreal_datetime_str and to_datetime functions, cause SurealDB has a specific datetime format
+- minor improvements for documentation, examples and tests
 
 **Version 0.4.0 (compatible with SurrealDB version 1.4.0):**
 - code attribute of a result is now containing http status code or error code for websocket
