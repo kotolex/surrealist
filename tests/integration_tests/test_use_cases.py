@@ -167,18 +167,18 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
-    def test_z_change_feed_include_original(self):
-        time.sleep(0.2)
-        with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
-            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-            time.sleep(1)
-            story = get_random_series(7)
-            db.table("include_original").create().set(story=story).run()
-            res = db.table("include_original").show_changes().since(tm).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertTrue(story in str(res.result), res.result)
-            self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
-            self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
+    # def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
+    #     time.sleep(0.2)
+    #     with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
+    #         tm = to_surreal_datetime_str(datetime.now(timezone.utc))
+    #         time.sleep(1)
+    #         story = get_random_series(7)
+    #         db.table("include_original").create().set(story=story).run()
+    #         res = db.table("include_original").show_changes().since(tm).run()
+    #         self.assertFalse(res.is_error(), res)
+    #         self.assertTrue(story in str(res.result), res.result)
+    #         self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
+    #         self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
@@ -337,6 +337,21 @@ class TestUseCases(TestCase):
             res = db.remove_index("not_exists", table_name="user").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The index 'not_exists' does not exist", res.result)
+
+    def test_define_index_and_rebuilds(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(9)
+            db.define_analyzer("ascii2").run()
+            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").run()
+            self.assertFalse(res.is_error(), res)
+            res = db.rebuild_index(f"index_{uid}", "user").run()
+            self.assertFalse(res.is_error(), res)
+            res = db.rebuild_index(f"index_{uid}", "user", if_exists=True).run()
+            self.assertFalse(res.is_error(), res)
+            res = db.rebuild_index(f"index_WRONG", "user", if_exists=True).run()
+            self.assertFalse(res.is_error(), res)
+            res = db.rebuild_index(f"index_WRONG", "user").run()
+            self.assertTrue(res.is_error(), res)
 
     def test_define_failed_no_analyzer(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:

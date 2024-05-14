@@ -1,4 +1,10 @@
 ## Release Notes ##
+**Version 0.5.0 (compatible with SurrealDB version 1.5.0):**
+- although INCLUDE ORIGINAL statement exists, it has no effect (SurrealDB team decision)
+- add REBUILD INDEX statement, usable for database and table objects
+- improve DEFINE INDEX statement, now it can use
+- minor improvements for documentation, examples and tests
+
 **Version 0.4.1 (compatible with SurrealDB version 1.4.2):**
 - add to_surreal_datetime_str and to_datetime functions, cause SurealDB has a specific datetime format
 - minor improvements for documentation, examples and tests

@@ -1,11 +1,12 @@
 from typing import Optional, Callable, Dict, Tuple, Union, List
 
-from surrealist.errors import WrongCallError
 from surrealist.connections import Connection
+from surrealist.errors import WrongCallError
 from surrealist.ql.statements.create import Create
 from surrealist.ql.statements.delete import Delete
 from surrealist.ql.statements.insert import Insert
 from surrealist.ql.statements.live import Live
+from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.remove import Remove
 from surrealist.ql.statements.select import Select
 from surrealist.ql.statements.show import Show
@@ -223,6 +224,21 @@ class Table:
         :return: Update object
         """
         return Update(self._connection, self._name, record_id)
+
+    def rebuild_index(self, index_name: str, if_exists: bool = False) -> RebuildIndex:
+        """
+        Represents REBUILD INDEX object, used to rebuild resources.
+
+        Example:
+        db.table("user").rebuild_index("my_index").run()
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
+
+        :param index_name: name of the index
+        :param if_exists: use IF EXISTS statement if True
+        :return: RebuildIndex object
+        """
+        return RebuildIndex(self._connection, index_name=index_name, table_name=self._name, if_exists=if_exists)
 
     def __repr__(self):
         return f"Table(name={self._name})"

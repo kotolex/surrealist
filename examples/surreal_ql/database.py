@@ -134,6 +134,11 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # we can remove index
     print(db.remove_index("userNameIndex", table_name="user"))  # REMOVE INDEX userNameIndex ON TABLE user;
 
+    # we can rebuild index
+    print(db.rebuild_index("userNameIndex", table_name="user"))  # REBUILD INDEX userNameIndex ON TABLE user;
+    # REBUILD INDEX IF EXISTS userNameIndex ON TABLE user;
+    print(db.rebuild_index("userNameIndex", table_name="user", if_exists=True))
+
     # on database object we can DEFINE TOKEN
     # DEFINE TOKEN token_name ON DATABASE
     # TYPE HS512
