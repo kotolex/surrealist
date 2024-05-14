@@ -30,6 +30,15 @@ class TestCreate(TestCase):
             Create(None, "person:tobie").content(
                 {"name": "Tobie", "company": "SurrealDB", "skills": ["Rust"]}).to_str())
 
+    def test_example_2(self):
+        text = 'CREATE person SET name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"];'
+        self.assertEqual(text,
+                         Create(None, "person").set(
+                             'name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"]').to_str())
+        self.assertEqual(text,
+                         Create(None, "person").set('name = "Tobie"', company="SurrealDB",
+                                                    skills=["Rust", "Go", "JavaScript"]).to_str())
+
     def test_returns(self):
         self.assertEqual('CREATE person SET age = 46, username = "john-smith" RETURN NONE;',
                          Create(None, "person").set(age=46, username="john-smith").return_none().to_str())

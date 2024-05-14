@@ -16,6 +16,10 @@ class TestCreate(TestCase):
     def test_set(self):
         text = 'RELATE person:john->wrote->article:main SET time.written = time::now();'
         self.assertEqual(text, Relate(None, "person:john->wrote->article:main").set("time.written = time::now()").to_str())
+        text = 'RELATE person:john->wrote->article:main SET a = 1, b = 2;'
+        self.assertEqual(text, Relate(None, "person:john->wrote->article:main").set("a = 1", b=2).to_str())
+        text = 'RELATE person:john->wrote->article:main SET a = 1, b = 2;'
+        self.assertEqual(text, Relate(None, "person:john->wrote->article:main").set(a=1, b=2).to_str())
 
     def test_returns(self):
         text = 'RELATE person:john->wrote->article:main RETURN DIFF;'

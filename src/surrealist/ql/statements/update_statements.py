@@ -14,10 +14,9 @@ class Set(FinishedStatement, CanUseWhere):
     def _clean_str(self):
         if not self._kw and not self._result:
             return self._statement._clean_str()
-        if not self._result:
-            args = ", ".join(f"{k} = {json.dumps(v)}" for k, v in self._kw.items())
-        else:
-            args = self._result
+        first = self._result if self._result else ''
+        second = ", ".join(f"{k} = {json.dumps(v)}" for k, v in self._kw.items()) if self._kw else ''
+        args = ', '.join(element for element in (first, second) if element)
         return f"{self._statement._clean_str()} SET {args}"
 
 
