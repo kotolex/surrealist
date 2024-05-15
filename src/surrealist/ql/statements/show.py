@@ -34,10 +34,20 @@ class Show(Statement):
         return [OK] if not result else result
 
     def limit(self, limit: int) -> "Show":
+        """
+        Limits number of results to show (LIMIT statement)
+        :param limit: number of results
+        :return: Show object
+        """
         self._limit = limit
         return self
 
     def since(self, timestamp: str) -> "Show":
+        """
+        Init timestamp since is to show updates
+        :param timestamp: surreal timestamp
+        :return: Show object
+        """
         self._since = timestamp
         return self
 

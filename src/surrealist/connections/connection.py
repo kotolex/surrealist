@@ -100,7 +100,7 @@ class Connection(ABC):
         return result
 
     @connected
-    def table_info(self, table_name: str) -> SurrealResult:
+    def table_info(self, table_name: str, structured: bool = False) -> SurrealResult:
         """
         Returns info about specified table. You should have permissions for this action.
 
@@ -108,12 +108,14 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
+        :param table_name: name of the table
+        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full table information
         """
-        return self._info(f"TABLE {table_name}")
+        return self._info(f"TABLE {table_name}", structured)
 
     @connected
-    def db_info(self) -> SurrealResult:
+    def db_info(self, structured: bool = False) -> SurrealResult:
         """
         Returns info about a current database. You should have permissions for this action.
 
@@ -121,12 +123,13 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
+        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full database information
         """
-        return self._info("DB")
+        return self._info("DB", structured)
 
     @connected
-    def ns_info(self) -> SurrealResult:
+    def ns_info(self, structured: bool = False) -> SurrealResult:
         """
         Returns info about current namespace. You should have permissions for this action.
 
@@ -134,12 +137,13 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
+        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full namespace information
         """
-        return self._info("NS")
+        return self._info("NS", structured)
 
     @connected
-    def root_info(self) -> SurrealResult:
+    def root_info(self, structured: bool = False) -> SurrealResult:
         """
         Returns info about root. You should have permissions for this action.
 
@@ -147,11 +151,14 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
+        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
         :return: information about root
         """
-        return self._info("ROOT")
+        return self._info("ROOT", structured)
 
-    def _info(self, type_: str) -> SurrealResult:
+    def _info(self, type_: str, structured: bool = False) -> SurrealResult:
+        if structured:
+            type_ = f"{type_} STRUCTURE"
         logger.info("Query-Operation: %s_INFO", type_)
         return self.query(f"INFO FOR {type_};")
 

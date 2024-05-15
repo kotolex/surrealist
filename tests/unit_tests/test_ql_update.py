@@ -32,7 +32,8 @@ class TestUpdate(TestCase):
 
     def test_first_example(self):
         text = 'UPDATE ONLY person:tobie SET name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"];'
-        upd = Update(None, "person", "tobie").only().set(name="Tobie", company="SurrealDB", skills=['Rust', 'Go', 'JavaScript'])
+        upd = Update(None, "person", "tobie").only().set(name="Tobie", company="SurrealDB",
+                                                         skills=['Rust', 'Go', 'JavaScript'])
         self.assertEqual(text, upd.to_str())
         self.assertTrue(upd.is_valid())
 
@@ -68,14 +69,27 @@ class TestUpdate(TestCase):
 
     def test_example_patch(self):
         text = 'UPDATE person:tobie PATCH [{"op": "add", "path": "Engineering", "value": "true"}];'
-        data = [{"op": "add","path": "Engineering","value": "true"}]
+        data = [{"op": "add", "path": "Engineering", "value": "true"}]
         upd = Update(None, "person", "tobie").patch(data)
         self.assertEqual(text, upd.to_str())
         self.assertTrue(upd.is_valid())
 
     def test_example_5(self):
-        text ='UPDATE person SET important = true WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;'
-        upd = Update(None, "person").set(important=True).where("->knows->person->(knows WHERE influencer = true)").timeout("5s")
+        text = 'UPDATE person SET important = true WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;'
+        upd = Update(None, "person").set(important=True).where(
+            "->knows->person->(knows WHERE influencer = true)").timeout("5s")
+        self.assertEqual(text, upd.to_str())
+        self.assertTrue(upd.is_valid())
+
+    def test_example6(self):
+        text = "UPDATE city SET rank = 4, population = 9541000 WHERE name = 'London';"
+        upd = Update(None, "city").set("rank = 4", population=9541000).where("name = 'London'")
+        self.assertEqual(text, upd.to_str())
+        self.assertTrue(upd.is_valid())
+        upd = Update(None, "city").set("rank = 4, population = 9541000").where("name = 'London'")
+        self.assertEqual(text, upd.to_str())
+        self.assertTrue(upd.is_valid())
+        upd = Update(None, "city").set(rank=4, population=9541000).where("name = 'London'")
         self.assertEqual(text, upd.to_str())
         self.assertTrue(upd.is_valid())
 

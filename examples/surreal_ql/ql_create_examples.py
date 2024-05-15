@@ -13,6 +13,12 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root'), use_htt
     # CREATE person SET name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"];
     print(db.table("person").create().set(name="Tobie", company="SurrealDB", skills=["Rust", "Go", "JavaScript"]))
 
+    # CREATE person SET name="Tobie", company="SurrealDB", skills=["Rust", "Go", "JavaScript"];
+    print(db.table("person").create().set('name="Tobie", company="SurrealDB", skills=["Rust", "Go", "JavaScript"]'))
+
+    # CREATE person SET name = "Tobie", company = "SurrealDB", skills = ["Rust", "Go", "JavaScript"];
+    print(db.table("person").create().set('name = "Tobie"', company="SurrealDB", skills=["Rust", "Go", "JavaScript"]))
+
     # CREATE person:tobie CONTENT {"name": "Tobie", "company": "SurrealDB", "skills": ["Rust"]};
     print(db.table("person").create("tobie").content({"name": "Tobie", "company": "SurrealDB", "skills": ["Rust"]}))
 

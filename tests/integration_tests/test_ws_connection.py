@@ -334,6 +334,10 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             self.assertTrue('tables' in res.result)
             self.assertEqual("INFO FOR DB;", res.query)
+            res = connection.db_info(structured=True)
+            self.assertFalse(res.is_error())
+            self.assertTrue('tables' in res.result)
+            self.assertEqual("INFO FOR DB STRUCTURE;", res.query)
 
     def test_session_info(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
@@ -447,6 +451,9 @@ class TestWebSocketConnection(TestCase):
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 2)
+            res = connection.root_info(structured=True)
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 2)
 
     def test_info_ns(self):
         surreal = Surreal(URL, 'test', credentials=('root', 'root'))
@@ -454,11 +461,17 @@ class TestWebSocketConnection(TestCase):
             res = connection.ns_info()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 3)
+            res = connection.ns_info(structured=True)
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 3)
 
     def test_info_table(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('root', 'root'))
         with surreal.connect() as connection:
             res = connection.table_info("author")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(res.result), 5)
+            res = connection.table_info("author", structured=True)
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 5)
 

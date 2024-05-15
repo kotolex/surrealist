@@ -14,6 +14,15 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # RELATE person:l19zjikkw1p1h9o6ixrg->wrote->article:8nkk6uj4yprt49 SET time.written = time::now();
     print(db.relate("person:l19zjikkw1p1h9o6ixrg->wrote->article:8nkk6uj4yprt49").set("time.written = time::now()"))
 
+    # RELATE person:john->wrote->article:best SET title = "title", text = "text";
+    print(db.relate("person:john->wrote->article:best").set('title = "title"', text="text"))
+
+    # RELATE person:john->wrote->article:best SET title = "title", text = "text";
+    print(db.relate("person:john->wrote->article:best").set(title="title", text="text"))
+
+    # RELATE person:john->wrote->article:best SET title = "title", text = "text";
+    print(db.relate("person:john->wrote->article:best").set('title = "title", text = "text"'))
+
     # RELATE person:l19zjikkw1p1h9o6ixrg->wrote->article:8nkk6uj4yprt49z7y3zm
     #     CONTENT {
     #         time: {

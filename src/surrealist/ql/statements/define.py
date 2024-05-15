@@ -2,6 +2,7 @@ from abc import ABC
 from typing import List, Union, Any, Optional, Tuple
 
 from surrealist.connections import Connection
+from surrealist.ql.statements.define_index_statements import CanUseIndexTypes
 from surrealist.ql.statements.permissions import CanUsePermissions
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
@@ -206,7 +207,7 @@ class DefineScope(Define):
                f"\nSIGNIN {self._signin}"
 
 
-class DefineIndex(Define):
+class DefineIndex(Define, CanUseIndexTypes):
     """
     Represents DEFINE INDEX statement
 
@@ -245,35 +246,13 @@ class DefineIndex(Define):
         self._fields = f"COLUMNS {columns}"
         return self
 
-    def unique(self) -> "DefineIndex":
-        """
-        Represents UNIQUE statement
-        """
-        self._analyzer = None
-        self._uni = True
-        return self
-
-    def search_analyzer(self, name: str, use: str = "BM25", highlights: bool = True) -> "DefineIndex":
-        """
-        Represents SEARCH ANALYZER statement
-        """
-        self._uni = False
-        hl = "" if not highlights else " HIGHLIGHTS"
-        self._analyzer = f" SEARCH ANALYZER {name} {use}{hl}"
-        return self
-
     def validate(self) -> List[str]:
         if not self._fields:
             return ["You need to specify FIELDS or COLUMNS"]
         return [OK]
 
     def _clean_str(self):
-        add = ""
-        if self._uni:
-            add = " UNIQUE"
-        elif self._analyzer:
-            add = self._analyzer
-        return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}{add}"
+        return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}"
 
 
 class DefineToken(Define):

@@ -49,12 +49,12 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # we can use simple Where to generate statements with permissions
     from surrealist import Where
 
-    select = Where(published=True).OR(user="$auth.id")
-    create = Where(user="$auth.id")
-    delete = Where(user="$auth.id").OR("$auth.admin = true")
+    select = Where(published=True).OR('user = "$auth.id"')
+    create = Where('user = "$auth.id"')
+    delete = Where('user = "$auth.id"').OR("$auth.admin = true")
     # DEFINE TABLE post SCHEMALESS
     # PERMISSIONS
-    #  FOR select WHERE published = True OR user = $auth.id
+    #  FOR select WHERE published = true OR user = $auth.id
     #  FOR create, update WHERE user = $auth.id
     #  FOR delete WHERE user = $auth.id OR $auth.admin = true;
     print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
@@ -130,9 +130,20 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_index("userAgeIndex", "user").columns("age"))
     # DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;
     print(db.define_index("userNameIndex", "user").columns("name").search_analyzer("ascii"))
+    # DEFINE INDEX mtree ON TABLE user FIELDS name MTREE DIMENSION 4 DIST EUCLIDEAN;
+    print(db.define_index(f"mtree", "user").fields("name").mtree(4).distance_euclidean())
+    # DEFINE INDEX hnsw ON TABLE user FIELDS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;
+    print(db.define_index(f"hnsw", "user").fields("name").hnsw(4).distance_cosine().efc("150").m(2))
+    # DEFINE INDEX IF NOT EXISTS mtree ON TABLE user FIELDS name MTREE DIMENSION 3 DIST MANHATTAN;
+    print(db.define_index(f"mtree", "user").if_not_exists().fields("name").mtree(3).distance_manhattan())
 
     # we can remove index
     print(db.remove_index("userNameIndex", table_name="user"))  # REMOVE INDEX userNameIndex ON TABLE user;
+
+    # we can rebuild index
+    print(db.rebuild_index("userNameIndex", table_name="user"))  # REBUILD INDEX userNameIndex ON TABLE user;
+    # REBUILD INDEX IF EXISTS userNameIndex ON TABLE user;
+    print(db.rebuild_index("userNameIndex", table_name="user", if_exists=True))
 
     # on database object we can DEFINE TOKEN
     # DEFINE TOKEN token_name ON DATABASE

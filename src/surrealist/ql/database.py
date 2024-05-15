@@ -4,6 +4,7 @@ from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
+from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
 from surrealist.ql.statements.statement import Statement
@@ -285,6 +286,19 @@ class Database:
         :return: DefineINdex object
         """
         return DefineIndex(self._connection, name, table_name)
+
+    def rebuild_index(self, index_name: str, table_name: str, if_exists: bool = False) -> RebuildIndex:
+        """
+        Represents REBUILD INDEX object, used to rebuild resources.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
+
+        :param index_name: name of the index
+        :param table_name: name of the table
+        :param if_exists: use IF EXISTS statement if True
+        :return: RebuildIndex object
+        """
+        return RebuildIndex(self._connection, index_name=index_name, table_name=table_name, if_exists=if_exists)
 
     def remove_index(self, name: str, table_name: str) -> Remove:
         """
