@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 
 from surrealist.ql.statements.common_statements import CanUseWhere
 from surrealist.ql.statements.statement import FinishedStatement, Statement
+from surrealist.ql.statements.utils import combine
 
 
 class Set(FinishedStatement, CanUseWhere):
@@ -14,9 +15,7 @@ class Set(FinishedStatement, CanUseWhere):
     def _clean_str(self):
         if not self._kw and not self._result:
             return self._statement._clean_str()
-        first = self._result if self._result else ''
-        second = ", ".join(f"{k} = {json.dumps(v)}" for k, v in self._kw.items()) if self._kw else ''
-        args = ', '.join(element for element in (first, second) if element)
+        args = combine(self._result, self._kw)
         return f"{self._statement._clean_str()} SET {args}"
 
 

@@ -126,12 +126,12 @@ VALUE "value";"""
 
         text = """DEFINE TABLE post 
 PERMISSIONS 
- FOR select WHERE published = True OR user = $auth.id
+ FOR select WHERE published = true OR user = $auth.id
  FOR create, update WHERE user = $auth.id
  FOR delete WHERE user = $auth.id OR $auth.admin = true;"""
-        select = Where(published=True).OR(user="$auth.id")
-        create = Where(user="$auth.id")
-        delete = Where(user="$auth.id").OR("$auth.admin = true")
+        select = Where(published=True).OR('user = $auth.id')
+        create = Where('user = $auth.id')
+        delete = Where('user = $auth.id').OR("$auth.admin = true")
         self.assertEqual(text, DefineTable(None, "post").permissions_for(select=select, create=create,
                                                                          update=create, delete=delete).to_str())
         text = """DEFINE TABLE temperatures_by_month AS

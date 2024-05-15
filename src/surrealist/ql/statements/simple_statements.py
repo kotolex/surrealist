@@ -1,4 +1,5 @@
 from typing import Optional
+from surrealist.ql.statements.utils import combine
 
 
 class Where:
@@ -8,7 +9,7 @@ class Where:
     def __init__(self, raw_string: Optional[str] = None, **kwargs):
         self._raw = raw_string
         self._kw = kwargs
-        self._body = raw_string if raw_string else ", ".join(f"{k} = {v}" for k, v in kwargs.items())
+        self._body = combine(self._raw, self._kw)
         self._body = f"WHERE {self._body}"
 
     def __str__(self):
@@ -35,7 +36,7 @@ class OrAnd(Where):
         super().__init__(raw_string, **kwargs)
         self._or = use_or
         self._parent = parent
-        self._cur_body = raw_string if raw_string else ", ".join(f"{k} = {v}" for k, v in kwargs.items())
+        self._cur_body = combine(raw_string, kwargs)
         self._type = "OR" if self._or else "AND"
         self._body = f"{parent} {self._type} {self._cur_body}"
 

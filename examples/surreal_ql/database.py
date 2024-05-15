@@ -49,12 +49,12 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # we can use simple Where to generate statements with permissions
     from surrealist import Where
 
-    select = Where(published=True).OR(user="$auth.id")
-    create = Where(user="$auth.id")
-    delete = Where(user="$auth.id").OR("$auth.admin = true")
+    select = Where(published=True).OR('user = "$auth.id"')
+    create = Where('user = "$auth.id"')
+    delete = Where('user = "$auth.id"').OR("$auth.admin = true")
     # DEFINE TABLE post SCHEMALESS
     # PERMISSIONS
-    #  FOR select WHERE published = True OR user = $auth.id
+    #  FOR select WHERE published = true OR user = $auth.id
     #  FOR create, update WHERE user = $auth.id
     #  FOR delete WHERE user = $auth.id OR $auth.admin = true;
     print(db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
