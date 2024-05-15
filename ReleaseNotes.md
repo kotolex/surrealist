@@ -5,6 +5,7 @@
 - improve DEFINE INDEX statement, now it can use MTREE and HNSW indexes
 - fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which has optional string and 
 keyword-arguments for QL will combine string and kwargs
+- add INFO ... STRUCTURE feature as optional, by default it is not used as it is for internal use of SDB
 - add more examples and tests
 
 **Version 0.4.1 (compatible with SurrealDB version 1.4.2):**
