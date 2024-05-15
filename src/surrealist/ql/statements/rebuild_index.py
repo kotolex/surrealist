@@ -1,8 +1,8 @@
 from typing import List
 
-from .statement import Statement
-from surrealist.utils import OK
 from surrealist.connections import Connection
+from surrealist.utils import OK
+from .statement import Statement
 
 
 class RebuildIndex(Statement):
@@ -13,6 +13,7 @@ class RebuildIndex(Statement):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
+
     def __init__(self, connection: Connection, index_name: str, table_name: str, if_exists: bool = False):
         super().__init__(connection)
         self._name = index_name
