@@ -90,6 +90,32 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
 
+    def test_define_index_mtree(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4 DIST EUCLIDEAN;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_euclidean().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4 DIST MANHATTAN;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_manhattan().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4 DIST MINKOWSKI;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_minkowski().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4 DIST COSINE;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_cosine().to_str())
+
+    def test_define_index_hnsw(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST EUCLIDEAN;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_euclidean().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST MANHATTAN;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_manhattan().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST MINKOWSKI;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_minkowski().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().efc("150").m(2).to_str())
+
     def test_define_index_exists(self):
         text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii " \
                "BM25 HIGHLIGHTS;"

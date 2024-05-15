@@ -2,7 +2,7 @@
 **Version 0.5.0 (compatible with SurrealDB version 1.5.0):**
 - although INCLUDE ORIGINAL statement exists, it has no effect (SurrealDB team decision for 1.5.0)
 - add REBUILD INDEX statement, usable for database and table objects
-- improve DEFINE INDEX statement, now it can use
+- improve DEFINE INDEX statement, now it can use MTREE and HNSW indexes
 - fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which has optional string and 
 keyword-arguments for QL will combine string and kwargs
 - add more examples and tests

@@ -330,6 +330,28 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
 
+    def test_define_mtree_index_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(8)
+            ind_count = len(db.table(f"user{uid}").info()["indexes"])
+            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").mtree(4).distance_euclidean().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
+            res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
+
+    def test_define_hnsw_index_and_remove(self):
+        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+            uid = get_random_series(11)
+            ind_count = len(db.table(f"user{uid}").info()["indexes"])
+            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc("150").m(2).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
+            res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
+
     def test_remove_non_existent_index(self):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             res = db.remove_index("not_exists", table_name="user").if_exists().run()

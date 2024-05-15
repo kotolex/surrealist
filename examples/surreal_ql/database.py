@@ -130,6 +130,12 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_index("userAgeIndex", "user").columns("age"))
     # DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;
     print(db.define_index("userNameIndex", "user").columns("name").search_analyzer("ascii"))
+    # DEFINE INDEX mtree ON TABLE user FIELDS name MTREE DIMENSION 4 DIST EUCLIDEAN;
+    print(db.define_index(f"mtree", "user").fields("name").mtree(4).distance_euclidean())
+    # DEFINE INDEX hnsw ON TABLE user FIELDS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;
+    print(db.define_index(f"hnsw", "user").fields("name").hnsw(4).distance_cosine().efc("150").m(2))
+    # DEFINE INDEX IF NOT EXISTS mtree ON TABLE user FIELDS name MTREE DIMENSION 3 DIST MANHATTAN;
+    print(db.define_index(f"mtree", "user").if_not_exists().fields("name").mtree(3).distance_manhattan())
 
     # we can remove index
     print(db.remove_index("userNameIndex", table_name="user"))  # REMOVE INDEX userNameIndex ON TABLE user;
