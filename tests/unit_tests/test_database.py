@@ -210,6 +210,10 @@ PERMISSIONS
         self.assertEqual(DefineTable(None, "likes").type_relation(from_to=("user", "post"), use_from_to=False).to_str(),
                          text)
 
+    def test_define_table_changefeed_validate(self):
+        self.assertEqual(DefineTable(None, "person").changefeed("1s").validate(), ['OK'])
+        self.assertEqual(DefineTable(None, "person").changefeed("1r").validate(), ["Wrong duration 1r, allowed postfix are ('w', 'y', 'd', 'h', 'ms', 's', 'm')"])
+
 
 if __name__ == '__main__':
     main()

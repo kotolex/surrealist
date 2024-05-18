@@ -31,6 +31,14 @@ class Remove(Statement):
         return [OK]
 
     def if_exists(self) -> "Remove":
+        """
+        Adds IF EXISTS to a final statement
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/remove#using-if-exists-clause-since-130
+
+        :return: Remove object
+        """
         self._on_exists = True
         return self
 

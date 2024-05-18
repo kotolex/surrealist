@@ -333,6 +333,12 @@ class DefineTable(Define, CanUsePermissions):
     def changefeed(self, duration: str, include_original: bool = False) -> "DefineTable":
         """
         Represents CHANGEFEED statement
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table#using-changefeed-clause
+
+        :param duration: valid string representation for duration, for example, "1s"
+        :param include_original: if True, then add INCLUDE ORIGINAL statement
         """
         self._changefeed = (duration, include_original)
         return self
@@ -385,8 +391,10 @@ class DefineTable(Define, CanUsePermissions):
 
     def validate(self) -> List[str]:
         durations = ('w', 'y', 'd', 'h', 'ms', 's', 'm')
-        if self._changefeed and not any(self._changefeed.endswith(letter) for letter in durations):
-            return [f"Wrong duration {self._changefeed}, allowed postfix are (ms, s, m, h, d, w, y)"]
+        if self._changefeed:
+            actual_duration, _ = self._changefeed
+            if not any(actual_duration.endswith(letter) for letter in durations):
+                return [f"Wrong duration {actual_duration}, allowed postfix are {durations}"]
         return [OK]
 
     def _clean_str(self):

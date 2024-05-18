@@ -44,6 +44,13 @@ class SearchAnalyzer(FinishedStatement):
         return self
 
     def bm25(self, value: Optional[str] = None) -> "SearchAnalyzer":
+        """
+        Add BM25 clause to a final statement
+        BM25 [(@k1, @b)]
+
+        :param value: optional key-value parameters for BM25
+        :return: SearchAnalyzer object
+        """
         self._bm25 = (True, value)
         return self
 

@@ -3,6 +3,7 @@
 - add more precise names for INDEX methods (M, TYPE)
 - limit allowed options for some methods (TYPE)
 - add documentation for index methods
+- fix validate method bug for changefeed
 - fix examples and tests
 
 **Version 0.5.0 (compatible with SurrealDB version 1.5.0):**

@@ -1,6 +1,6 @@
 # README #
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 1.5.0)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 

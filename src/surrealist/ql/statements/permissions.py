@@ -38,10 +38,19 @@ class PermissionsFor(FinishedStatement):
 
 class CanUsePermissions:
     def permissions_none(self) -> PermissionsNone:
+        """
+        Represents PERMISSIONS NONE statement
+        """
         return PermissionsNone(self)
 
     def permissions_full(self) -> PermissionsFull:
+        """
+        Represents PERMISSIONS FULL statement
+        """
         return PermissionsFull(self)
 
     def permissions_for(self, **kwargs) -> PermissionsFor:
+        """
+        Represents PERMISSIONS FOR statement
+        """
         return PermissionsFor(self, **kwargs)
