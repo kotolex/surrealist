@@ -345,7 +345,7 @@ class TestUseCases(TestCase):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             uid = get_random_series(11)
             ind_count = len(db.table(f"user{uid}").info()["indexes"])
-            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc("150").m(2).run()
+            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc(150).max_connections(2).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
             res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()

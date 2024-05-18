@@ -1,4 +1,10 @@
 ## Release Notes ##
+**Version 0.5.1 (compatible with SurrealDB version 1.5.0):**
+- add more precise names for INDEX methods (M, TYPE)
+- limit allowed options for some methods (TYPE)
+- add documentation for index methods
+- fix examples and tests
+
 **Version 0.5.0 (compatible with SurrealDB version 1.5.0):**
 - although INCLUDE ORIGINAL statement exists, it has no effect (SurrealDB team decision for 1.5.0)
 - add REBUILD INDEX statement, usable for database and table objects
