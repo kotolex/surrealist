@@ -86,9 +86,12 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
                          to_str())
 
     def test_define_index(self):
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").bm25().highlights().to_str())
 
     def test_define_index_mtree(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4;"
@@ -119,8 +122,7 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().efc(150).max_connections(2).to_str())
 
     def test_define_index_exists(self):
-        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii " \
-               "BM25 HIGHLIGHTS;"
+        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").if_not_exists().columns("name").
                          search_analyzer("ascii").to_str())
 

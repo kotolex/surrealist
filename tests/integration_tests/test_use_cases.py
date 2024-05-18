@@ -503,10 +503,8 @@ class TestUseCases(TestCase):
             db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
             # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
             # DEFINE INDEX book_content ON book FIELDS content SEARCH ANALYZER custom_analyzer BM25;
-            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer",
-                                                                                  highlights=False).run()
-            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer",
-                                                                                      highlights=False).run()
+            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer").run()
+            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer").run()
             res = db.book.select().where("content @@ 'tools'").run()
             self.assertFalse(res.is_error(), res)
 

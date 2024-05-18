@@ -1,3 +1,5 @@
+from typing import Optional
+
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
@@ -23,15 +25,35 @@ class SearchAnalyzer(FinishedStatement):
     https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#full-text-search-index
     """
 
-    def __init__(self, statement: Statement, name: str, use: str = "BM25", highlights: bool = True):
+    def __init__(self, statement: Statement, name: str):
         super().__init__(statement)
         self._name = name
-        self._use = use
-        self._high = highlights
+        self._bm25 = None
+        self._high = False
+
+    def highlights(self) -> "SearchAnalyzer":
+        """
+        Used for highlights the matching keywords
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search#highlighting
+
+        :return: SearchAnalyzer object
+        """
+        self._high = True
+        return self
+
+    def bm25(self, value: Optional[str] = None) -> "SearchAnalyzer":
+        self._bm25 = (True, value)
+        return self
 
     def _clean_str(self):
         hl = "" if not self._high else " HIGHLIGHTS"
-        return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name} {self._use}{hl}"
+        bm25 = ''
+        if self._bm25:
+            _, value = self._bm25
+            bm25 = " BM25" if value is None else f' BM25 {value}'
+        return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name}{bm25}{hl}"
 
 
 class MTree(FinishedStatement):
@@ -367,7 +389,7 @@ class CanUseIndexTypes:
         """
         return Unique(self)
 
-    def search_analyzer(self, name: str, use: str = "BM25", highlights: bool = True) -> SearchAnalyzer:
+    def search_analyzer(self, name: str) -> SearchAnalyzer:
         """
         Creates full-text search index
 
@@ -375,11 +397,9 @@ class CanUseIndexTypes:
         https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#full-text-search-index
 
         :param name: analyzer name
-        :param use: model to use
-        :param highlights: use HIGHLIGHT if True
         :return: SearchAnalyzer object
         """
-        return SearchAnalyzer(self, name, use, highlights)
+        return SearchAnalyzer(self, name)
 
     def mtree(self, num_dimension: int) -> MTree:
         """

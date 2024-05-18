@@ -129,7 +129,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # DEFINE INDEX userAgeIndex ON TABLE user COLUMNS age;
     print(db.define_index("userAgeIndex", "user").columns("age"))
     # DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;
-    print(db.define_index("userNameIndex", "user").columns("name").search_analyzer("ascii"))
+    print(db.define_index("userNameIndex", "user").columns("name").search_analyzer("ascii").bm25().highlights())
     # DEFINE INDEX mtree ON TABLE user FIELDS name MTREE DIMENSION 4 DIST EUCLIDEAN;
     print(db.define_index("mtree", "user").fields("name").mtree(4).distance_euclidean())
     # DEFINE INDEX hnsw ON TABLE user FIELDS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;
