@@ -5,15 +5,15 @@
 - add documentation for index methods
 - change BM25 (add docs and parameters)
 - fix validate method bug for changefeed
-- fix examples and tests
+- fix README, examples and tests
 
 **Version 0.5.0 (compatible with SurrealDB version 1.5.0):**
 - although INCLUDE ORIGINAL statement exists, it has no effect (SurrealDB team decision for 1.5.0)
 - add REBUILD INDEX statement, usable for database and table objects
 - improve DEFINE INDEX statement, now it can use MTREE and HNSW indexes
-- fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which has optional string and 
+- fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which have optional string and 
 keyword-arguments for QL will combine string and kwargs
-- add INFO ... STRUCTURE feature as optional, by default it is not used as it is for internal use of SDB
+- add INFO ... STRUCTURE feature as optional, by default, it is not used as it is for internal use of SDB
 - add more examples and tests
 
 **Version 0.4.1 (compatible with SurrealDB version 1.4.2):**

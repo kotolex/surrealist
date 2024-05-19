@@ -160,7 +160,7 @@ You can find QL examples [here](https://github.com/kotolex/surrealist/tree/maste
 
 One of the main features of QL-builder is that using dot you can see all statements available on each level, 
 any modern IDE will show possible statements when you type dot. 
-Thanks to this, you can not only study QL but also gain confidence that you are forming a valid query.
+Thanks to this, you can study QL and also gain confidence that you are forming a valid query.
 
 for example
 `db.account.select().limit(50).start_at(50)` analog "SELECT * FROM account LIMIT 50 START 50;"
@@ -171,7 +171,7 @@ it is readable and shorter, but in that particular case you will not get IDE sug
 So, we recommend using table() method `db.table("person").select()` it is not much bigger, but still readable, 
 and you will get help from your IDE
 
-If you cannot form your query, you always can use a raw query via `database.raw_query` or `connection.query`
+If you cannot form your query with QL, you always can use a raw query via `database.raw_query` or `connection.query`
 It is the most efficient way, cause it allows you to do all that is possible if you have permissions.
 
 ### Iteration on Select ###
@@ -518,8 +518,10 @@ with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credential
     make_something_with_a_lot_of_threads_or_data(db) # use pool everywhere we need as a simple Database object
 ```
 
-**Note:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
+**Note 1:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
 It is your job as a developer to limit number of pools created in your application
+
+**Note 2:** DatabaseConnectionsPool uses threads, not processes
 
 **Important note:** for many and maybe the most cases, one shared connection is enough to do the job. Test it and make sure you really need a connection pool.
 
