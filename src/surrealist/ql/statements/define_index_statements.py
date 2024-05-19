@@ -43,23 +43,29 @@ class SearchAnalyzer(FinishedStatement):
         self._high = True
         return self
 
-    def bm25(self, value: Optional[str] = None) -> "SearchAnalyzer":
+    def bm25(self, k1: Optional[float] = None, b: Optional[float] = None) -> "SearchAnalyzer":
         """
-        Add BM25 clause to a final statement
+        Use ranking algorithm Best Match 25 (Add BM25 clause to a final statement)
         BM25 [(@k1, @b)]
 
-        :param value: optional key-value parameters for BM25
+        Note: you should specify both parameters (k1, b) or none of them. If you specify only one of them,
+        the other will be equal to 0.0
+
+        :param k1: optional parameter for BM25
+        :param b: optional parameter for BM25
         :return: SearchAnalyzer object
         """
-        self._bm25 = (True, value)
+        self._bm25 = (k1, b)
+        if (k1, b) != (None, None):
+            self._bm25 = (k1 or 0.0, b or 0.0)
         return self
 
     def _clean_str(self):
         hl = "" if not self._high else " HIGHLIGHTS"
-        bm25 = ''
+        bm25 = ""
         if self._bm25:
-            _, value = self._bm25
-            bm25 = " BM25" if value is None else f' BM25 {value}'
+            pair = self._bm25
+            bm25 = " BM25" if pair == (None, None) else f" BM25 {pair[0]} {pair[1]}"
         return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name}{bm25}{hl}"
 
 

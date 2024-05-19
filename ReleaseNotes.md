@@ -3,6 +3,7 @@
 - add more precise names for INDEX methods (M, TYPE)
 - limit allowed options for some methods (TYPE)
 - add documentation for index methods
+- change BM25 (add docs and parameters)
 - fix validate method bug for changefeed
 - fix examples and tests
 

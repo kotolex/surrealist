@@ -92,6 +92,18 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").bm25().highlights().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.7;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(1.2, 0.7).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.0;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(1.2).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 0.0 1.2;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(None, 1.2).to_str())
 
     def test_define_index_mtree(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4;"
