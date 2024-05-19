@@ -40,10 +40,24 @@ class Live(Statement, LiveUseWhere):
         self._value = None
 
     def value(self, field_name: str) -> "Live":
+        """
+        Add VALUE statement
+
+        :param field_name: field to use
+        :return: Live object
+        """
         self._value = field_name
         return self
 
     def alias(self, value_name: str, alias: str) -> "Live":
+        """
+        Add AS statement
+        @fields [ AS @alias ]
+
+        :param value_name: name of the field
+        :param alias: name of the alias
+        :return: Live object
+        """
         self._alias = (value_name, alias)
         self._diff = False
         return self

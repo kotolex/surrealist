@@ -19,10 +19,23 @@ class Fetch(FinishedStatement):
 
 class LiveUseFetch:
     def fetch(self, *args: str) -> Fetch:
+        """
+        Add fetch clause to final statement.
+        NOTE: Support for FETCH is not yet available on SurrealDb side!!!
+
+        :param args: arguments to fetch
+        :return: Fetch object
+        """
         return Fetch(self, *args)
 
 
 class Where(FinishedStatement, LiveUseFetch):
+    """
+    Represents WHERE part of the LIVE statement
+
+    Refer to:
+    https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query
+    """
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._predicate = predicate
@@ -39,4 +52,13 @@ class Where(FinishedStatement, LiveUseFetch):
 
 class LiveUseWhere(LiveUseFetch):
     def where(self, predicate: str) -> Where:
+        """
+        Add WHERE clause to filter data
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query
+
+        :param predicate: condition to filter data
+        :return: Where object
+        """
         return Where(self, predicate)

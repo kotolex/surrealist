@@ -86,9 +86,24 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
                          to_str())
 
     def test_define_index(self):
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").bm25().highlights().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.7;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(1.2, 0.7).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.0;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(1.2).to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 0.0 1.2;"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
+                             "ascii").bm25(None, 1.2).to_str())
 
     def test_define_index_mtree(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4;"
@@ -101,6 +116,8 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_minkowski().to_str())
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4 DIST COSINE;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).distance_cosine().to_str())
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 3 TYPE F64 CAPACITY 50;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(3).type_f64().capacity(50).to_str())
 
     def test_define_index_hnsw(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4;"
@@ -114,11 +131,10 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().to_str())
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;"
-        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().efc("150").m(2).to_str())
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().efc(150).max_connections(2).to_str())
 
     def test_define_index_exists(self):
-        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii " \
-               "BM25 HIGHLIGHTS;"
+        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").if_not_exists().columns("name").
                          search_analyzer("ascii").to_str())
 
@@ -205,6 +221,10 @@ PERMISSIONS
         text = "DEFINE TABLE likes TYPE RELATION IN user OUT post;"
         self.assertEqual(DefineTable(None, "likes").type_relation(from_to=("user", "post"), use_from_to=False).to_str(),
                          text)
+
+    def test_define_table_changefeed_validate(self):
+        self.assertEqual(DefineTable(None, "person").changefeed("1s").validate(), ['OK'])
+        self.assertEqual(DefineTable(None, "person").changefeed("1r").validate(), ["Wrong duration 1r, allowed postfix are ('w', 'y', 'd', 'h', 'ms', 's', 'm')"])
 
 
 if __name__ == '__main__':

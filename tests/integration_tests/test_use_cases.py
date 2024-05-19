@@ -345,7 +345,7 @@ class TestUseCases(TestCase):
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             uid = get_random_series(11)
             ind_count = len(db.table(f"user{uid}").info()["indexes"])
-            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc("150").m(2).run()
+            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc(150).max_connections(2).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
             res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
@@ -477,6 +477,15 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The table 'not_exists' does not exist", res.result)
 
+    def test_remove_non_existent_db(self):
+        surreal = Surreal(URL, namespace="test", credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            res = connection.query("REMOVE DB IF EXISTS surrealdb_non_exist;")
+            self.assertFalse(res.is_error(), res)
+            res = connection.query("REMOVE DB surrealdb_non_exist;")
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The database 'surrealdb_non_exist' does not exist", res.result)
+
     def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
         with Database(URL, 'test', 'test', ('root', 'root')) as db:
             db.table("a").create(record_id=1).run()
@@ -503,10 +512,8 @@ class TestUseCases(TestCase):
             db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
             # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
             # DEFINE INDEX book_content ON book FIELDS content SEARCH ANALYZER custom_analyzer BM25;
-            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer",
-                                                                                  highlights=False).run()
-            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer",
-                                                                                      highlights=False).run()
+            db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer").bm25().run()
+            db.define_index("book_content", "book").fields("content").search_analyzer("custom_analyzer").bm25().run()
             res = db.book.select().where("content @@ 'tools'").run()
             self.assertFalse(res.is_error(), res)
 
@@ -555,20 +562,6 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
-    #     def test_break(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/break
-    #         text = """
-    #         FOR $num IN [1, 2, 3, 4, 5, 6, 7, 8, 9] {
-    # 	IF ($num > 5) {
-    # 		BREAK;
-    # 	};
-    #
-    # 	CREATE person:$num;
-    # };
-    #         """
-    #         surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
-    #         with surreal.connect() as connection:
-    #             res = connection.query(text)
-    #             self.assertFalse(res.is_error(), res)
 
     def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
         text = """
