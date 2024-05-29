@@ -8,7 +8,7 @@ from surrealist.errors import (SurrealConnectionError, HttpClientError, Compatib
 from surrealist.result import SurrealResult, to_result
 from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
 
-logger = getLogger("http_connection")
+logger = getLogger("surrealist.connections.http")
 
 
 class HttpConnection(Connection):

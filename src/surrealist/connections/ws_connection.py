@@ -10,7 +10,7 @@ from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError,
 from surrealist.result import SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass
 
-logger = getLogger("websocket_connection")
+logger = getLogger("surrealist.connections.websocket")
 
 
 class WebSocketConnection(Connection):

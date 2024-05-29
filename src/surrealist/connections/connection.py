@@ -8,7 +8,7 @@ from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLev
 from surrealist.result import SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, crop_data
 
-logger = getLogger("connection")
+logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
 
 

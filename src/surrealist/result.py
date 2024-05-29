@@ -8,7 +8,7 @@ from surrealist.utils import OK, ERR, HTTP_OK
 class SurrealResult:
     """
     Represents a result of the request both via http or websocket.
-    Contains a few helpers to work with results of different kind: id, ids, get, is_error, is_empty
+    Contains a few helpers to work with results of different kinds: id, ids, get, is_error, is_empty
     """
 
     def __init__(self, **kwargs):

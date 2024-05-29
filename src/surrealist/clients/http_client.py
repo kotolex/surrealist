@@ -10,7 +10,7 @@ from urllib.error import URLError, HTTPError
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
 from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
 
-logger = getLogger("http_client")
+logger = getLogger("surrealist.clients.http")
 
 
 class HttpClient:
