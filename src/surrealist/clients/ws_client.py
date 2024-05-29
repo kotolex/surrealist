@@ -12,7 +12,7 @@ from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevel
 from surrealist.result import to_result, SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
 
-logger = getLogger("websocket_client")
+logger = getLogger("surrealist.clients.websocket")
 
 
 class WebSocketClient:

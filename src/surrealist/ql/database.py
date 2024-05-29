@@ -14,7 +14,7 @@ from surrealist.result import SurrealResult
 from surrealist.surreal import Surreal
 from surrealist.utils import DEFAULT_TIMEOUT
 
-logger = logging.getLogger("databaseQL")
+logger = logging.getLogger("surrealist.databaseQL")
 
 
 class Database:
@@ -27,10 +27,10 @@ class Database:
     """
 
     def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
-                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT, log_level: str = "ERROR"):
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
         self._namespace = namespace
         self._database = database
-        self._connection = Surreal(url, namespace, database, credentials, use_http, timeout, log_level).connect()
+        self._connection = Surreal(url, namespace, database, credentials, use_http, timeout).connect()
         self._connected = True
         logger.info("DatabaseQL is up")
 

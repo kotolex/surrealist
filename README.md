@@ -1,6 +1,6 @@
 # README #
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 1.5.0)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 1.5.1)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -11,8 +11,8 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (1.5.0), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
- * debug mode to see all that goes in and out if you need
+ * fully compatible with the latest version of SurrealDB (1.5.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
  * connections pool for use at a high load
@@ -58,9 +58,9 @@ In this example, we explicitly show all parameters, but remember many of them ar
 from surrealist import Surreal
 
 # we create a surreal object, it can be used to create one or more connections with websockets (use_http=False)
-# with timeout 10 seconds and ERROR logging level
+# with timeout 10 seconds
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"),
-                  use_http=False, timeout=10, log_level="ERROR")
+                  use_http=False, timeout=10)
 print(surreal.is_ready())  # prints True if server up and running on that url
 print(surreal.version())  # prints server version
 ```
@@ -87,7 +87,6 @@ For example for wss://127.0.0.1:9000/some/rps predicted http url will be https:/
 
 **timeout** - optional, 5 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
 
-**log_level** - optional, "ERROR" by default, one of (DEBUG, INFO, ERROR), where ERROR - to see only errors, INFO—to see errors and operations, DEBUG—to see all, including transport requests/responses
 
 **Example 2**
 
@@ -97,7 +96,7 @@ In this example, we do not use default(optional) parameters
 from surrealist import Surreal
 
 # we create a surreal object, it can be used to create one or more connections with websockets
-# with timeout 5 seconds and ERROR logging level
+# with timeout 15 seconds
 surreal = Surreal("http://127.0.0.1:8000")
 print(surreal.is_ready())  # prints True if server up and running on that url
 print(surreal.version())  # prints server version
@@ -242,51 +241,57 @@ ws_connection.select("person", record_id="john") under the hood became
 ws_connection.select("person:john"), but no other logic performed. Do not expect we specified "`" for you.
 
 
-## Debug mode ##
-As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use log level.
-If you specify "INFO" level, then you will see transport operations, which methods were called, which parameters were used.
+## Logging and Debug mode ##
+As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use standard logging.
+All library logs will contain "surrealist" prefix in logs. You, as a developer, should choose proper handlers, formats, filters etc.
+Surrealist does not use root logger, does not use any handlers and uses only DEBUG, INFO and ERROR level for its events.
+
 For example
 
 **Example 7**
 
 ```python
-from surrealist import Surreal
+from logging import basicConfig, INFO, DEBUG
 
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"),
-                  log_level="INFO")
+from surrealist import Surreal, LOG_FORMAT  # LOG_FORMAT is used for simplicity, you can use your own
+
+basicConfig(format=LOG_FORMAT, level=INFO)  # we specify a format and level of events to catch
+
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
 with surreal.connect() as connection:
     res = connection.create("article", {"author": "John Doe", "title": "In memoriam", "text": "text"})
-
 ```
 if you run it, you get in the console:
 ```
-2024-02-02 18:31:09,419 : Thread-1 : websocket : INFO : Websocket connected
-2024-02-02 18:31:09,521 : MainThread : websocket_connection : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
-2024-02-02 18:31:09,627 : MainThread : websocket_connection : INFO : Got result: SurrealResult(id='836a2834-c6d5-416c-a840-6322a17b47cc', error=None, result='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MDY4ODA2NjksIm5iZiI6MTcwNjg4MDY2OSwiZXhwIjoxNzA2ODg0MjY5LCJpc3MiOiJTdXJyZWFsREIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRCI6InJvb3QifQ.mrzxXkva3lCg6EihtUEx8c1yjOtuJt_EvJninTqxJ_1...
-2024-02-02 18:31:09,627 : MainThread : websocket_connection : INFO : Connected to ws://127.0.0.1:8000/rpc, params: {'NS': 'test', 'DB': 'test'}, credentials: ('root', '******'), timeout: 5
-2024-02-02 18:31:09,627 : MainThread : websocket_connection : INFO : Operation: CREATE. Path: article, data: {'author': 'John Doe', 'title': 'In memoriam', 'text': 'text'}
-2024-02-02 18:31:09,733 : MainThread : websocket_connection : INFO : Got result: SurrealResult(id='0870492e-faba-4a5f-b454-c7f7315348bd', error=None, result=[{'author': 'John Doe', 'id': 'article:pt0907zkhkhb94evjnze', 'text': 'text', 'title': 'In memoriam'}], code=None, token=None, status='OK', time='')
-2024-02-02 18:31:09,734 : MainThread : connection : INFO : Connection was closed
+2024-05-29 15:59:41,759 : Thread-1 : websocket : INFO : Websocket connected
+2024-05-29 15:59:41,762 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
+2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=c3fcebbc-359f-47d0-822b-a4ad8043f64b, status=OK, result=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODAzODEsIm5iZiI6MTcxNjk4MDM4MSwiZXhwIjoxNzE2OTgzOTgxLCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiI0YTQyNWFiNy00NGEyLTQ4OGItYjM4MS05YjUyNDQzYTI5OTQiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRC...
+2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Connected to ws://127.0.0.1:8000/rpc, params: {'NS': 'test', 'DB': 'test'}, credentials: ('root', '******'), timeout: 15
+2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Operation: CREATE. Path: article, data: {'author': 'John Doe', 'title': 'In memoriam', 'text': 'text'}
+2024-05-29 15:59:41,794 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=b307d67f-b01b-4b71-a319-906fa17b8c72, status=OK, result=[{'author': 'John Doe', 'id': 'article:b44tdiiyb8jw6mcn1tzs', 'text': 'text', 'title': 'In memoriam'}], query=None, code=None, time=None, additional_info={})
+2024-05-29 15:59:41,794 : MainThread : surrealist.connection : INFO : The connection was closed
 ```
-but if in example above (example 5) you choose "DEBUG", you will see all, including low-level clients' data:
+but if in the example above (example 7) you choose "DEBUG" for level, you will see all, including low-level clients' data:
 ```
-2024-02-02 18:33:15,119 : MainThread : root : DEBUG : Log level switch to DEBUG
-2024-02-02 18:33:15,124 : Thread-1 : websocket : INFO : Websocket connected
-2024-02-02 18:33:15,223 : MainThread : websocket_client : DEBUG : Connected to ws://127.0.0.1:8000/rpc, timeout is 5 seconds
-2024-02-02 18:33:15,223 : MainThread : websocket_connection : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
-2024-02-02 18:33:15,224 : MainThread : websocket_client : DEBUG : Send data: {"id": "5a2e9c12-e03e-4879-a78a-bd360cd871b1", "method": "signin", "params": [{"user": "root", "pass": "******", "NS": "test", "DB": "test"}]}
-2024-02-02 18:33:15,281 : Thread-1 : websocket_client : DEBUG : Get message b'{"id":"5a2e9c12-e03e-4879-a78a-bd360cd871b1","result":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MDY4ODA3OTUsIm5iZiI6MTcwNjg4MDc5NSwiZXhwIjoxNzA2ODg0Mzk1LCJpc3MiOiJTdXJyZWFsREIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRCI6InJvb3QifQ.2ekRL9EyiaWOQR0Aw1qX8VE5S822Kab5SiYLHLC3YkPX3_Yu-FkWSCoP3XGoUg9w8'...
-2024-02-02 18:33:15,326 : MainThread : websocket_connection : INFO : Got result: SurrealResult(id='5a2e9c12-e03e-4879-a78a-bd360cd871b1', error=None, result='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MDY4ODA3OTUsIm5iZiI6MTcwNjg4MDc5NSwiZXhwIjoxNzA2ODg0Mzk1LCJpc3MiOiJTdXJyZWFsREIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRCI6InJvb3QifQ.2ekRL9EyiaWOQR0Aw1qX8VE5S822Kab5SiYLHLC3YkP...
-2024-02-02 18:33:15,326 : MainThread : websocket_connection : INFO : Connected to ws://127.0.0.1:8000/rpc, params: {'NS': 'test', 'DB': 'test'}, credentials: ('root', '******'), timeout: 5
-2024-02-02 18:33:15,326 : MainThread : websocket_connection : INFO : Operation: CREATE. Path: article, data: {'author': 'John Doe', 'title': 'In memoriam', 'text': 'text'}
-2024-02-02 18:33:15,326 : MainThread : websocket_client : DEBUG : Send data: {"id": "145b2ed4-9b42-44ab-ade2-e28a27730faa", "method": "create", "params": ["article", {"author": "John Doe", "title": "In memoriam", "text": "text"}]}
-2024-02-02 18:33:15,327 : Thread-1 : websocket_client : DEBUG : Get message b'{"id":"145b2ed4-9b42-44ab-ade2-e28a27730faa","result":[{"author":"John Doe","id":"article:s0coora4gedavt2skd36","text":"text","title":"In memoriam"}]}'
-2024-02-02 18:33:15,432 : MainThread : websocket_connection : INFO : Got result: SurrealResult(id='145b2ed4-9b42-44ab-ade2-e28a27730faa', error=None, result=[{'author': 'John Doe', 'id': 'article:s0coora4gedavt2skd36', 'text': 'text', 'title': 'In memoriam'}], code=None, token=None, status='OK', time='')
-2024-02-02 18:33:15,433 : MainThread : connection : INFO : Connection was closed
-2024-02-02 18:33:15,434 : MainThread : websocket_client : DEBUG : Client is closed connection to ws://127.0.0.1:8000/rpc
+2024-05-29 16:03:58,438 : MainThread : surrealist.clients.websocket : DEBUG : Connecting to ws://127.0.0.1:8000/rpc
+2024-05-29 16:03:58,445 : Thread-1 : websocket : INFO : Websocket connected
+2024-05-29 16:03:58,458 : MainThread : surrealist.clients.websocket : DEBUG : Connected to ws://127.0.0.1:8000/rpc, timeout is 15 seconds
+2024-05-29 16:03:58,458 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
+2024-05-29 16:03:58,458 : MainThread : surrealist.clients.websocket : DEBUG : Send data: {"id": "1d5758bb-0879-4d8d-9e14-37c9117669a3", "method": "signin", "params": [{"user": "root", "pass": "******", "NS": "test", "DB": "test"}]}
+2024-05-29 16:03:58,484 : Thread-1 : surrealist.clients.websocket : DEBUG : Get message b'{"id":"1d5758bb-0879-4d8d-9e14-37c9117669a3","result":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODA2MzgsIm5iZiI6MTcxNjk4MDYzOCwiZXhwIjoxNzE2OTg0MjM4LCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiIwODhhMWY0My04YzY3LTQ5NjYtYTdjNC02ZGI5NjA0MGNkYmIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRCI6InJvb3QifQ.1pSbJ'...
+2024-05-29 16:03:58,484 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=1d5758bb-0879-4d8d-9e14-37c9117669a3, status=OK, result=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODA2MzgsIm5iZiI6MTcxNjk4MDYzOCwiZXhwIjoxNzE2OTg0MjM4LCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiIwODhhMWY0My04YzY3LTQ5NjYtYTdjNC02ZGI5NjA0MGNkYmIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRC...
+2024-05-29 16:03:58,484 : MainThread : surrealist.connections.websocket : INFO : Connected to ws://127.0.0.1:8000/rpc, params: {'NS': 'test', 'DB': 'test'}, credentials: ('root', '******'), timeout: 15
+2024-05-29 16:03:58,484 : MainThread : surrealist.connections.websocket : INFO : Operation: CREATE. Path: article, data: {'author': 'John Doe', 'title': 'In memoriam', 'text': 'text'}
+2024-05-29 16:03:58,484 : MainThread : surrealist.clients.websocket : DEBUG : Send data: {"id": "9bbc90d7-d6dc-4a51-ad97-b765e6b09131", "method": "create", "params": ["article", {"author": "John Doe", "title": "In memoriam", "text": "text"}]}
+2024-05-29 16:03:58,490 : Thread-1 : surrealist.clients.websocket : DEBUG : Get message b'{"id":"9bbc90d7-d6dc-4a51-ad97-b765e6b09131","result":[{"author":"John Doe","id":"article:72duj8mef1s97c67dv38","text":"text","title":"In memoriam"}]}'
+2024-05-29 16:03:58,491 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=9bbc90d7-d6dc-4a51-ad97-b765e6b09131, status=OK, result=[{'author': 'John Doe', 'id': 'article:72duj8mef1s97c67dv38', 'text': 'text', 'title': 'In memoriam'}], query=None, code=None, time=None, additional_info={})
+2024-05-29 16:03:58,491 : MainThread : surrealist.connection : INFO : The connection was closed
+2024-05-29 16:03:58,491 : Thread-1 : surrealist.clients.websocket : DEBUG : Close connection to ws://127.0.0.1:8000/rpc
+2024-05-29 16:03:58,491 : MainThread : surrealist.clients.websocket : DEBUG : Client is closed connection to ws://127.0.0.1:8000/rpc
 ```
 
 **Note:** passwords and auth information always masked in logs. If you still see it in logs - please, report an issue
+
 
 ## Live Query ##
 Live queries let you subscribe to events of desired table when changes happen—you get notification as a simple result or in DIFF format

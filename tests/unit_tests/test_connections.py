@@ -21,10 +21,6 @@ class TestConnections(TestCase):
         with self.assertRaises(SurrealConnectionError):
             db.connect()
 
-    def test_raise_on_wrong_level(self):
-        with self.assertRaises(ValueError):
-            Surreal(URL, log_level="WARN")
-
     def test_health(self):
         surreal = Surreal(WRONG_URL, timeout=1)
         with self.assertRaises(SurrealConnectionError):

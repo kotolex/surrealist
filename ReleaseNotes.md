@@ -1,4 +1,10 @@
 ## Release Notes ##
+**Version 0.5.2 (compatible with SurrealDB version 1.5.1):**
+- now user should use standard logging for debug
+- remove log_level arguments for classes
+- add LOG_FORMAT for default uses
+- fix README
+
 **Version 0.5.1 (compatible with SurrealDB version 1.5.0):**
 - add more precise names for INDEX methods (M, TYPE)
 - limit allowed options for some methods (TYPE)

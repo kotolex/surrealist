@@ -12,7 +12,7 @@ from surrealist.surreal import Surreal
 from surrealist.utils import DEFAULT_TIMEOUT
 
 CORES_COUNT = cpu_count()
-logger = getLogger("pool")
+logger = getLogger("surrealist.connection.pool")
 
 
 def connected_and_pooled(func):
@@ -41,11 +41,11 @@ class Pool:
     """
     def __init__(self, first_connection: Connection, url: str, namespace: Optional[str] = None,
                  database: Optional[str] = None, credentials: Tuple[str, str] = None, use_http: bool = False,
-                 timeout: int = DEFAULT_TIMEOUT, log_level: str = "ERROR", min_connections: int = CORES_COUNT,
+                 timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT,
                  max_connections: int = 50):
         self._options = {
             "url": url, "namespace": namespace, "database": database, "credentials": credentials, "use_http": use_http,
-            "timeout": timeout, "log_level": log_level
+            "timeout": timeout
         }
         self._timeout = timeout
         self._url = url

@@ -7,13 +7,13 @@ from surrealist.ql.database import Database
 from surrealist.utils import DEFAULT_TIMEOUT
 
 CORES_COUNT = cpu_count()
-logger = logging.getLogger("pool_databaseQL")
+logger = logging.getLogger("surrealist.databaseQL.pool")
 
 
 class DatabaseConnectionsPool(Database):
     """
-    Represents a pool of connections to a database, for using in high-load multithreaded environments. As a child of
-    Database object it can be used everywhere, where Database can.
+    Represents a pool of connections to a database, for using in high-load multithreading environments. As a child of
+    Database object it can be used everywhere where Database can.
     The main difference is a number of created connections. By default, the minimum number is equal to CPU cores count
     in the system and cannot be less than 2.
 
@@ -25,7 +25,7 @@ class DatabaseConnectionsPool(Database):
     """
 
     def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
-                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT, log_level: str = "ERROR",
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
                  min_connections: int = CORES_COUNT, max_connections: int = 50):
         """
         All parameters are the same as for Surreal or Database object
@@ -35,10 +35,9 @@ class DatabaseConnectionsPool(Database):
         """
         self._options = {
             "url": url, "namespace": namespace, "database": database, "credentials": credentials, "use_http": use_http,
-            "timeout": timeout, "log_level": log_level, "min_connections": min_connections,
-            "max_connections": max_connections
+            "timeout": timeout, "min_connections": min_connections, "max_connections": max_connections
         }
-        super().__init__(url, namespace, database, credentials, use_http, timeout, log_level)
+        super().__init__(url, namespace, database, credentials, use_http, timeout)
         self._connection = Pool(self._connection, **self._options)
         self._connected = True
         self._min = min_connections

@@ -1,5 +1,5 @@
 import urllib.parse
-from logging import getLogger, ERROR, DEBUG, basicConfig, INFO
+from logging import getLogger
 from typing import Tuple, Optional
 
 from surrealist.clients import HttpClient
@@ -9,15 +9,13 @@ from surrealist.connections.ws_connection import WebSocketConnection
 from surrealist.errors import HttpClientError, SurrealConnectionError
 from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
 
-FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'
-basicConfig(level=ERROR, format=FORMAT)
-logger = getLogger()
+logger = getLogger("surrealist")
 
 
 class Surreal:
     """
     Represents the SurrealDB client, all connections should be established via this class. By default, connection will
-    use websocket transport (recommended). This class uses log level to monitor all actions, can check a version and
+    use websocket transport (recommended). This class uses logging to monitor all actions, can check a version and
     state of the SurrealDb server.
     If you have only one SurrealDB server, you need exactly one object of this class!
 
@@ -25,13 +23,12 @@ class Surreal:
     """
 
     def __init__(self, url: str, namespace: Optional[str] = None, database: Optional[str] = None,
-                 credentials: Tuple[str, str] = None, use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
-                 log_level: str = "ERROR"):
+                 credentials: Tuple[str, str] = None, use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
         """
         Initiating all parameters for connection, this method does not check or validates anything by itself, just save
         data for future use. To make sure your url is valid and accessible - use **is_ready** method of Surreal object.
 
-        About log_level and debug mode: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
+        About debug mode: https://github.com/kotolex/surrealist?tab=readme-ov-file#logging-and-debug-mode
 
         :param url: database url, for local database http://127.0.0.1:8000/
         :param namespace: namespace to use
@@ -40,12 +37,8 @@ class Surreal:
         :param use_http: boolean flag of using http transport. Will use websocket-client if False.
         It is strongly recommended to use websocket transport as it is more powerful.
         :param timeout: connection timeout in seconds
-        :param log_level: level of logging for debug purposes, one of (DEBUG, INFO, ERROR) allowed, where ERROR
-        is default, INFO - to see only operations, DEBUG - to see all, including transport requests/responses
         """
-        self._log_level = log_level
         self._log_data_length = DATA_LENGTH_FOR_LOGS
-        self.set_log_level(log_level)
         self._client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
         if namespace:
@@ -92,32 +85,6 @@ class Surreal:
         """
         _set_length(length)
         self._log_data_length = length
-
-    def set_log_level(self, level: str):
-        """
-        Setting log level for all underlying connections of that Surreal object.
-        There are 3 options:
-        - ERROR which is default and recommended for most situations, you will see only errors
-        - INFO which is show all information about connection operations
-        - DEBUG, when you will see all logs, including requests and responses via transport level. This level is very
-        useful for debugging and finding some useful information in logs
-
-        Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#debug-mode
-
-        Notice: authorization params and passwords can't be seen in logs at any time, if you see it, please report
-        an issue
-
-        Notice: you will see logs of this library(in and out), but not SurrealDb server logs
-
-        :param level: one of "DEBUG", "INFO", "ERROR"
-        """
-        if level not in ("DEBUG", "INFO", "ERROR"):
-            raise ValueError("Log level should be one of (DEBUG, INFO, ERROR), where ERROR is default")
-        levels = {"DEBUG": DEBUG, "INFO": INFO, "ERROR": ERROR}
-        new_level = levels[level]
-        logger.setLevel(new_level)
-        logger.debug("Log level switch to %s", level)
-        self._log_level = level
 
     def connect(self) -> Connection:
         """
@@ -182,6 +149,9 @@ class Surreal:
         :raise SurrealConnectionError: if cant connect to http-endpoint
         """
         return self.__get("version")[1]
+
+    def __repr__(self) -> str:
+        return f"Surreal(url={self._possible_url}, db_params={self.db_params}, timeout={self.timeout})"
 
     def __get(self, endpoint: str) -> Tuple[int, str]:
         try:
