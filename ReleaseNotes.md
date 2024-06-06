@@ -1,4 +1,7 @@
 ## Release Notes ##
+**Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
+- minor fixes for docs and examples
+
 **Version 0.5.2 (compatible with SurrealDB version 1.5.1):**
 - now user should use standard logging for debug
 - remove log_level arguments for classes

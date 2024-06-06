@@ -1,6 +1,6 @@
 # README #
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 1.5.1)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 1.5.2)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -11,7 +11,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (1.5.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (1.5.2), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -523,10 +523,8 @@ with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credential
     make_something_with_a_lot_of_threads_or_data(db) # use pool everywhere we need as a simple Database object
 ```
 
-**Note 1:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
+**Note:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
 It is your job as a developer to limit number of pools created in your application
-
-**Note 2:** DatabaseConnectionsPool uses threads, not processes
 
 **Important note:** for many and maybe the most cases, one shared connection is enough to do the job. Test it and make sure you really need a connection pool.
 

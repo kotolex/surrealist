@@ -5,16 +5,25 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
 class PermissionsNone(FinishedStatement):
+    """
+    Represents a `PERMISSIONS NONE` statement
+    """
     def _clean_str(self):
         return f"{self._statement._clean_str()} PERMISSIONS NONE"
 
 
 class PermissionsFull(FinishedStatement):
+    """
+    Represents a `PERMISSIONS FULL` statement
+    """
     def _clean_str(self):
         return f"{self._statement._clean_str()} PERMISSIONS FULL"
 
 
 class PermissionsFor(FinishedStatement):
+    """
+    Represents a `PERMISSIONS FOR` statement
+    """
     def __init__(self, statement: Statement, select: Optional[Union[str, Where]] = None,
                  create: Optional[Union[str, Where]] = None,
                  update: Optional[Union[str, Where]] = None,
@@ -37,6 +46,9 @@ class PermissionsFor(FinishedStatement):
 
 
 class CanUsePermissions:
+    """
+    Represents interface for using permissions
+    """
     def permissions_none(self) -> PermissionsNone:
         """
         Represents PERMISSIONS NONE statement

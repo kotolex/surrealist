@@ -331,6 +331,10 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
                     self.assertEqual(res.result, expected)
 
+    def test_version(self):
+        surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', ('root', 'root'))
+        self.assertTrue("1.5.2" in surreal.version())
+
 
 if __name__ == '__main__':
     main()

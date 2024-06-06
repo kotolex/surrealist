@@ -391,6 +391,9 @@ class HNSW(FinishedStatement):
 
 
 class CanUseIndexTypes:
+    """
+    Represents interface for index types
+    """
     def unique(self) -> Unique:
         """
         Creates unique index
