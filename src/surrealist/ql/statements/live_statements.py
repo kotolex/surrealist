@@ -20,7 +20,7 @@ class Fetch(FinishedStatement):
 class LiveUseFetch:
     def fetch(self, *args: str) -> Fetch:
         """
-        Add fetch clause to final statement.
+        Add fetch clause to a final statement.
         NOTE: Support for FETCH is not yet available on SurrealDb side!!!
 
         :param args: arguments to fetch

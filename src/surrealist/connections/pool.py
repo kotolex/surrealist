@@ -41,8 +41,7 @@ class Pool:
     """
     def __init__(self, first_connection: Connection, url: str, namespace: Optional[str] = None,
                  database: Optional[str] = None, credentials: Tuple[str, str] = None, use_http: bool = False,
-                 timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT,
-                 max_connections: int = 50):
+                 timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT, max_connections: int = 50):
         self._options = {
             "url": url, "namespace": namespace, "database": database, "credentials": credentials, "use_http": use_http,
             "timeout": timeout
@@ -109,7 +108,7 @@ class Pool:
         connection. Then it waits until the first non-busy connection and delegates work to it, calling in method.
         After that - always put connection back to pool
 
-        :param name: name of the connection method to call, for example "query"
+        :param name: name of the connection method to call, for example, "query"
         :param args: args to call
         :param kwargs: keyword args to call
         :return: result of the query

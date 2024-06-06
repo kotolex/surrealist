@@ -3,6 +3,9 @@ from surrealist.utils import OK
 
 
 class Parallel(FinishedStatement):
+    """
+    Represents a 'PARALLEL' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} PARALLEL"
@@ -14,6 +17,9 @@ class CanUseParallel:
 
 
 class Timeout(FinishedStatement, CanUseParallel):
+    """
+    Represents a 'TIMEOUT' statement. Allowed durations are (ms, s, m)
+    """
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration

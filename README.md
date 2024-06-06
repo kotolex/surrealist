@@ -523,10 +523,8 @@ with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credential
     make_something_with_a_lot_of_threads_or_data(db) # use pool everywhere we need as a simple Database object
 ```
 
-**Note 1:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
+**Note:** DatabaseConnectionsPool is NOT a singleton, it allows creating as many pools as you like, for example, for different databases or namespaces. 
 It is your job as a developer to limit number of pools created in your application
-
-**Note 2:** DatabaseConnectionsPool uses threads, not processes
 
 **Important note:** for many and maybe the most cases, one shared connection is enough to do the job. Test it and make sure you really need a connection pool.
 
