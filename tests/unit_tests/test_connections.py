@@ -81,9 +81,9 @@ class TestConst(TestCase):
         self.assertFalse(res.is_error())
 
     def test_masked_opts(self):
-        res = mask_opts({"headers": {"Authorization": "Basic 123456"}, "data": b'0' * 350, "method": "GET"})
+        res = mask_opts({"headers": {"Authorization": "Bearer 123456"}, "data": b'0' * 350, "method": "GET"})
         self.assertEqual(res,
-                         {"headers": {"Authorization": "Basic ******"}, "data": "b'" + "0" * 298 + "...",
+                         {"headers": {"Authorization": "Bearer ******"}, "data": "b'" + "0" * 298 + "...",
                           "method": "GET"})
 
 

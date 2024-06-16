@@ -5,6 +5,10 @@ from surrealist.connections import Connection
 from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS, to_surreal_datetime_str
 from .statement import Statement
 
+"""
+SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" | "@versionstamp" [LIMIT @number]
+"""
+
 
 class Show(Statement):
     """

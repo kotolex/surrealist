@@ -26,11 +26,13 @@ class Database:
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
 
-    def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
+    def __init__(self, url: str, namespace: str, database: str, access: Optional[str] = None,
+                 credentials: Optional[Tuple[str, str]] = None,
                  use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
         self._namespace = namespace
         self._database = database
-        self._connection = Surreal(url, namespace, database, credentials, use_http, timeout).connect()
+        self._connection = Surreal(url, namespace, database, access=access, credentials=credentials, use_http=use_http,
+                                   timeout=timeout).connect()
         self._connected = True
         logger.info("DatabaseQL is up")
 

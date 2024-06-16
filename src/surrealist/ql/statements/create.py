@@ -5,6 +5,17 @@ from surrealist.ql.statements.create_statements import CreateUseSetContent
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
+"""
+CREATE [ ONLY ] @targets
+    [ CONTENT @value
+      | SET @field = @value ...
+    ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+;
+"""
+
 
 class Create(Statement, CreateUseSetContent):
     """

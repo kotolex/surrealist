@@ -27,7 +27,7 @@ class Statement(ABC):
     def is_valid(self) -> bool:
         """
         Checks is whole query is valid
-        :return: True, f query is valid, False otherwise
+        :return: True, if query is valid, False otherwise
         """
         return all(mess == OK for mess in self.validate())
 

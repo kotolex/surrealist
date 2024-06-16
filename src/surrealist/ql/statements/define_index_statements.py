@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from surrealist.ql.statements.statement import FinishedStatement, Statement
@@ -5,7 +6,27 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 # This module contains classes with duplicate code. This is made specifically for IDE hints
 
-class Unique(FinishedStatement):
+class Comment(FinishedStatement):
+    def __init__(self, statement: Statement, text: str):
+        super().__init__(statement)
+        self._text = text
+
+    def _clean_str(self):
+        text = f" COMMENT {json.dumps(self._text)}" if self._text else ""
+        return f"{self._statement._clean_str()}{text}"
+
+
+class CanUseComment:
+    def comment(self, comment: str) -> Comment:
+        """
+        Adds COMMENT statement to the query
+        :param comment: comment text
+        :return: self
+        """
+        return Comment(self, comment)
+
+
+class Unique(FinishedStatement, CanUseComment):
     """
     Represents UNIQUE statement
 
@@ -17,7 +38,7 @@ class Unique(FinishedStatement):
         return f"{self._statement._clean_str()} UNIQUE"
 
 
-class SearchAnalyzer(FinishedStatement):
+class SearchAnalyzer(FinishedStatement, CanUseComment):
     """
     Represents SEARCH ANALYZER statement
 
@@ -69,7 +90,7 @@ class SearchAnalyzer(FinishedStatement):
         return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name}{bm25}{hl}"
 
 
-class MTree(FinishedStatement):
+class MTree(FinishedStatement, CanUseComment):
     """
     Represents MTREE index.
     There is code duplication in this class. This is made specifically for IDE hints
@@ -221,7 +242,7 @@ class MTree(FinishedStatement):
         return f"{self._statement._clean_str()} MTREE DIMENSION {self._num}{type_}{dist}{cap}"
 
 
-class HNSW(FinishedStatement):
+class HNSW(FinishedStatement, CanUseComment):
     """
     Represents HNSW index
     There is code duplication in this class. This is made specifically for IDE hints
@@ -394,6 +415,7 @@ class CanUseIndexTypes:
     """
     Represents interface for index types
     """
+
     def unique(self) -> Unique:
         """
         Creates unique index

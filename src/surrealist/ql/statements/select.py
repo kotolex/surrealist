@@ -5,6 +5,30 @@ from surrealist.utils import OK
 from .select_statements import SelectUseIndex
 from .statement import Statement, IterableStatement
 
+"""
+SELECT [ VALUE ] @fields [ AS @alias ]
+    [ OMIT @fields ...]
+    FROM [ ONLY ] @targets
+    [ WITH [ NOINDEX | INDEX @indexes ... ]]
+    [ WHERE @conditions ]
+    [ SPLIT [ AT ] @field ... ]
+    [ GROUP [ BY ] @fields ... ]
+    [ ORDER [ BY ]
+        @fields [
+            RAND()
+            | COLLATE
+            | NUMERIC
+        ] [ ASC | DESC ] ...
+    ]
+    [ LIMIT [ BY ] @limit ]
+    [ START [ AT ] @start ]
+    [ FETCH @fields ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+    [ EXPLAIN [ FULL ]]
+;
+"""
+
 
 class Select(IterableStatement, SelectUseIndex):
     """

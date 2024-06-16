@@ -6,6 +6,8 @@
 - you can now specify access method on connecting via a Surreal object
 - now use Bearer instead of Basic for Authorization
 - database argument is now optional for USE method, but raises for websocket if database is not specified
+- all QL-statements now have SurrealQL Syntax in documentation for module or for class
+- all DEFINE statements now have COMMENT finished statement
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples

@@ -4,6 +4,12 @@ from surrealist.connections import Connection
 from surrealist.utils import OK
 from .statement import Statement
 
+"""
+REBUILD [
+    INDEX [ IF EXISTS ] @name ON [ TABLE ] @table
+]
+"""
+
 
 class RebuildIndex(Statement):
     """

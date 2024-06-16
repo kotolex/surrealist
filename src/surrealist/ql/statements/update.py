@@ -5,6 +5,20 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update_statements import UpdateUseMethods
 from surrealist.utils import OK
 
+"""
+UPDATE [ ONLY ] @targets
+    [ CONTENT @value
+      | MERGE @value
+      | PATCH @value
+      | SET @field = @value ...
+    ]
+    [ WHERE @condition ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+;
+"""
+
 
 class Update(Statement, UpdateUseMethods):
     """

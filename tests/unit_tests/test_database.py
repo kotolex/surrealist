@@ -31,6 +31,13 @@ class TestDatabase(TestCase):
         self.assertEqual(text, DefineEvent(None, "email", table_name="user", then=then).
                          when("$before.email != $after.email").to_str())
 
+    def test_define_event_comment(self):
+        text = "DEFINE EVENT email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event SET " \
+               "user = $value.id, time = time::now(), value = $after.email) COMMENT \"some\";"
+        then = Create(None, "event").set("user = $value.id, time = time::now(), value = $after.email")
+        self.assertEqual(text, DefineEvent(None, "email", table_name="user", then=then).
+                         when("$before.email != $after.email").comment("some").to_str())
+
     def test_define_event_exists(self):
         text = "DEFINE EVENT IF NOT EXISTS email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event " \
                "SET user = $value.id, time = time::now(), value = $after.email);"
@@ -50,8 +57,16 @@ class TestDatabase(TestCase):
         self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER;",
                          DefineUser(None, "john", "123456").if_not_exists().role_owner().to_str())
 
+    def test_define_user_comment(self):
+        self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER COMMENT \"some\";",
+                         DefineUser(None, "john", "123456").if_not_exists().role_owner().comment("some").to_str())
+
     def test_define_param(self):
         self.assertEqual("DEFINE PARAM $user VALUE john;", DefineParam(None, "user", "john").to_str())
+
+    def test_define_param_comment(self):
+        self.assertEqual("DEFINE PARAM $user VALUE john COMMENT \"some\";",
+                         DefineParam(None, "user", "john").comment("some").to_str())
 
     def test_define_param_exists(self):
         self.assertEqual("DEFINE PARAM IF NOT EXISTS $user VALUE john;", DefineParam(None, "user", "john").
@@ -60,6 +75,10 @@ class TestDatabase(TestCase):
     def test_define_analyzer(self):
         self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;",
                          DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").to_str())
+
+    def test_define_analyzer_comment(self):
+        self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii COMMENT \"some\";",
+                         DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").comment("some").to_str())
 
     def test_define_analyzer_exists(self):
         self.assertEqual("DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;",
@@ -105,6 +124,11 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
                              "ascii").bm25(None, 1.2).to_str())
 
+    def test_define_index_comment(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii COMMENT \"some\";"
+        self.assertEqual(text,
+                         DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").comment("some").to_str())
+
     def test_define_index_mtree(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 4;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(4).to_str())
@@ -119,6 +143,10 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 3 TYPE F64 CAPACITY 50;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(3).type_f64().capacity(50).to_str())
 
+    def test_define_index_mtree_comment(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name MTREE DIMENSION 3 TYPE F64 CAPACITY 50 COMMENT \"some\";"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").mtree(3).type_f64().capacity(50).comment("some").to_str())
+
     def test_define_index_hnsw(self):
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).to_str())
@@ -132,6 +160,10 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().to_str())
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE EFC 150 M 2;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().efc(150).max_connections(2).to_str())
+
+    def test_define_index_hnsw_comment(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE COMMENT \"some\";"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().comment("some").to_str())
 
     def test_define_index_exists(self):
         text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
@@ -183,6 +215,10 @@ PERMISSIONS
             "city")
         self.assertEqual(text, DefineTable(None, "temperatures_by_month").alias(select).to_str())
 
+    def test_define_table_comment(self):
+        text = "DEFINE TABLE table_name COMMENT \"some\";"
+        self.assertEqual(text, DefineTable(None, "table_name").comment("some").to_str())
+
     def test_define_table_exists(self):
         text = "DEFINE TABLE IF NOT EXISTS table_name;"
         self.assertEqual(text, DefineTable(None, "table_name").if_not_exists().to_str())
@@ -206,6 +242,11 @@ PERMISSIONS
         text = "DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;"
         self.assertEqual(text, DefineField(None, "comment", "resource").type("string",
                                                                              is_flexible=True).permissions_full().to_str())
+
+    def test_define_field_comment(self):
+        text = "DEFINE FIELD updated ON TABLE resource DEFAULT time::now() COMMENT \"some\";"
+        self.assertEqual(text, DefineField(None, "updated", "resource").default("time::now()").comment("some").to_str())
+
 
     def test_define_field_exists(self):
         text = "DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;"

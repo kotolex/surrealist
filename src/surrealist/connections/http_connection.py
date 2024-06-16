@@ -36,25 +36,25 @@ class HttpConnection(Connection):
         logger.info("Connected to %s, params: %s, credentials: %s, timeout: %s", url, db_params, masked_creds, timeout)
 
     def _sign(self, credentials, db_params, url):
+        user, password, ns, db, ac = None, None, None, None, None
         if credentials:
             user, password = credentials
-            ns, db, ac = None, None, None
-            if db_params:
-                ns = db_params.get(NS)
-                db = db_params.get(DB)
-                ac = db_params.get(AC)
-            try:
-                result = self._signin(user, password, namespace=ns, database=db, access=ac)
-                if result.is_error():
-                    logger.error("Cant sign in to %s with given credentials", url)
-                    raise SurrealConnectionError(f"Cant sign in to {url} with given credentials\n"
-                                                 f"Info: {result.additional_info}\n")
-                self._http_client.set_token(result.result)
-            except HttpClientError:
-                logger.error("Cant connect to %s", url)
-                raise SurrealConnectionError(f"Cant connect to {url}\n"
-                                             f"Is your SurrealDB started and work on that url? "
-                                             f"Refer to https://docs.surrealdb.com/docs/introduction/start")
+        if db_params:
+            ns = db_params.get(NS)
+            db = db_params.get(DB)
+            ac = db_params.get(AC)
+        try:
+            result = self._signin(user, password, namespace=ns, database=db, access=ac)
+            if result.is_error():
+                logger.error("Cant sign in to %s with given credentials", url)
+                raise SurrealConnectionError(f"Cant sign in to {url} with given credentials\n"
+                                             f"Info: {result.additional_info}\n")
+            self._http_client.set_token(result.result)
+        except HttpClientError:
+            logger.error("Cant connect to %s", url)
+            raise SurrealConnectionError(f"Cant connect to {url}\n"
+                                         f"Is your SurrealDB started and work on that url? "
+                                         f"Refer to https://docs.surrealdb.com/docs/introduction/start")
 
     def _signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
                 access: Optional[str] = None) -> SurrealResult:
@@ -76,6 +76,8 @@ class HttpConnection(Connection):
         :return: a result of request
         """
         opts = {"user": user, "pass": password}
+        if user is None or password is None:
+            opts = {}
         if namespace:
             opts["ns"] = namespace
         if database:

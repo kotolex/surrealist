@@ -1,6 +1,6 @@
 from surrealist import Database
 
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
     print(db)  # Database(namespace=test, name=test, connected=True)
     # The database is empty, so on next request we get
     # {'analyzers': {}, 'functions': {}, 'models': {}, 'params': {}, 'scopes': {}, 'tables': {}, 'tokens': {},
@@ -22,6 +22,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
     print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
+    # DEFINE TABLE reading CHANGEFEED 1h COMMENT "Some comment";
+    print(db.define_table("reading").changefeed("1h").comment("Some comment"))
 
     # DEFINE TABLE reading CHANGEFEED 1h INCLUDE ORIGINAL;
     print(db.define_table("reading").changefeed("1h", include_original=True))
@@ -69,6 +71,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     print(db.define_field("field", "user").type("bool", is_flexible=True))
     # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;
     print(db.define_field("locked", "user").type("bool").default("false"))
+    # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false COMMENT "Some comment";
+    print(db.define_field("locked", "user").type("bool").default("false").comment("Some comment"))
     # DEFINE FIELD updated ON TABLE resource DEFAULT time::now();
     print(db.define_field("updated", "resource").default("time::now()"))
     # DEFINE FIELD updated ON TABLE resource DEFAULT time::now() READONLY;
@@ -124,6 +128,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # on database object we can DEFINE INDEX
     # DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
     print(db.define_index("userEmailIndex", "user").columns("email").unique())
+    # DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE COMMENT "unique index";
+    print(db.define_index("userEmailIndex", "user").columns("email").unique().comment("unique index"))
     # DEFINE INDEX IF NOT EXISTS userEmailIndex ON TABLE user COLUMNS email UNIQUE;
     print(db.define_index("userEmailIndex", "user").if_not_exists().columns("email").unique())
     # DEFINE INDEX userAgeIndex ON TABLE user COLUMNS age;

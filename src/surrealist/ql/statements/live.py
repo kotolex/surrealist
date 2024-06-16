@@ -6,6 +6,18 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.result import SurrealResult
 from surrealist.utils import OK
 
+"""
+LIVE SELECT
+    [
+        [ VALUE ] @fields [ AS @alias ]
+        | DIFF
+    ]
+    FROM @targets
+    [ WHERE @conditions ]
+    [ FETCH @fields ... ]
+;
+"""
+
 
 class Live(Statement, LiveUseWhere):
     """

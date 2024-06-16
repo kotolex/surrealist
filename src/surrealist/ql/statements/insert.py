@@ -6,6 +6,15 @@ from surrealist.ql.statements.insert_statements import InsertUseDuplicate
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
+"""
+INSERT [ IGNORE ] INTO @what
+    [ @value
+      | (@fields) VALUES (@values)
+        [ ON DUPLICATE KEY UPDATE @field = @value ... ]
+    ]
+;
+"""
+
 
 class Insert(Statement, InsertUseDuplicate):
     """

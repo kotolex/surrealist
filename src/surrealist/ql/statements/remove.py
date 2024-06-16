@@ -4,6 +4,23 @@ from surrealist.connections import Connection
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
+"""
+REMOVE [
+    NAMESPACE [ IF EXISTS ] @name
+    | DATABASE [ IF EXISTS] @name
+    | USER [ IF EXISTS ] @name ON [ ROOT | NAMESPACE | DATABASE ]
+    | TOKEN [ IF EXISTS ] @name ON [ NAMESPACE | DATABASE ]
+    | EVENT [ IF EXISTS ] @name ON [ TABLE ] @table
+    | FIELD [ IF EXISTS ] @name ON [ TABLE ] @table
+    | INDEX [ IF EXISTS ] @name ON [ TABLE ] @table
+    | ANALYZER [ IF EXISTS ] @name
+    | FUNCTION [ IF EXISTS ] fn::@name
+    | PARAM [ IF EXISTS ] $@name
+    | SCOPE [ IF EXISTS ] @name
+    | TABLE [ IF EXISTS ] @name
+]
+"""
+
 
 class Remove(Statement):
     """

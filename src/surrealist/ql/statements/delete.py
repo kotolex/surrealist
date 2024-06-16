@@ -5,6 +5,15 @@ from surrealist.utils import OK
 from .common_statements import CanUseWhere
 from .statement import Statement
 
+"""
+DELETE [ ONLY ] @targets
+    [ WHERE @condition ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+;
+"""
+
 
 class Delete(Statement, CanUseWhere):
     """
