@@ -1,6 +1,7 @@
 import logging
 from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
+from surrealist import Algorithm
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
@@ -312,7 +313,7 @@ class Database:
         """
         return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
 
-    def define_token(self, name: str, token_type: str, value: str) -> DefineToken:
+    def define_token(self, name: str, token_type: Algorithm, value: str) -> DefineToken:
         """
         Represents DEFINE TOKEN statement
 
@@ -321,7 +322,7 @@ class Database:
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
         :param name: name for the token
-        :param token_type: type of the token, for example, RS256
+        :param token_type: type of the token, for example, Algorithm.RS256
         :param value: value of the token
         :return: DefineIndex object
         """

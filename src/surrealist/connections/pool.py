@@ -40,11 +40,12 @@ class Pool:
     client will be blocked until the first connection finishes the task and appears at the pool.
     """
     def __init__(self, first_connection: Connection, url: str, namespace: Optional[str] = None,
-                 database: Optional[str] = None, credentials: Tuple[str, str] = None, use_http: bool = False,
-                 timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT, max_connections: int = 50):
+                 database: Optional[str] = None, access: Optional[str] =None, credentials: Tuple[str, str] = None,
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT,
+                 max_connections: int = 50):
         self._options = {
-            "url": url, "namespace": namespace, "database": database, "credentials": credentials, "use_http": use_http,
-            "timeout": timeout
+            "url": url, "namespace": namespace, "database": database, "access": access, "credentials": credentials,
+            "use_http": use_http, "timeout": timeout
         }
         self._timeout = timeout
         self._url = url

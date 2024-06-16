@@ -2,6 +2,7 @@ import json
 from abc import ABC
 from typing import List, Union, Any, Optional, Tuple
 
+from surrealist.enums import Algorithm
 from surrealist.connections import Connection
 from surrealist.ql.statements.define_index_statements import CanUseIndexTypes
 from surrealist.ql.statements.permissions import CanUsePermissions
@@ -302,7 +303,7 @@ class DefineToken(Define):
     [ COMMENT @string ]
     """
 
-    def __init__(self, connection: Connection, name: str, token_type: str, value: str):
+    def __init__(self, connection: Connection, name: str, token_type: Algorithm, value: str):
         super().__init__(connection)
         self._name = name
         self._type = token_type
@@ -313,10 +314,12 @@ class DefineToken(Define):
         return self
 
     def validate(self) -> List[str]:
+        if not isinstance(self._type, Algorithm):
+            return ["Invalid token type, you should use one of Algorithm enumerations"]
         return [OK]
 
     def _clean_str(self):
-        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type} \n' \
+        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type.name} \n' \
                f'VALUE "{self._value}"{self._comment()}'
 
 

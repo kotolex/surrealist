@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from surrealist import Where
+from surrealist import Where, Algorithm
 from surrealist.ql.statements import Create, Update, Select
 from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
     DefineIndex, DefineToken, DefineTable, DefineField
@@ -174,13 +174,13 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = """DEFINE TOKEN token_name ON DATABASE 
 TYPE RS256 
 VALUE "value";"""
-        self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").to_str())
+        self.assertEqual(text, DefineToken(None, "token_name", Algorithm.RS256, "value").to_str())
 
     def test_define_token_exists(self):
         text = """DEFINE TOKEN IF NOT EXISTS token_name ON DATABASE 
 TYPE RS256 
 VALUE "value";"""
-        self.assertEqual(text, DefineToken(None, "token_name", "RS256", "value").if_not_exists().to_str())
+        self.assertEqual(text, DefineToken(None, "token_name", Algorithm.RS256, "value").if_not_exists().to_str())
 
     def test_define_table(self):
         text = "DEFINE TABLE table_name;"

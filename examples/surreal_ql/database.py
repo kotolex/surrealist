@@ -157,11 +157,13 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.rebuild_index("userNameIndex", table_name="user", if_exists=True))
 
     # on database object we can DEFINE TOKEN
+    from surrealist import Algorithm  # need to specify algorithm for token
+
     # DEFINE TOKEN token_name ON DATABASE
     # TYPE HS512
     # VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz";
     token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz"
-    print(db.define_token("token_name", "HS512", value=token_value))
+    print(db.define_token("token_name", Algorithm.HS512, value=token_value))
 
     # we can remove token by name
     print(db.remove_token("token_name"))  # REMOVE TOKEN token_name ON DATABASE;
