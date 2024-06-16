@@ -4,9 +4,9 @@ from typing import Tuple, Dict, Optional, Union, Any, List, BinaryIO
 
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
-from surrealist.errors import (SurrealConnectionError, HttpClientError, CompatibilityError, HttpConnectionError)
+from surrealist.errors import (CompatibilityError, HttpConnectionError, HttpClientError, SurrealConnectionError)
 from surrealist.result import SurrealResult, to_result
-from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK)
+from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, HTTP_OK, NS, DB, AC)
 
 logger = getLogger("surrealist.connections.http")
 
@@ -30,76 +30,60 @@ class HttpConnection(Connection):
         super().__init__(db_params, credentials, timeout)
         self._url = url
         self._http_client = HttpClient(url, headers=db_params, credentials=credentials, timeout=timeout)
-        try:
-            is_ready = self._is_ready()
-        except HttpClientError:
-            is_ready = False
-        if not is_ready:
-            logger.error("Cant connect to %s OR /status and /health are not OK", url)
-            raise SurrealConnectionError(f"Cant connect to {url} OR /status and /health are not OK.\n"
-                                         f"Is your SurrealDB started and work on that url? "
-                                         f"Refer to https://docs.surrealdb.com/docs/introduction/start")
+        self._sign(credentials, db_params, url)
         self._connected = True
         masked_creds = None if not credentials else (credentials[0], "******")
         logger.info("Connected to %s, params: %s, credentials: %s, timeout: %s", url, db_params, masked_creds, timeout)
 
-    def _is_ready(self) -> bool:
-        return self._simple_get("status")[0] == HTTP_OK and self._simple_get("health")[0] == HTTP_OK
+    def _sign(self, credentials, db_params, url):
+        if credentials:
+            user, password = credentials
+            ns, db, ac = None, None, None
+            if db_params:
+                ns = db_params.get(NS)
+                db = db_params.get(DB)
+                ac = db_params.get(AC)
+            try:
+                result = self._signin(user, password, namespace=ns, database=db, access=ac)
+                if result.is_error():
+                    logger.error("Cant sign in to %s with given credentials", url)
+                    raise SurrealConnectionError(f"Cant sign in to {url} with given credentials\n"
+                                                 f"Info: {result.additional_info}\n")
+                self._http_client.set_token(result.result)
+            except HttpClientError:
+                logger.error("Cant connect to %s", url)
+                raise SurrealConnectionError(f"Cant connect to {url}\n"
+                                             f"Is your SurrealDB started and work on that url? "
+                                             f"Refer to https://docs.surrealdb.com/docs/introduction/start")
 
-    @connected
-    def signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
-               scope: Optional[str] = None) -> SurrealResult:
+    def _signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
+                access: Optional[str] = None) -> SurrealResult:
         """
         This method allows you to sign in a root, namespace, database or scope user against SurrealDB
 
         Refer to: https://docs.surrealdb.com/docs/integration/http#signin
 
         Example:
-        http_connection.signin('root', 'root') # sign in as root user
-        http_connection.signin('root', 'root', namespace='test', database='test') # sign in as db user
+        http_connection._signin('root', 'root') # sign in as root user
+        http_connection._signin('user_db', 'user_db', namespace='test', database='test') # sign in as db user
 
 
         :param user: name of the user
         :param password: password for auth
         :param namespace: name of the namespace to use
         :param database: name of the database to use
-        :param scope: name of the scope to use
+        :param access: access method to use
         :return: a result of request
         """
         opts = {"user": user, "pass": password}
         if namespace:
-            opts['ns'] = namespace
+            opts["ns"] = namespace
         if database:
-            opts['db'] = database
-        if scope:
-            opts['scope'] = scope
+            opts["db"] = database
+        if access:
+            opts["ac"] = access
         logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(opts))))
         _, text = self._simple_request("POST", "signin", opts)
-        return to_result(text)
-
-    @connected
-    def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
-        """
-        This method allows you to sign up a user
-
-        Refer to: https://docs.surrealdb.com/docs/integration/http#signup
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-
-        Example:
-        http_connection.signup(namespace='test', database='test', scope='user_scope',
-                              params={'user': 'john:doe', 'pass': '123456'})
-
-        :param namespace: name of the namespace to use
-        :param database: name of the database to use
-        :param scope: name of the scope to use
-        :param params: dict with user and pass, for example {"user":"root", "pass":"root"}
-        :return: result of request
-        """
-        params = params or {}
-        body = {"ns": namespace, "db": database, "sc": scope, **params}
-        logger.info("Operation: SIGNUP. Data: %s", crop_data(mask_pass(str(body))))
-        _, text = self._simple_request("POST", "signup", body)
         return to_result(text)
 
     @connected
@@ -399,29 +383,24 @@ class HttpConnection(Connection):
         return self.query(f"REMOVE PARAM ${name};")
 
     @connected
-    def use(self, namespace: str, database: str) -> SurrealResult:
+    def use(self, namespace: str, database: Optional[str] = None) -> None:
         """
-        This method specifies the namespace and database for the current connection
-
-        Http transport use **query** method under the hood with "USE NS namespace DB database;"
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
+        This method specifies the namespace and optional database for the current connection. For http-connection, it
+        actually means using headers "surreal-ns" and "surreal-db", no checks for namespace or database to be existent
+        will be made
 
         Example:
         http_connection.use("test", "test") # use test namespace and test database for this connection
 
         :param namespace: name of the namespace to use
-        :param database: name of the database to use
-        :return: result of request
+        :param database: name of the database to use (optional)
+        :return: None
         """
-        logger.info("Query-Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
-        result = self.query(f"USE NS {namespace} DB {database};")
-        if not result.is_error():
-            # if USE was OK we need to store new data (ns and db)
-            self._db_params = {"NS": namespace, "DB": database}
-            self._http_client = HttpClient(self._url, headers=self._db_params, credentials=self._credentials,
-                                           timeout=self._timeout)
-        return result
+        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database or "None"))
+        self._db_params = {NS: namespace}
+        if database:
+            self._db_params[DB] = database
+        self._http_client.set_db_params(self._db_params)
 
     @connected
     def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:

@@ -242,9 +242,9 @@ class Connection(ABC):
         return self.query(query)
 
     @abstractmethod
-    def use(self, namespace: str, database: str) -> SurrealResult:
+    def use(self, namespace: str, database: Optional[str] = None) -> SurrealResult:
         """
-        This method specifies the namespace and database for the current connection
+        This method specifies the namespace and optionally database for the current connection
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
         """
@@ -308,21 +308,6 @@ class Connection(ABC):
         This method is used to terminate a running live query by id
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
-        """
-
-    @abstractmethod
-    def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
-        """
-        This method allows you to sign up a user
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-        """
-
-    @abstractmethod
-    def signin(self, user: str, password: str, namespace: Optional[str] = None,
-               database: Optional[str] = None, scope: Optional[str] = None) -> SurrealResult:
-        """
-        This method allows you to sign in a root, namespace, database or scope user against SurrealDB
         """
 
     @abstractmethod

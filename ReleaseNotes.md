@@ -1,4 +1,12 @@
 ## Release Notes ##
+**Version 1.0.0 (compatible with SurrealDB version 2.0.0):**
+- both http and ws connections lost signin and signup methods, sign in now happen under the hood on connect
+- USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
+- for root user now you should connect only with credentials and then call use method (see examples)
+- you can now specify access method on connecting via a Surreal object
+- now use Bearer instead of Basic for Authorization
+- database argument is now optional for USE method, but raises for websocket if database is not specified
+
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples
 

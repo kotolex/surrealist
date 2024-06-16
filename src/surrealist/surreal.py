@@ -6,8 +6,8 @@ from surrealist.clients import HttpClient
 from surrealist.connections.connection import Connection
 from surrealist.connections.http_connection import HttpConnection
 from surrealist.connections.ws_connection import WebSocketConnection
-from surrealist.errors import HttpClientError, SurrealConnectionError
-from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK
+from surrealist.errors import HttpClientError, SurrealConnectionError, ConnectionParametersError
+from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK, NS, DB, AC
 
 logger = getLogger("surrealist")
 
@@ -23,7 +23,8 @@ class Surreal:
     """
 
     def __init__(self, url: str, namespace: Optional[str] = None, database: Optional[str] = None,
-                 credentials: Tuple[str, str] = None, use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
+                 access: Optional[str] = None, credentials: Tuple[str, str] = None, use_http: bool = False,
+                 timeout: int = DEFAULT_TIMEOUT):
         """
         Initiating all parameters for connection, this method does not check or validates anything by itself, just save
         data for future use. To make sure your url is valid and accessible - use **is_ready** method of Surreal object.
@@ -33,6 +34,8 @@ class Surreal:
         :param url: database url, for local database http://127.0.0.1:8000/
         :param namespace: namespace to use
         :param database: a database to use, make sure to use both namespace and database or none of them
+        :param access: access method, this parameter is only required if you are signing in using an access method,
+        otherwise you can omit it for database, namespace and root users.
         :param credentials: pair of user and password, for example ("root", "root")
         :param use_http: boolean flag of using http transport. Will use websocket-client if False.
         It is strongly recommended to use websocket transport as it is more powerful.
@@ -42,9 +45,19 @@ class Surreal:
         self._client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
         if namespace:
-            self.db_params["NS"] = namespace
+            self.db_params[NS] = namespace
         if database:
-            self.db_params["DB"] = database
+            if not namespace:
+                msg = "Database can't be used without a namespace. Please specify namespace to use"
+                logger.error(msg)
+                raise ConnectionParametersError(msg)
+            self.db_params[DB] = database
+        if access:
+            if not database:
+                msg = "Access method can't be used without a namespace and database. Please specify it"
+                logger.error(msg)
+                raise ConnectionParametersError(msg)
+            self.db_params[AC] = access
         if not self.db_params:
             self.db_params = None
         self._url, self._possible_url, self._is_http_url = url, url, True

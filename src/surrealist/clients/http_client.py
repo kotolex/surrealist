@@ -1,4 +1,3 @@
-import base64
 import json
 import urllib.parse
 import urllib.request
@@ -8,7 +7,7 @@ from typing import Optional, Tuple, Dict, Union, BinaryIO
 from urllib.error import URLError, HTTPError
 
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
-from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
+from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB, AC
 
 logger = getLogger("surrealist.clients.http")
 
@@ -26,10 +25,16 @@ class HttpClient:
         headers = headers or {}
         headers = {k: v for k, v in headers.items() if v is not None}
         self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
-        if credentials:
-            self._user, self._pass = credentials
-            base64string = base64.encodebytes(f'{self._user}:{self._pass}'.encode(ENCODING))[:-1]
-            self._headers["Authorization"] = f"Basic {base64string.decode(ENCODING)}"
+        self._token = None
+
+    def set_token(self, token: str) -> None:
+        self._token = token
+        self._headers["Authorization"] = f"Bearer {token}"
+
+    def set_db_params(self, params: Dict) -> None:
+        # We have to remove `db`, 'ns' and `ac` params from headers, before add new
+        self._headers = {k: v for k, v in self._headers.items() if k not in (DB, AC, NS)}
+        self._headers = {**self._headers, **params}
 
     def get(self, path: str = '') -> HTTPResponse:
         """
@@ -120,7 +125,7 @@ def mask_opts(options: Dict) -> Dict:
     masked_opts = {}
     for key, value in options.items():
         if key == "headers" and "Authorization" in value:
-            value = {**value, "Authorization": "Basic ******"}
+            value = {**value, "Authorization": "Bearer ******"}
         elif key == "data":
             value = crop_data(mask_pass(str(value)))
         masked_opts[key] = value

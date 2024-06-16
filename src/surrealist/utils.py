@@ -12,6 +12,9 @@ HTTP_OK = 200  # status code for success
 DEFAULT_TIMEOUT = 15  # timeout in seconds for basic operations
 DATA_LENGTH_FOR_LOGS = 300  # size of data in logs, data will be cropped if bigger than that
 LOG_FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'  # use it for logs
+NS = "surreal-ns"
+DB = "surreal-db"
+AC = "ac"
 
 
 def _set_length(length: int):

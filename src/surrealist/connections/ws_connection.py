@@ -8,7 +8,7 @@ from surrealist.connections.connection import Connection, connected
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB
 
 logger = getLogger("surrealist.connections.websocket")
 
@@ -35,10 +35,10 @@ class WebSocketConnection(Connection):
         base_url = urllib.parse.urlparse(url.lower())
         self._params = {}
         if db_params:
-            if "NS" in db_params:
-                self._params["NS"] = db_params["NS"]
-            if "DB" in db_params:
-                self._params["DB"] = db_params["DB"]
+            if NS in db_params:
+                self._params[NS] = db_params[NS]
+            if DB in db_params:
+                self._params[DB] = db_params[DB]
             if not self._params:
                 message = "Connection parameters namespace and database required"
                 logger.error(message)
@@ -88,9 +88,10 @@ class WebSocketConnection(Connection):
                     raise WebSocketConnectionError(f"Error on connecting to '{self._base_url}'.\nInfo: {signin_result}")
 
     @connected
-    def use(self, namespace: str, database: str) -> SurrealResult:
+    def use(self, namespace: str, database: Optional[str] = None) -> SurrealResult:
         """
-        This method specifies the namespace and database for the current connection
+        This method specifies the namespace and database for the current connection.
+        For websocket connection, you should specify both.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#use
 
@@ -103,8 +104,14 @@ class WebSocketConnection(Connection):
         :param database: name of the database to use
         :return: result of request
         """
-        data = {"method": "use", "params": [namespace, database]}
-        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database))
+        if not database:
+            # For some reason, websocket connection cannot work with only namespace
+            msg = "Both namespace and database are required"
+            logger.error(msg)
+            raise CompatibilityError(msg)
+        params = [namespace, database]
+        data = {"method": "use", "params": params}
+        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database or "None"))
         result = self._run(data)
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
