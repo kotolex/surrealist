@@ -11,3 +11,6 @@ __all__ = ("Surreal", "SurrealResult", "WebSocketConnection", "HttpConnection", 
            "ConnectionParametersError", "CompatibilityError", "OperationOnClosedConnectionError", "WrongCallError",
            "DATA_LENGTH_FOR_LOGS", "Connection", "get_uuid", "Database", "Table", "Where", "DatabaseConnectionsPool",
            "to_surreal_datetime_str", "to_datetime", "LOG_FORMAT", "Algorithm")
+
+
+# TODO change all docs url with 2.x.x

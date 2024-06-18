@@ -2,8 +2,9 @@ from unittest import TestCase, main
 
 from surrealist import Where, Algorithm
 from surrealist.ql.statements import Create, Update, Select
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope, \
+from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineScope, \
     DefineIndex, DefineToken, DefineTable, DefineField
+from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -74,16 +75,18 @@ class TestDatabase(TestCase):
 
     def test_define_analyzer(self):
         self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;",
-                         DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").to_str())
+                         DefineAnalyzer(None, "example_ascii").tokenizer_class().filter_ascii().to_str())
+        self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS camel, class FILTERS ascii, ngram(1,5);",
+                         DefineAnalyzer(None, "example_ascii").tokenizer_class().tokenizer_camel().filter_ascii().filter_ngram(1,5).to_str())
 
     def test_define_analyzer_comment(self):
         self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii COMMENT \"some\";",
-                         DefineAnalyzer(None, "example_ascii").tokenizers("class").filters("ascii").comment("some").to_str())
+                         DefineAnalyzer(None, "example_ascii").tokenizer_class().filter_ascii().comment("some").to_str())
 
     def test_define_analyzer_exists(self):
-        self.assertEqual("DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;",
-                         DefineAnalyzer(None, "example_ascii").if_not_exists().tokenizers("class").
-                         filters("ascii").to_str())
+        self.assertEqual("DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS lowercase;",
+                         DefineAnalyzer(None, "example_ascii").if_not_exists().tokenizer_class().
+                         filter_lowercase().to_str())
 
     def test_define_scope(self):
         create = Create(None, "user").set("email = $email, pass = crypto::argon2::generate($pass)")

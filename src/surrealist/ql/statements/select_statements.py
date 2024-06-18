@@ -25,13 +25,32 @@ class SelectUseExplain:
         return Explain(self, full=True)
 
 
-class Parallel(IterableStatement, SelectUseExplain):
+class Tempfiles(IterableStatement, SelectUseExplain):
+    def _clean_str(self):
+        return f"{self._statement._clean_str()} TEMPFILES"
+
+
+class SelectUseTempfiles(SelectUseExplain):
+
+    def tempfiles(self) -> Tempfiles:
+        """
+        Include TEMPFILES statement for the query
+        When processing a large result set with many records, it is possible to use the TEMPFILES clause to specify that
+        the statement should be processed in temporary files rather than memory. This significantly reduces memory
+        usage, though it will also result in slower performance
+
+        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/select#the-tempfiles-clause
+        """
+        return Tempfiles(self)
+
+
+class Parallel(IterableStatement):
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} PARALLEL"
 
 
-class SelectUseParallel(SelectUseExplain):
+class SelectUseParallel(SelectUseTempfiles):
     def parallel(self) -> Parallel:
         return Parallel(self)
 

@@ -5,8 +5,9 @@ from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm
 from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
-from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
+from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
+from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return

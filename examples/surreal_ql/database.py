@@ -107,9 +107,13 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
 
     # on database object we can DEFINE ANALYZER
     # DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;
-    print(db.define_analyzer("example_ascii").tokenizers("class").filters("ascii"))
+    print(db.define_analyzer("example_ascii").tokenizer_class().filter_ascii())
     # DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;
-    print(db.define_analyzer("example_ascii").if_not_exists().tokenizers("class").filters("ascii"))
+    print(db.define_analyzer("example_ascii").if_not_exists().tokenizer_class().filter_ascii())
+    # DEFINE ANALYZER example_ascii TOKENIZERS class, camel FILTERS ascii, lowercase;
+    print(db.define_analyzer("example_ascii").tokenizer_class().tokenizer_camel().filter_lowercase().filter_ascii())
+    # DEFINE ANALYZER example_ascii FILTERS lowercase, snowball(english);
+    print(db.define_analyzer("example_ascii").filter_lowercase().filter_snowball("english"))
     # we can remove analyzer
     print(db.remove_analyzer("example_ascii"))  # REMOVE ANALYZER example_ascii;
 

@@ -166,50 +166,6 @@ class DefineParam(Define):
         return f"DEFINE PARAM{self._exists()} ${self._name} VALUE {self._value}{self._comment()}"
 
 
-class DefineAnalyzer(Define):
-    """
-    Represents DEFINE ANALYZER statement
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-    DEFINE ANALYZER [ IF NOT EXISTS ] @name [ TOKENIZERS @tokenizers ] [ FILTERS @filters ] [ COMMENT @string ]
-    """
-
-    def __init__(self, connection: Connection, name: str):
-        super().__init__(connection)
-        self._name = name
-        self._tokenizers = None
-        self._filters = None
-
-    def if_not_exists(self) -> "DefineAnalyzer":
-        self._if_not_exists = True
-        return self
-
-    def tokenizers(self, value: str) -> "DefineAnalyzer":
-        """
-        Represents TOKENIZERS statement
-        """
-        self._tokenizers = value
-        return self
-
-    def filters(self, value: str) -> "DefineAnalyzer":
-        """
-        Represents FILTERS statement
-        """
-        self._filters = value
-        return self
-
-    def validate(self) -> List[str]:
-        return [OK]
-
-    def _clean_str(self):
-        tok = "" if not self._tokenizers else f" TOKENIZERS {self._tokenizers}"
-        filters = "" if not self._filters else f" FILTERS {self._filters}"
-        return f"DEFINE ANALYZER{self._exists()} {self._name}{tok}{filters}{self._comment()}"
-
-
 class DefineScope(Define):
     """
     Represents DEFINE SCOPE statement

@@ -12,6 +12,8 @@
 - Database object can be created from active connection with Database.from_connection(connection)
 - Connection can be extracted from Database with Database.get_connection()
 - SHOW statement can use versionstamp
+- improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of them
+- SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples

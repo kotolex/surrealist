@@ -2,7 +2,7 @@ from typing import Optional, Tuple, Union, List
 
 from surrealist.connections import Connection
 from surrealist.utils import OK
-from .select_statements import SelectUseIndex
+from .select_statements import SelectUseIndex, SelectUseTempfiles
 from .statement import Statement, IterableStatement
 
 """
@@ -25,12 +25,13 @@ SELECT [ VALUE ] @fields [ AS @alias ]
     [ FETCH @fields ... ]
     [ TIMEOUT @duration ]
     [ PARALLEL ]
+    [TEMPFILES]
     [ EXPLAIN [ FULL ]]
 ;
 """
 
 
-class Select(IterableStatement, SelectUseIndex):
+class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):
     """
     Represents SELECT statement, it should be able to use any statements from documentation.
     It can use iterator to traverse results

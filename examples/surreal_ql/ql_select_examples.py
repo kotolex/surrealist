@@ -5,7 +5,7 @@ from surrealist import Database
 
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', ('user_db', 'user_db')) as db:
     print(db.table("person").select())  # SELECT * FROM person;
     print(db.table("person").select("*"))  # SELECT * FROM person;
     print(db.table("person").select().by_id("john"))  # SELECT * FROM person:john;
@@ -24,17 +24,24 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # SELECT array::group(tags) AS tags FROM article GROUP ALL;
     print(db.article.select(alias=[("tags", "array::group(tags)")]).group_all())
 
-    print(db.person.select().omit("password", "opts.security")) # SELECT * OMIT password, opts.security FROM person;
-    print(db.user.select().split("emails")) # SELECT * FROM user SPLIT emails;
-    print(db.user.select("country").group_by("country")) # SELECT country FROM user GROUP BY country;
+    print(db.person.select().omit("password", "opts.security"))  # SELECT * OMIT password, opts.security FROM person;
+    print(db.user.select().split("emails"))  # SELECT * FROM user SPLIT emails;
+    print(db.user.select("country").group_by("country"))  # SELECT country FROM user GROUP BY country;
 
     # SELECT count() AS number_of_records FROM person GROUP ALL;
     print(db.person.select(alias=[("number_of_records", "count()")]).group_all())
 
-    print(db.person.select().order_by_rand()) # SELECT * FROM person ORDER BY RAND();
+    print(db.person.select().order_by_rand())  # SELECT * FROM person ORDER BY RAND();
 
-    print(db.song.select().order_by("artist ASC", "rating DESC")) # SELECT * FROM song ORDER BY artist ASC, rating DESC;
-    print(db.account.select().limit(50).start_at(50)) # SELECT * FROM account LIMIT 50 START 50;
+    # SELECT * FROM song ORDER BY artist ASC, rating DESC;
+    print(db.song.select().order_by("artist ASC", "rating DESC"))
+    print(db.account.select().limit(50).start_at(50))  # SELECT * FROM account LIMIT 50 START 50;
+
+    # When processing a large result set with many records, it is possible to use the TEMPFILES clause to specify that
+    # the statement should be processed in temporary files rather than memory. This significantly reduces memory usage,
+    # though it will also result in slower performance.
+    # SELECT * FROM person WHERE email='tobie@surrealdb.com' TEMPFILES EXPLAIN;
+    print(db.table("person").select().where("email='tobie@surrealdb.com'").tempfiles().explain())
 
     # SELECT * FROM person WHERE email='tobie@surrealdb.com' EXPLAIN;
     print(db.person.select().where("email='tobie@surrealdb.com'").explain())
@@ -53,8 +60,3 @@ with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
     # SELECT * FROM (SELECT * FROM events WHERE type = 'active') LIMIT 5 PARALLEL;
     sub_query = db.events.select().where("type = 'active'")
     print(db.select_from(sub_query).limit(5).parallel())
-
-
-
-
-
