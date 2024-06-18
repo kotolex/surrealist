@@ -32,6 +32,7 @@ class WebSocketConnection(Connection):
     def __init__(self, url: str, db_params: Optional[Dict] = None, credentials: Optional[Tuple[str, str]] = None,
                  timeout: int = DEFAULT_TIMEOUT):
         super().__init__(db_params, credentials, timeout)
+        self._url = url
         base_url = urllib.parse.urlparse(url.lower())
         self._params = {}
         if db_params:

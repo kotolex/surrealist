@@ -1,5 +1,6 @@
+import json
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from surrealist.connections import Connection
 from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS, to_surreal_datetime_str
@@ -27,7 +28,7 @@ class Show(Statement):
 
     def validate(self) -> List[str]:
         result = []
-        if self._since:
+        if self._since and isinstance(self._since, str):
             try:
                 format_ = DATE_FORMAT if "." not in self._since else DATE_FORMAT_NS
                 datetime.strptime(self._since, format_)
@@ -46,17 +47,20 @@ class Show(Statement):
         self._limit = limit
         return self
 
-    def since(self, timestamp: str) -> "Show":
+    def since(self, time_or_version_stamp: Union[str,int]) -> "Show":
         """
-        Init timestamp since is to show updates
-        :param timestamp: surreal timestamp
+        Init timestamp or versionstamp since is to show updates
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/show#basic-usage
+
+        :param time_or_version_stamp: surreal timestamp or versionstamp
         :return: Show object
         """
-        self._since = timestamp
+        self._since = time_or_version_stamp
         return self
 
     def _clean_str(self):
         if not self._since:
             self._since = to_surreal_datetime_str(datetime.now(timezone.utc))  # default value
         limit = f" LIMIT {self._limit}" if self._limit else ""
-        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE "{self._since}"{limit}'
+        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE {json.dumps(self._since)}{limit}'

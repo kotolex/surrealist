@@ -24,6 +24,7 @@ class HttpClient:
         self._timeout = timeout
         headers = headers or {}
         headers = {k: v for k, v in headers.items() if v is not None}
+        headers = {k if k not in (NS, DB) else f"surreal-{k}": v for k, v in headers.items()}
         self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
         self._token = None
 
@@ -35,6 +36,7 @@ class HttpClient:
         # We have to remove `db`, 'ns' and `ac` params from headers, before add new
         self._headers = {k: v for k, v in self._headers.items() if k not in (DB, AC, NS)}
         self._headers = {**self._headers, **params}
+        self._headers = {k if k not in (NS, DB) else f"surreal-{k}": v for k, v in self._headers.items()}
 
     def get(self, path: str = '') -> HTTPResponse:
         """

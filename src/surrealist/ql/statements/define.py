@@ -2,8 +2,8 @@ import json
 from abc import ABC
 from typing import List, Union, Any, Optional, Tuple
 
-from surrealist.enums import Algorithm
 from surrealist.connections import Connection
+from surrealist.enums import Algorithm
 from surrealist.ql.statements.define_index_statements import CanUseIndexTypes
 from surrealist.ql.statements.permissions import CanUsePermissions
 from surrealist.ql.statements.statement import Statement, FinishedStatement
@@ -87,7 +87,7 @@ class DefineEvent(Define):
 
 class DefineUser(Define):
     """
-    Represents DEFINE USER statement
+    Represents DEFINE USER ON DATABASE statement, a default role is viewer
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
 
@@ -121,6 +121,14 @@ class DefineUser(Define):
 
         """
         self._role = "EDITOR"
+        return self
+
+    def role_viewer(self) -> "DefineUser":
+        """
+        Represents role VIEWER
+
+        """
+        self._role = "VIEWER"
         return self
 
     def validate(self) -> List[str]:

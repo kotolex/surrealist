@@ -4,6 +4,7 @@ from enum import Enum, auto
 class Algorithm(Enum):
     """
     Represents different types of cryptographic algorithms to use for token verification
+    https://github.com/surrealdb/surrealdb/blob/main/core/src/iam/verify.rs#L17-L72
     """
     HS256 = auto()
     HS384 = auto()

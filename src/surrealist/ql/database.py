@@ -1,7 +1,9 @@
 import logging
 from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
-from surrealist import Algorithm
+from surrealist.connections.connection import Connection
+from surrealist.enums import Algorithm
+from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
@@ -13,7 +15,7 @@ from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
 from surrealist.result import SurrealResult
 from surrealist.surreal import Surreal
-from surrealist.utils import DEFAULT_TIMEOUT
+from surrealist.utils import DEFAULT_TIMEOUT, NS, DB, AC
 
 logger = logging.getLogger("surrealist.databaseQL")
 
@@ -29,13 +31,46 @@ class Database:
 
     def __init__(self, url: str, namespace: str, database: str, access: Optional[str] = None,
                  credentials: Optional[Tuple[str, str]] = None,
-                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
-        self._namespace = namespace
-        self._database = database
-        self._connection = Surreal(url, namespace, database, access=access, credentials=credentials, use_http=use_http,
-                                   timeout=timeout).connect()
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
+                 active_connection: Optional[Connection] = None):
+        """
+        Creates a new connection to the database or uses existing connection
+        :param url: url of the SurrealDB
+        :param namespace: name of the namespace
+        :param database: name of the database
+        :param access: access method
+        :param credentials: pair of username and password
+        :param use_http: uses http-transport if True, websockets otherwise
+        :param timeout: timeout for the queries
+        :param active_connection: existing and active (connected) connection to use, If specified, all other
+        parameters are ignored
+        """
+        if active_connection is None:
+            self._namespace = namespace
+            self._database = database
+            self._access = access
+            self._connection = Surreal(url, namespace, database, access=access, credentials=credentials,
+                                       use_http=use_http, timeout=timeout).connect()
+            logger.info("DatabaseQL is up")
+        else:
+            self._connection = self._use_connection(active_connection)
+            logger.info("DatabaseQL is up, using existing connection")
         self._connected = True
-        logger.info("DatabaseQL is up")
+
+    def _use_connection(self, connection: Connection) -> Connection:
+        is_connected = connection.is_connected()
+        if not is_connected:
+            raise SurrealConnectionError("Cant use connection which is not active")
+        db_params = connection._db_params
+        if not db_params or db_params.get(NS) is None or db_params.get(DB) is None:
+            raise SurrealConnectionError("Can use only database level connection here, specify namespace and database")
+        ns = db_params[NS]
+        db = db_params[DB]
+        access = db_params.get(AC)
+        self._namespace = ns
+        self._database = db
+        self._access = access
+        return connection
 
     def __enter__(self):
         return self
@@ -49,6 +84,13 @@ class Database:
         :return: True if connection is active, False otherwise
         """
         return self._connected
+
+    def get_connection(self) -> Connection:
+        """
+        Returns the underlying connection
+        :return: Connection object
+        """
+        return self._connection
 
     @property
     def namespace(self) -> str:
@@ -73,6 +115,15 @@ class Database:
         logger.info("DatabaseQL is closed")
         self._connection.close()
         self._connected = False
+
+    @classmethod
+    def from_connection(cls, connection: Connection) -> "Database":
+        """
+        Builds a database object from an active existing connection
+        :param connection: connection to use
+        :return: Database object
+        """
+        return Database("", "", "", None, None, False, 0, connection)
 
     def tables(self) -> List[str]:
         """
@@ -184,7 +235,7 @@ class Database:
 
     def define_user(self, user_name: str, password: str) -> DefineUser:
         """
-        Allow defining user for a current database
+        Allow defining user for a current database, default role is VIEWER
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
 

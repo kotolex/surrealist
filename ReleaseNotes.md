@@ -9,6 +9,9 @@
 - all QL-statements now have SurrealQL Syntax in documentation for module or for class
 - all DEFINE statements now have COMMENT finished statement
 - now DEFINE TOKEN use Algorithm enum
+- Database object can be created from active connection with Database.from_connection(connection)
+- Connection can be extracted from Database with Database.get_connection()
+- SHOW statement can use versionstamp
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples
