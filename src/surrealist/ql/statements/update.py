@@ -23,6 +23,8 @@ UPDATE [ ONLY ] @targets
 class Update(Statement, UpdateUseMethods):
     """
     Represents UPDATE statement, it should be able to use any statements from documentation
+    The UPDATE statement can be used to update existing records in the database.
+    If the record does not exist, the statement will fail and no records will be updated.
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
 
