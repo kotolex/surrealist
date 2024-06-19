@@ -19,6 +19,3 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # SHOW CHANGES FOR TABLE person SINCE "2023-09-07T01:23:52Z" LIMIT 10;
     print(db.person.show_changes().since("2023-09-07T01:23:52Z").limit(10))
     print(db.person.show_changes(since="2023-09-07T01:23:52Z").limit(10))
-
-    # SHOW CHANGES FOR TABLE person SINCE 1 LIMIT 10;
-    print(db.person.show_changes().since(1).limit(10))

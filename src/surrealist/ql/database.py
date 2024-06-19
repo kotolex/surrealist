@@ -5,9 +5,10 @@ from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm
 from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
-from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineScope,
+from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
+from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
@@ -234,19 +235,18 @@ class Database:
         """
         return Remove(self._connection, table_name=table_name, type_="EVENT", name=name)
 
-    def define_user(self, user_name: str, password: str) -> DefineUser:
+    def define_user(self, user_name: str) -> DefineUser:
         """
-        Allow defining user for a current database, default role is VIEWER
+        Allow defining user for a current database
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
         :param user_name: name for the new user
-        :param password: password for user
         :return: DefineUser object
         """
-        return DefineUser(self._connection, user_name=user_name, password=password)
+        return DefineUser(self._connection, user_name=user_name)
 
     def remove_user(self, user_name: str) -> Remove:
         """

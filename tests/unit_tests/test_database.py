@@ -2,9 +2,10 @@ from unittest import TestCase, main
 
 from surrealist import Where, Algorithm
 from surrealist.ql.statements import Create, Update, Select
-from surrealist.ql.statements.define import DefineEvent, DefineUser, DefineParam, DefineScope, \
+from surrealist.ql.statements.define import DefineEvent, DefineParam, DefineScope, \
     DefineIndex, DefineToken, DefineTable, DefineField
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
+from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -48,19 +49,19 @@ class TestDatabase(TestCase):
 
     def test_define_user(self):
         self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456' ROLES OWNER;",
-                         DefineUser(None, "john", "123456").role_owner().to_str())
-        self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456' ROLES VIEWER;",
-                         DefineUser(None, "john", "123456").to_str())
+                         DefineUser(None, "john").password("123456").role_owner().to_str())
+        self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456';",
+                         DefineUser(None, "john").password("123456").to_str())
         self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456' ROLES EDITOR;",
-                         DefineUser(None, "john", "123456").role_editor().to_str())
+                         DefineUser(None, "john").password("123456").role_editor().to_str())
 
     def test_define_user_exists(self):
         self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER;",
-                         DefineUser(None, "john", "123456").if_not_exists().role_owner().to_str())
+                         DefineUser(None, "john").password("123456").if_not_exists().role_owner().to_str())
 
     def test_define_user_comment(self):
         self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER COMMENT \"some\";",
-                         DefineUser(None, "john", "123456").if_not_exists().role_owner().comment("some").to_str())
+                         DefineUser(None, "john").password("123456").if_not_exists().role_owner().comment("some").to_str())
 
     def test_define_param(self):
         self.assertEqual("DEFINE PARAM $user VALUE john;", DefineParam(None, "user", "john").to_str())

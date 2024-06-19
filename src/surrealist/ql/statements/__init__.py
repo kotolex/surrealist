@@ -1,5 +1,7 @@
 from .create import Create
-from .define import DefineEvent, DefineParam, DefineUser
+from .define import DefineEvent, DefineParam
+from .define_user import DefineUser
+from .define_analyzer import DefineAnalyzer
 from .delete import Delete
 from .insert import Insert
 from .live import Live
@@ -11,4 +13,4 @@ from .transaction import Transaction
 from .update import Update
 
 __all__ = ("Create", "Delete", "Insert", "Live", "Remove", "Select", "Show", "Update", "Transaction", "DefineParam",
-           "DefineUser", "DefineEvent", "RebuildIndex")
+           "DefineUser", "DefineEvent", "RebuildIndex", "DefineAnalyzer")

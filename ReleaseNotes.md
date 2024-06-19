@@ -1,6 +1,6 @@
 ## Release Notes ##
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0):**
-- both http and ws connections lost signin and signup methods, sign in now happen under the hood on connect
+- both http and ws connections lost signin and signup methods, sign in now happen under the hood on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
 - for root user now you should connect only with credentials and then call use method (see examples)
 - you can now specify access method on connecting via a Surreal/Database object
@@ -11,9 +11,9 @@
 - now DEFINE TOKEN use Algorithm enum
 - Database object can be created from active connection with Database.from_connection(connection)
 - Connection can be extracted from Database with Database.get_connection()
-- SHOW statement can use versionstamp
 - improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of them
 - SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
+- update DEFINE USER statement
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples

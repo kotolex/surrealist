@@ -91,14 +91,6 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # we can REMOVE EVENT
     print(db.remove_event("email", table_name="user"))  # REMOVE EVENT email ON TABLE user;
 
-    # on database object we can DEFINE USER
-    # DEFINE USER new_user ON DATABASE PASSWORD '123456' ROLES OWNER;
-    print(db.define_user("new_user", "123456").role_owner())
-    # DEFINE USER IF NOT EXISTS new_user ON DATABASE PASSWORD '123456' ROLES OWNER;
-    print(db.define_user("new_user", "123456").if_not_exists().role_owner())
-    # we can remove user
-    print(db.remove_user("new_user"))  # REMOVE USER new_user ON DATABASE;
-
     # on database object we can DEFINE PARAM
     print(db.define_param("key", 1000))  # DEFINE PARAM $key VALUE 1000;
     print(db.define_param("key", 1000).if_not_exists())  # DEFINE PARAM IF NOT EXISTS $key VALUE 1000;

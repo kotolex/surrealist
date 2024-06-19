@@ -7,7 +7,7 @@ from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS, to_surreal_datetim
 from .statement import Statement
 
 """
-SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" | "@versionstamp" [LIMIT @number]
+SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" [LIMIT @number]
 """
 
 
@@ -47,16 +47,16 @@ class Show(Statement):
         self._limit = limit
         return self
 
-    def since(self, time_or_version_stamp: Union[str,int]) -> "Show":
+    def since(self, timestamp: str) -> "Show":
         """
-        Init timestamp or versionstamp since is to show updates
+        Init timestamp since is to show updates
 
         Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/show#basic-usage
 
-        :param time_or_version_stamp: surreal timestamp or versionstamp
+        :param timestamp: surreal timestamp
         :return: Show object
         """
-        self._since = time_or_version_stamp
+        self._since = timestamp
         return self
 
     def _clean_str(self):

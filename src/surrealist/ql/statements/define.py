@@ -85,60 +85,6 @@ class DefineEvent(Define):
                f"THEN {self._then}{self._comment()}"
 
 
-class DefineUser(Define):
-    """
-    Represents DEFINE USER ON DATABASE statement, a default role is viewer
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-    DEFINE USER [ IF NOT EXISTS ] @name ON [ ROOT | NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
-    ROLES @roles [ COMMENT @string ]
-    """
-
-    def __init__(self, connection: Connection, user_name: str, password: str):
-        super().__init__(connection)
-        self._name = user_name
-        self._pass = password
-        self._role = "VIEWER"
-
-    def if_not_exists(self) -> "DefineUser":
-        self._if_not_exists = True
-        return self
-
-    def role_owner(self) -> "DefineUser":
-        """
-        Represents role OWNER
-
-        """
-        self._role = "OWNER"
-        return self
-
-    def role_editor(self) -> "DefineUser":
-        """
-        Represents role EDITOR
-
-        """
-        self._role = "EDITOR"
-        return self
-
-    def role_viewer(self) -> "DefineUser":
-        """
-        Represents role VIEWER
-
-        """
-        self._role = "VIEWER"
-        return self
-
-    def validate(self) -> List[str]:
-        return [OK]
-
-    def _clean_str(self):
-        return f"DEFINE USER{self._exists()} {self._name} ON DATABASE PASSWORD '{self._pass}' " \
-               f"ROLES {self._role}{self._comment()}"
-
-
 class DefineParam(Define):
     """
     Represents DEFINE PARAM statement
