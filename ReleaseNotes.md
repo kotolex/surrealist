@@ -15,6 +15,9 @@
 - SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
 - update DEFINE USER statement
 - add UPSERT statement
+- add DEFINE ACCESS JWT and DEFINE ACCESS RECORD statements
+- add REMOVE ACCESS statement
+- deprecate DEFINE TOKEN and DEFINE SCOPE
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples

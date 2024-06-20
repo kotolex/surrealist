@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
 from surrealist.connections.connection import Connection
@@ -7,6 +8,7 @@ from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
+from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
@@ -305,6 +307,8 @@ class Database:
     def define_scope(self, name: str, duration: str, signup: Union[str, Statement],
                      signin: Union[str, Statement]) -> DefineScope:
         """
+        Deprecated since SurrealDB 2.x, use define_access_record instead!
+
         Represents DEFINE SCOPE statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
@@ -317,6 +321,10 @@ class Database:
         :param signin: Select statement with string or Statement representation
         :return: DefineScope object
         """
+        msg = "Deprecated since SurrealDB 2.x, use define_access_record instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access"
+        warnings.warn(msg)
+        logger.warning(msg)
         return DefineScope(self._connection, name, duration, signup, signin)
 
     def remove_scope(self, name: str) -> Remove:
@@ -367,6 +375,8 @@ class Database:
 
     def define_token(self, name: str, token_type: Algorithm, value: str) -> DefineToken:
         """
+        Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
+
         Represents DEFINE TOKEN statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
@@ -376,8 +386,12 @@ class Database:
         :param name: name for the token
         :param token_type: type of the token, for example, Algorithm.RS256
         :param value: value of the token
-        :return: DefineIndex object
+        :return: DefineToken object
         """
+        msg = "Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access"
+        warnings.warn(msg)
+        logger.warning(msg)
         return DefineToken(self._connection, name, token_type, value)
 
     def remove_token(self, name: str) -> Remove:
@@ -388,6 +402,43 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, "", type_="TOKEN", name=name)
+
+    def define_access_jwt(self, name: str) -> DefineAccessJwt:
+        """
+        Represents DEFINE ACCESS ... JWT statement.
+        Use this method instead of define_token
+
+        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/jwt
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
+
+        :param name: name for the access
+        :return: DefineAccessJwt object
+        """
+        return DefineAccessJwt(self._connection, name)
+
+    def define_access_record(self, name: str) -> DefineAccessRecord:
+        """
+        Represents DEFINE ACCESS ... RECORD statement.
+        Use this method instead of define_token or define_scope
+
+        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
+
+        :param name: name for the access
+        :return: DefineAccessRecord object
+        """
+        return DefineAccessRecord(self._connection, name)
+
+    def remove_access(self, name: str) -> Remove:
+        """
+        Remove access by name for the database
+
+        :param name: name of the access
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="ACCESS", name=name)
 
     def relate(self, value: str) -> Relate:
         """

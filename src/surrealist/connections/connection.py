@@ -174,7 +174,7 @@ class Connection(ABC):
         :return: full session information
         """
         query = 'return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), ' \
-                '"ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};'
+                '"ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::ac()};'
         logger.info("Query-Operation: SESSION_INFO")
         return self.query(query)
 

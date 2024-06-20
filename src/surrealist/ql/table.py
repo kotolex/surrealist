@@ -233,7 +233,7 @@ class Table:
         Example:
         db.table("user").upsert("alex").only().merge({"active": True}).run()
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_upsert_examples.py
 

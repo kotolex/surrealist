@@ -114,6 +114,8 @@ class DefineParam(Define):
 
 class DefineScope(Define):
     """
+    Deprecated since SurrealDB 2.x, use define_access_record instead!
+
     Represents DEFINE SCOPE statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
@@ -203,6 +205,8 @@ class DefineIndex(Define, CanUseIndexTypes):
 
 class DefineToken(Define):
     """
+    Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
+
     Represents DEFINE TOKEN statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token

@@ -110,6 +110,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.remove_analyzer("example_ascii"))  # REMOVE ANALYZER example_ascii;
 
     # on database object we can DEFINE SCOPE
+    # DEFINE SCOPE is deprecated since SurrealDB 2.x, use DEFINE ACCESS instead
     # but first, let's generate Create and Select queries for our scope users
     create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
     select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
@@ -153,6 +154,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.rebuild_index("userNameIndex", table_name="user", if_exists=True))
 
     # on database object we can DEFINE TOKEN
+    # DEFINE TOKEN is deprecated since SurrealDB 2.x, use DEFINE ACCESS instead
     from surrealist import Algorithm  # need to specify algorithm for token
 
     # DEFINE TOKEN token_name ON DATABASE

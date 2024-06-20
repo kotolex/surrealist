@@ -6,6 +6,7 @@ from surrealist.ql.statements.define import DefineEvent, DefineParam, DefineScop
     DefineIndex, DefineToken, DefineTable, DefineField
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_user import DefineUser
+from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;
@@ -270,6 +271,30 @@ PERMISSIONS
     def test_define_table_changefeed_validate(self):
         self.assertEqual(DefineTable(None, "person").changefeed("1s").validate(), ['OK'])
         self.assertEqual(DefineTable(None, "person").changefeed("1r").validate(), ["Wrong duration 1r, allowed postfix are ('w', 'y', 'd', 'h', 'ms', 's', 'm')"])
+
+    def test_define_access_jwt(self):
+        key = "sNSYneezcr8kqphfOC6NwwraUHJCVAt"
+        text = "DEFINE ACCESS token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'sNSYneezcr8kqphfOC6NwwraUHJCVAt';"
+        self.assertEqual(text, DefineAccessJwt(None, "token_name").algorithm(Algorithm.HS512, key).to_str())
+        text = "DEFINE ACCESS token_name ON DATABASE TYPE JWT URL 'http://example.com';"
+        self.assertEqual(text, DefineAccessJwt(None, "token_name").url("http://example.com").to_str())
+        text = "DEFINE ACCESS token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'sNSYneezcr8kqphfOC6NwwraUHJCVAt' DURATION FOR SESSION 1h;"
+        self.assertEqual(text, DefineAccessJwt(None, "token_name").algorithm(Algorithm.HS512, key).duration("1h").to_str())
+
+    def test_define_access_record(self):
+        # Examples for DEFINE ACCESS ... RECORD
+        create = Create(None, "user").set(email="$email", passw="crypto::argon2::generate($pass)")
+        select = Select(None, "user").where("email = $email AND crypto::argon2::compare(pass, $pass)")
+
+        text = """DEFINE ACCESS account ON DATABASE TYPE RECORD SIGNIN SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass) SIGNUP CREATE user SET email = "$email", passw = "crypto::argon2::generate($pass)" DURATION FOR TOKEN 15m, DURATION FOR SESSION 12h;"""
+        self.assertEqual(text, DefineAccessRecord(None, "account").signup(create).signin(select).duration_for_token(
+            "15m").duration_for_session("12h").to_str())
+
+        text = "DEFINE ACCESS token ON DATABASE TYPE RECORD ALGORITHM HS256 KEY 'some_key';"
+        self.assertEqual(text, DefineAccessRecord(None, "token").algorithm(Algorithm.HS256, "some_key").to_str())
+
+        text= "DEFINE ACCESS token ON DATABASE TYPE RECORD ALGORITHM RS256 KEY 'some_key' WITH ISSUER KEY 'issuer_key';"
+        self.assertEqual(text, DefineAccessRecord(None, "token").algorithm(Algorithm.RS256, "some_key", issuer_key="issuer_key").to_str())
 
 
 if __name__ == '__main__':

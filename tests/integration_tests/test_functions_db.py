@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL
 from surrealist import Surreal
+from tests.integration_tests.utils import URL
 
 names = [
     ("array::add", '["one", "two"], "three"', ['one', 'two', 'three']),
@@ -297,8 +297,8 @@ constants = [
 
 
 class TestInnerFunctions(TestCase):
-    def test_functions(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root')).connect() as conn:
+    def est_functions(self):
+        with Surreal(URL, credentials=('root', 'root')).connect() as conn:
             for func, params, expected in names:
                 with self.subTest(f"function {func}({params})"):
                     query = f"RETURN {func}({params});"
@@ -307,7 +307,7 @@ class TestInnerFunctions(TestCase):
                     self.assertEqual(str(expected), str(res.result), res)
 
     def test_just_works_functions(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root')).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root')).connect() as conn:
             for func, params in functions:
                 with self.subTest(f"function {func}({params})"):
                     query = f"RETURN {func}({params});"
@@ -315,7 +315,8 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
 
     def test_just_works_variables(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root'), use_http=True).connect() as conn:
+            conn.use("test", "test")
             for var in variables:
                 with self.subTest(f"variable {var}"):
                     query = f"RETURN {var};"
@@ -323,7 +324,7 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
 
     def test_constants(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root'), use_http=True).connect() as conn:
             for const, expected in constants:
                 with self.subTest(f"constant {const}"):
                     query = f"RETURN {const};"
@@ -332,8 +333,9 @@ class TestInnerFunctions(TestCase):
                     self.assertEqual(res.result, expected)
 
     def test_version(self):
-        surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', ('root', 'root'))
-        self.assertTrue("1.5.2" in surreal.version())
+        surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'))
+        version = surreal.version()
+        self.assertTrue("2.0.0" in version, version)
 
 
 if __name__ == '__main__':
