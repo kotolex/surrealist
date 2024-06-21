@@ -329,11 +329,17 @@ class Database:
 
     def remove_scope(self, name: str) -> Remove:
         """
+        Do not work since SurrealDB 2.x, use remove_access instead!
+
         Remove the scope
 
         :param name: name of the scope
         :return: Remove object
         """
+        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/remove"
+        warnings.warn(msg)
+        logger.warning(msg)
         return Remove(self._connection, "", type_="SCOPE", name=name)
 
     def define_index(self, name: str, table_name: str) -> DefineIndex:
@@ -396,11 +402,17 @@ class Database:
 
     def remove_token(self, name: str) -> Remove:
         """
+        Do not work since SurrealDB 2.x, use remove_access instead!
+
         Remove token by name for the database
 
         :param name: name of the token
         :return: Remove object
         """
+        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/remove"
+        warnings.warn(msg)
+        logger.warning(msg)
         return Remove(self._connection, "", type_="TOKEN", name=name)
 
     def define_access_jwt(self, name: str) -> DefineAccessJwt:

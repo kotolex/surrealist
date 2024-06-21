@@ -77,6 +77,24 @@ names = [
     ("duration::from::secs", '3', "3s"),
     ("duration::from::weeks", '3', "3w"),
     ("math::abs", '-13.746189', 13.746189),
+    ("math::acos", '0.5', 1.0471975511965979),
+    ("math::acot", '1', 0.7853981633974483),
+    ("math::asin", '0.5', 0.5235987755982989),
+    ("math::atan", '1', 0.7853981633974483),
+    ("math::ln", '10', 2.302585092994046),
+    ("math::clamp", '1, 5, 10', 5),
+    ("math::log", '100, 10', 2.0),
+    ("math::log10", '1000', 3.0),
+    ("math::log2", '8', 3.0),
+    ("math::lerp", '0, 10, 0.5', 5.0),
+    ("math::lerpangle", '0, 180, 0.5', 90.0),
+    ("math::cos", '1', 0.5403023058681398),
+    ("math::cot", '1', 0.6420926159343306),
+    ("math::deg2rad", '180', 3.141592653589793),
+    ("math::rad2deg", '3.141592653589793', 180.0),
+    ("math::sign", '-42', -1),
+    ("math::sin", '1', 0.8414709848078965),
+    ("math::tan", '1', 1.5574077246549023),
     ("math::bottom", '[1, 2, 3], 2', [2, 1]),
     ("math::ceil", '13.146572', 14.0),
     ("math::fixed", '13.146572, 2', 13.15),
@@ -132,12 +150,17 @@ names = [
     ("string::is::domain", "'surrealdb.com'", True),
     ("string::is::email", "'info@surrealdb.com'", True),
     ("string::is::hexadecimal", "'ff009e'", True),
+    ("string::is::ip", "'192.168.1.1'", True),
+    ("string::is::ipv4", "'192.168.1.1'", True),
+    ("string::is::ipv6", "'192.168.1.1'", False),
     ("string::is::latitude", "'-0.118092'", True),
     ("string::is::longitude", "'51.509865'", True),
     ("string::is::numeric", "'1484091748'", True),
     ("string::is::semver", '"1.0.0"', True),
     ("string::is::url", '"https://surrealdb.com"', True),
     ("string::is::uuid", '"018a6680-bef9-701b-9025-e1754f296a0f"', True),
+    ("string::html::encode", '"<h1>Safe Title</h1>"', '&lt;h1&gt;Safe&#32;Title&lt;&#47;h1&gt;'),
+    ("string::html::sanitize", '"<h1>Safe Title</h1>"', '<h1>Safe Title</h1>'),
     ("string::semver::compare", '"1.0.0", "1.3.5"', -1),
     ("string::semver::major", '"3.2.6"', 3),
     ("string::semver::minor", '"3.2.6"', 2),
@@ -181,6 +204,7 @@ names = [
     ("type::string", '12345', "12345"),
     ("type::table", '"ert"', "ert"),
     ("type::thing", '"one","two"', 'one:two'),
+    ("type::range", '"product_price","10", "100", { begin: "excluded", end: "included" }', "{'tb': 'product_price', 'beg': {'Excluded': {'String': '10'}}, 'end': {'Included': {'String': '100'}}}"),
     ("type::is::array", "[ 'a', 'b', 'c' ]", True),
     ("type::is::array", "12345", False),
     ("type::is::bool", "true", True),
@@ -297,7 +321,7 @@ constants = [
 
 
 class TestInnerFunctions(TestCase):
-    def est_functions(self):
+    def test_functions(self):
         with Surreal(URL, credentials=('root', 'root')).connect() as conn:
             for func, params, expected in names:
                 with self.subTest(f"function {func}({params})"):

@@ -7,20 +7,20 @@ from tests.integration_tests.utils import URL, get_random_series
 
 class TestTable(TestCase):
     def test_count(self):
-        with Database(URL, 'test', 'test', ('root', 'root'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
             author = db.author
             self.assertEqual(2, author.count())
             author = db.table("author")
             self.assertEqual(2, author.count())
 
     def test_select(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             result = db.table("author").select().run()
             self.assertFalse(result.is_error())
             self.assertEqual(result.result[0]["id"], "author:john")
 
     def test_create(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(11)
             result = db.table("ql_article").create(uid).content({"author": "author:john", "title": uid}).return_none(). \
                 run()
@@ -31,7 +31,7 @@ class TestTable(TestCase):
             self.assertEqual(result.result[0]["title"], uid)
 
     def test_delete(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(12)
             result = db.table("ql_article").create(uid).content({"title": uid}).return_none().run()
             self.assertFalse(result.is_error())
@@ -44,7 +44,7 @@ class TestTable(TestCase):
             self.assertEqual(result.result, [])
 
     def test_delete_all(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(12)
             table = db.table("qld_article")
             table.create().content({"title": uid}).return_none().run()
@@ -57,7 +57,7 @@ class TestTable(TestCase):
             self.assertTrue(table.count() != count)
 
     def test_remove_or_drop(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(13)
             table = db.table(f"test_{uid}")
             table2 = db.table(f"test_{uid}2")
@@ -71,7 +71,7 @@ class TestTable(TestCase):
             self.assertTrue(f"test_{uid}2" not in db.tables())
 
     def test_remove_via_db(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(13)
             table = db.table(f"test_{uid}")
             table.create().content({"title": uid}).return_none().run()
@@ -82,7 +82,7 @@ class TestTable(TestCase):
     def test_live_and_kill(self):
         a_list = []
         func = lambda mess: a_list.append(mess)
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
             table = db.table("ws_artile")
             result = table.live(func).run()
@@ -97,7 +97,7 @@ class TestTable(TestCase):
     def test_live_and_kill_with_cond(self):
         a_list = []
         func = lambda mess: a_list.append(mess)
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
             table = db.table("ws_person")
             result = table.live(func).alias("title", "TITLE").where("age > 22").run()
@@ -113,7 +113,7 @@ class TestTable(TestCase):
             self.assertFalse(result.is_error())
 
     def test_insert(self):
-        with Database(URL, 'test', 'test', ('root', 'root'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
             uid = get_random_series(10)
             result = db.person.insert(("name", "age"), (uid, 33)).run()
             self.assertFalse(result.is_error())
@@ -121,7 +121,7 @@ class TestTable(TestCase):
             self.assertEqual(result.result[0]["name"], uid)
 
     def test_update(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
             result = db.table("ql_article").create(uid).content({"author": "author:john", "title": uid}).return_none(). \
                 run()

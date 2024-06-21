@@ -12,8 +12,8 @@ class TestUseCases(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        surreal_ws = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=False)
-        surreal_http = Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True)
+        surreal_ws = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=False)
+        surreal_http = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True)
         con_ws = surreal_ws.connect()
         con_ws.close()
         con_http = surreal_http.connect()
@@ -26,8 +26,6 @@ class TestUseCases(TestCase):
         We check here is_connected id False after close, and using method after it raise error
         """
         params = (
-            (True, "signin", ["root", "root"]),
-            (True, "signup", ["ns", "db", "scope"]),
             (True, "select", ["some"]),
             (True, "create", ["some", {}]),
             (True, "update", ["some", {}]),
@@ -62,8 +60,6 @@ class TestUseCases(TestCase):
             (False, "show_changes", ["a", "b"]),
             (True, "is_table_exists", ["a"]),
             (False, "is_table_exists", ["a"]),
-            (False, "signin", ["root", "root"]),
-            (False, "signup", ["ns", "db", "scope"]),
             (False, "select", ["some"]),
             (False, "create", ["some", {}]),
             (False, "update", ["some", {}]),
@@ -94,7 +90,7 @@ class TestUseCases(TestCase):
         """
         a_list = []
         function = lambda mess: a_list.append(mess)
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             with surreal.connect() as connection2:
                 res = connection.live("ws_article", callback=function)
@@ -114,7 +110,7 @@ class TestUseCases(TestCase):
         """
         first = []
         second = []
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             thread1 = threading.Thread(target=lambda: first.append(connection.select("user")), daemon=True)
             thread2 = threading.Thread(target=lambda: second.append(connection.select("article")), daemon=True)
@@ -132,7 +128,7 @@ class TestUseCases(TestCase):
         params = (True, False)
         for use_http in params:
             with self.subTest(f"Change feed use_http={use_http}"):
-                surreal = Surreal(URL, 'test', 'test', credentials=('root', 'root'), use_http=use_http)
+                surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=use_http)
                 with surreal.connect() as connection:
                     count = 0
                     while True:
@@ -156,7 +152,7 @@ class TestUseCases(TestCase):
 
     def test_z_change_feed(self):
         time.sleep(0.2)
-        with Database(URL, 'test', 'test', credentials=('root', 'root'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
             tm = to_surreal_datetime_str(datetime.now())
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
@@ -167,21 +163,21 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
-    # def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
-    #     time.sleep(0.2)
-    #     with Database(URL, 'test', 'test', credentials=('root', 'root')) as db:
-    #         tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-    #         time.sleep(1)
-    #         story = get_random_series(7)
-    #         db.table("include_original").create().set(story=story).run()
-    #         res = db.table("include_original").show_changes().since(tm).run()
-    #         self.assertFalse(res.is_error(), res)
-    #         self.assertTrue(story in str(res.result), res.result)
-    #         self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
-    #         self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
+    def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
+        time.sleep(0.2)
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
+            time.sleep(1)
+            story = get_random_series(7)
+            db.table("include_original").create().set(story=story).run()
+            res = db.table("include_original").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result), res.result)
+            self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
+            self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             author = db.table("t_author")
             book = db.table("t_book")
             counter = db.table("t_counter")
@@ -195,7 +191,7 @@ class TestUseCases(TestCase):
             self.assertTrue(len(res.result) == 3)
 
     def test_define_event_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             events_count = len(db.user.info()["events"])
             uid = get_random_series(6)
             then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
@@ -214,7 +210,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.user.info()["events"]), events_count)
 
     def test_remove_non_existent_event(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_event("not_exists", table_name="user").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_event("not_exists", table_name="user").run()
@@ -222,7 +218,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The event 'not_exists' does not exist", res.result)
 
     def test_define_user_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(8)
             count = len(db.info()["users"])
             res = db.define_user(f"user_{uid}", password="123456").run()
@@ -238,7 +234,10 @@ class TestUseCases(TestCase):
             self.assertTrue(len(db.info()["users"]), count)
 
     def test_remove_non_existent_user(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        surreal = Surreal(URL, credentials=("root", "root"), use_http=True)
+        with surreal.connect() as ws_connection:  # create context manager, it will close connection for us
+            ws_connection.use("test", "test")
+            db = Database.from_connection(ws_connection)
             res = db.remove_user("not_exists").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_user("not_exists").run()
@@ -246,7 +245,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The user 'not_exists' does not exist in the database 'test'", res.result)
 
     def test_define_param_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(8)
             res = db.define_param(f"param_{uid}", 1000).run()
             self.assertFalse(res.is_error(), res)
@@ -259,7 +258,7 @@ class TestUseCases(TestCase):
             self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
 
     def test_remove_non_existent_param(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_param("not_exists").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_param("not_exists").run()
@@ -267,7 +266,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The param '$not_exists' does not exist", res.result)
 
     def test_define_analyzer_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(4)
             count = len(db.info()["analyzers"])
             res = db.define_analyzer(f"anal_{uid}").run()
@@ -282,7 +281,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.info()["analyzers"]), count)
 
     def test_remove_non_existent_analyzer(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_analyzer("not_exists").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_analyzer("not_exists").run()
@@ -290,32 +289,24 @@ class TestUseCases(TestCase):
             self.assertEqual("The analyzer 'not_exists' does not exist", res.result)
 
     def test_define_scope_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(6)
-            count = len(db.info()["scopes"])
+            count = len(db.info()["accesses"])
             create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
             select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
             res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["scopes"]), count + 1)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
             res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The scope 'scope_{uid}' already exists", res.result, res)
-            self.assertEqual(len(db.info()["scopes"]), count + 1)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
             res = db.remove_scope(f"scope_{uid}").run()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["scopes"]), count)
-
-    def test_remove_non_existent_scope(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
-            res = db.remove_scope("not_exists").if_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_scope("not_exists").run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual("The scope 'not_exists' does not exist", res.result)
+            self.assertEqual(len(db.info()["accesses"]), count)
 
     def test_define_index_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             ind_count = len(db.user.info()["indexes"])
             uid = get_random_series(7)
             db.define_analyzer("ascii").run()
@@ -331,7 +322,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
 
     def test_define_mtree_index_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(8)
             ind_count = len(db.table(f"user{uid}").info()["indexes"])
             res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").mtree(4).distance_euclidean().run()
@@ -342,7 +333,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
 
     def test_define_hnsw_index_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(11)
             ind_count = len(db.table(f"user{uid}").info()["indexes"])
             res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc(150).max_connections(2).run()
@@ -353,7 +344,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
 
     def test_remove_non_existent_index(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_index("not_exists", table_name="user").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_index("not_exists", table_name="user").run()
@@ -361,7 +352,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The index 'not_exists' does not exist", res.result)
 
     def test_define_index_and_rebuilds(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(9)
             db.define_analyzer("ascii2").run()
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").run()
@@ -376,13 +367,13 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
 
     def test_define_failed_no_analyzer(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(8)
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("non-exists").run()
             self.assertTrue(res.is_error(), res)
 
     def test_iterator(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             iterator = db.table("user").select().iter(limit=3)
             count = db.user.count()
             total = 0
@@ -393,23 +384,23 @@ class TestUseCases(TestCase):
             self.assertEqual(total, count)
 
     def test_define_token_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(8)
-            count = len(db.info()["tokens"])
+            count = len(db.info()["accesses"])
             val = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
             res = db.define_token(f"token_{uid}", "HS512", value=val).run()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["tokens"]), count + 1)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
             res = db.define_token(f"token_{uid}", "HS512", value=val).if_not_exists().run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The database token 'token_{uid}' already exists", res.result, res)
-            self.assertEqual(len(db.info()["tokens"]), count + 1)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
             res = db.remove_token(f"token_{uid}").run()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["tokens"]), count)
+            self.assertEqual(len(db.info()["accesses"]), count)
 
     def test_remove_non_existent_token(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_token("not_exists").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_token("not_exists").run()
@@ -417,14 +408,14 @@ class TestUseCases(TestCase):
             self.assertEqual("The database token 'not_exists' does not exist", res.result)
 
     def test_define_relate(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.relate("author:john->write->ws_article:main").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.get("in"), "author:john")
             self.assertEqual(res.get("out"), "ws_article:main")
 
     def test_define_table(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             from surrealist import Where
             select = Where(published=True).OR(user="$auth.id")
             create = Where(user="$auth.id")
@@ -434,7 +425,7 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error())
 
     def test_define_tables_with_types(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.define_table("any_type").type_any().run()
             self.assertFalse(res.is_error())
             res = db.define_table("normal_type").type_normal().run()
@@ -447,7 +438,7 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error())
 
     def test_define_field_and_remove(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             ind_count = len(db.user.info()["fields"])
             uid = get_random_series(5)
             res = db.define_field(f"field_{uid}", "user").type("bool").read_only().run()
@@ -462,7 +453,7 @@ class TestUseCases(TestCase):
             self.assertEqual(len(db.user.info()["fields"]), ind_count)
 
     def test_remove_non_existent_field(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_field("not_exists", table_name="user").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_field("not_exists", table_name="user").run()
@@ -470,7 +461,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The field 'not_exists' does not exist", res.result)
 
     def test_remove_non_existent_table(self):
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_table("not_exists").if_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_table("not_exists").run()
@@ -478,8 +469,9 @@ class TestUseCases(TestCase):
             self.assertEqual("The table 'not_exists' does not exist", res.result)
 
     def test_remove_non_existent_db(self):
-        surreal = Surreal(URL, namespace="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
+            connection.use("test", "test")
             res = connection.query("REMOVE DB IF EXISTS surrealdb_non_exist;")
             self.assertFalse(res.is_error(), res)
             res = connection.query("REMOVE DB surrealdb_non_exist;")
@@ -487,7 +479,7 @@ class TestUseCases(TestCase):
             self.assertEqual("The database 'surrealdb_non_exist' does not exist", res.result)
 
     def test_bug_where(self):  # https://github.com/surrealdb/surrealdb/issues/3510
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             db.table("a").create(record_id=1).run()
             db.table("b").create(record_id=1).set(link="a:1", num=1).run()
             res1 = db.table("b").select("link.*").run().result
@@ -495,19 +487,19 @@ class TestUseCases(TestCase):
             self.assertEqual(res1, res2)
 
     def test_bug_index_cant_use_datetime(self):  # https://github.com/surrealdb/surrealdb/issues/2939
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             db.define_index("idx_first", table_name="series").columns("f_aired")
             r = db.table("series").select("id, f_aired").where('f_aired > "2024-10-01T00:00:00Z"').explain().run()
             self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
 
     def test_bug_index_unsupport_uuid(self):  # https://github.com/surrealdb/surrealdb/issues/2939
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             r = db.table("sessions").select().where(
                 'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
             self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
 
     def test_for_full_text_search(self):  # https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search
-        with Database(URL, 'test', 'test', ('root', 'root')) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
             db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
             # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
@@ -525,7 +517,7 @@ class TestUseCases(TestCase):
     #     # TODO add cancel transaction
     #     a_list = []
     #     function = lambda mess: a_list.append(mess)
-    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
     #     with surreal.connect() as connection:
     #         res = connection.live("player", callback=function)
     #         self.assertFalse(res.is_error(), res)
@@ -547,7 +539,7 @@ class TestUseCases(TestCase):
     def test_insert_bulk_checked_by_lq(self):
         a_list = []
         function = lambda mess: a_list.append(mess)
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.live("article", callback=function)
             self.assertFalse(res.is_error(), res)
@@ -573,7 +565,7 @@ class TestUseCases(TestCase):
 	UPDATE $person.id SET can_vote = true;
 };
    """
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             connection.create("person", {"id": "John", "age": 16, "name": "John"})
             connection.create("person", {"id": "Jane", "age": 20, "name": "Jane"})
@@ -586,18 +578,18 @@ class TestUseCases(TestCase):
 
     def test_throw(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/throw
         text = 'THROW "some error message";'
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.query(text)
             self.assertTrue(res.is_error(), res)
             self.assertEqual(res.result, "An error occurred: some error message", res)
 
-    # def test_array_clump_fails(self):  # TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/3757
-    #     text = 'RETURN array::clump([0, 1, 2, 3], 0);'
-    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('root', 'root'))
-    #     with surreal.connect() as connection:
-    #         res = connection.query(text)
-    #         self.assertTrue(res.is_error(), res)
+    def test_array_clump_fails(self):
+        text = 'RETURN array::clump([0, 1, 2, 3], 0);'
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        with surreal.connect() as connection:
+            res = connection.query(text)
+            self.assertTrue(res.is_error(), res)
 
 
 if __name__ == '__main__':

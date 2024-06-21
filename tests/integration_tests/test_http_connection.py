@@ -236,25 +236,13 @@ class TestHttpConnection(TestCase):
         self.assertTrue(len(res.result) > 10)
         self.assertEqual(res.status, "OK")
 
-    # def test_signin(self): TODO make tests
-    #     params = (
-    #         'root', 'user_db', 'user_ns'
-    #     )
-    #     for type_ in params:
-    #         with self.subTest(f"sign_in as {type_}"):
-    #             db = Surreal(URL, use_http=True)
-    #             connection = db.connect()
-    #             res = connection.signin(type_, type_, namespace='test', database='test')
-    #             self.assertEqual(res.code, 200)
-    #             self.assertEqual(res.additional_info["details"], "Authentication succeeded")
 
-
-    # def test_use(self): TODO test use with ns
-    #     db = Surreal(URL, credentials=("root", "root"), use_http=True)
-    #     with db.connect() as connection:
-    #         connection.use(namespace='test', database='test')
-    #         res = connection.select("article", "any")
-    #         self.assertFalse(res.is_error())
+    def test_use(self):
+        db = Surreal(URL, credentials=("root", "root"), use_http=True)
+        with db.connect() as connection:
+            connection.use(namespace='test')
+            res = connection.query("INFO FOR NS;")
+            self.assertFalse(res.is_error())
 
     def test_insert_one(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)

@@ -13,8 +13,8 @@ class TestDatabasePool(TestCase):
     def test_check_pool(self):
         for use in (True, False):
             with self.subTest(f"check pool(use_http={use}"):
-                with DatabaseConnectionsPool(URL, 'test', 'test', ('root', 'root'), use_http=True, min_connections=2,
-                                             max_connections=10) as db:
+                with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True,
+                                             min_connections=2, max_connections=10) as db:
                     self.assertEqual(text, str(db))
                     self.assertTrue("tables" in db.info())
                     self.assertTrue(isinstance(db.tables(), List))
@@ -32,7 +32,7 @@ class TestDatabasePool(TestCase):
     def test_live_and_kill(self):
         a_list = []
         func = lambda mess: a_list.append(mess)
-        with DatabaseConnectionsPool(URL, 'test', 'test', ('root', 'root')) as db:
+        with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'),) as db:
             uid = get_random_series(12)
             result = db.live_query(table_name="ws_artile", callback=func).run()
             self.assertFalse(result.is_error())
@@ -46,7 +46,7 @@ class TestDatabasePool(TestCase):
     def test_live_and_kill_via_table(self):
         a_list = []
         func = lambda mess: a_list.append(mess)
-        with DatabaseConnectionsPool(URL, 'test', 'test', ('root', 'root')) as db:
+        with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'),) as db:
             uid = get_random_series(12)
             result = db.table("ws_article").live(callback=func).run()
             self.assertFalse(result.is_error())
