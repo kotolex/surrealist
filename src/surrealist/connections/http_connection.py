@@ -79,11 +79,11 @@ class HttpConnection(Connection):
         if user is None or password is None:
             opts = {}
         if namespace:
-            opts["ns"] = namespace
+            opts[NS] = namespace
         if database:
-            opts["db"] = database
+            opts[DB] = database
         if access:
-            opts["ac"] = access
+            opts[AC] = access
         logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(opts))))
         _, text = self._simple_request("POST", "signin", opts)
         return to_result(text)
@@ -351,40 +351,6 @@ class HttpConnection(Connection):
         return text
 
     @connected
-    def let(self, name: str, value: Any) -> SurrealResult:
-        """
-        This method sets and stores a value which can then be used in a subsequent query
-
-        Http transport use **query** method under the hood with "LET $@parameter = @value;"
-
-        Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
-
-        :param name: name for the variable (without $ sign!)
-        :param value: value for the variable
-        :return: result of request
-        """
-        data = self._in_out_json(value, is_loads=False)
-        logger.info("Query-Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
-        return self.query(f"LET ${name} = {data};")
-
-    @connected
-    def unset(self, name: str) -> SurrealResult:
-        """
-        This method unsets value, which was previously stored
-
-        Http transport use **query** method under the hood with "LET $@parameter = @value;"
-
-        Refer to: https://docs.surrealdb.com/docs/integration/websocket#unset
-
-        :param name: name for the variable (without $ sign!)
-        :return: result of request
-        """
-        logger.info("Query-Operation: UNSET. Variable name: %s", crop_data(name))
-        return self.query(f"REMOVE PARAM ${name};")
-
-    @connected
     def use(self, namespace: str, database: Optional[str] = None) -> None:
         """
         This method specifies the namespace and optional database for the current connection. For http-connection, it
@@ -511,6 +477,26 @@ class HttpConnection(Connection):
         :raise CompatibilityError: on any use
         """
         message = "Http transport cannot invalidate, you should use websocket for that"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    def let(self, name: str, value: Any):
+        """
+        Http transport cannot use LET method, you should use websocket for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport cannot use LET method, you should use websocket for that"
+        logger.error(message)
+        raise CompatibilityError(message)
+
+    def unset(self, name: str):
+        """
+        Http transport cannot use UNSET method, you should use websocket for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport cannot use UNSET method, you should use websocket for that"
         logger.error(message)
         raise CompatibilityError(message)
 

@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 from unittest import TestCase, main
 
-from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str, Algorithm
 from tests.integration_tests.utils import URL, get_random_series
 
 
@@ -37,8 +37,6 @@ class TestUseCases(TestCase):
             (True, "export", []),
             (True, "ml_import", ["some"]),
             (True, "ml_export", ["some", "some"]),
-            (True, "let", ["some", "some"]),
-            (True, "unset", ["some"]),
             (True, "use", ["some", "some"]),
             (True, "db_info", []),
             (False, "db_info", []),
@@ -163,18 +161,18 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
-    def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
-        time.sleep(0.2)
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-            time.sleep(1)
-            story = get_random_series(7)
-            db.table("include_original").create().set(story=story).run()
-            res = db.table("include_original").show_changes().since(tm).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertTrue(story in str(res.result), res.result)
-            self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
-            self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
+    # def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
+    #     time.sleep(0.2)
+    #     with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+    #         tm = to_surreal_datetime_str(datetime.now(timezone.utc))
+    #         time.sleep(1)
+    #         story = get_random_series(7)
+    #         db.table("include_original").create().set(story=story).run()
+    #         res = db.table("include_original").show_changes().since(tm).run()
+    #         self.assertFalse(res.is_error(), res)
+    #         self.assertTrue(story in str(res.result), res.result)
+    #         self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
+    #         self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -191,7 +189,10 @@ class TestUseCases(TestCase):
             self.assertTrue(len(res.result) == 3)
 
     def test_define_event_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
             events_count = len(db.user.info()["events"])
             uid = get_random_series(6)
             then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
@@ -199,12 +200,14 @@ class TestUseCases(TestCase):
                 "$before.email != $after.email").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count + 1)
-            # now define if exists
-            res = db.define_event(f"email_{uid}", table_name="user", then=then).if_not_exists().when(
-                "$before.email != $after.email").run()
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).when("$before.email != $after.email").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The event 'email_{uid}' already exists", res.result, res)
             self.assertEqual(len(db.user.info()["events"]), events_count + 1)
+            # now define if exists
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).if_not_exists().when(
+                "$before.email != $after.email").run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_event(f"email_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count)
@@ -218,17 +221,22 @@ class TestUseCases(TestCase):
             self.assertEqual("The event 'not_exists' does not exist", res.result)
 
     def test_define_user_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
             uid = get_random_series(8)
             count = len(db.info()["users"])
-            res = db.define_user(f"user_{uid}", password="123456").run()
+            res = db.define_user(f"user_{uid}").password("123456").run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(len(db.info()["users"]), count + 1)
-            # now define if exists
-            res = db.define_user(f"user_{uid}", password="123456").if_not_exists().run()
+            res = db.define_user(f"user_{uid}").password("123456").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The user 'user_{uid}' already exists in the database 'test'", res.result, res)
             self.assertTrue(len(db.info()["users"]), count + 1)
+            # now define if exists
+            res = db.define_user(f"user_{uid}").password("123456").if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_user(f"user_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(len(db.info()["users"]), count)
@@ -250,9 +258,11 @@ class TestUseCases(TestCase):
             res = db.define_param(f"param_{uid}", 1000).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(1000, db.raw_query(f"RETURN $param_{uid};").result)
-            res = db.define_param(f"param_{uid}", 1000).if_not_exists().run()
+            res = db.define_param(f"param_{uid}", 1000).run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The param '$param_{uid}' already exists", res.result, res)
+            res = db.define_param(f"param_{uid}", 1000).if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_param(f"param_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
@@ -272,10 +282,11 @@ class TestUseCases(TestCase):
             res = db.define_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count + 1)
-            res = db.define_analyzer(f"anal_{uid}").if_not_exists().run()
+            res = db.define_analyzer(f"anal_{uid}").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The analyzer 'anal_{uid}' already exists", res.result, res)
-            self.assertEqual(len(db.info()["analyzers"]), count + 1)
+            res = db.define_analyzer(f"anal_{uid}").if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count)
@@ -289,7 +300,10 @@ class TestUseCases(TestCase):
             self.assertEqual("The analyzer 'not_exists' does not exist", res.result)
 
     def test_define_scope_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
             uid = get_random_series(6)
             count = len(db.info()["accesses"])
             create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
@@ -297,11 +311,13 @@ class TestUseCases(TestCase):
             res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
+            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The scope 'scope_{uid}' already exists", res.result, res)
+            self.assertEqual(f"The database access method 'scope_{uid}' already exists", res.result, res)
             self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.remove_scope(f"scope_{uid}").run()
+            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_access(f"scope_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count)
 
@@ -313,10 +329,12 @@ class TestUseCases(TestCase):
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count + 1)
-            res = db.define_index(f"index_{uid}", "user").if_not_exists().columns("name").search_analyzer("ascii").run()
+            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The index 'index_{uid}' already exists", res.result, res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count + 1)
+            res = db.define_index(f"index_{uid}", "user").if_not_exists().columns("name").search_analyzer("ascii").run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_index(f"index_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
@@ -384,28 +402,24 @@ class TestUseCases(TestCase):
             self.assertEqual(total, count)
 
     def test_define_token_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
             uid = get_random_series(8)
             count = len(db.info()["accesses"])
             val = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
-            res = db.define_token(f"token_{uid}", "HS512", value=val).run()
+            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_token(f"token_{uid}", "HS512", value=val).if_not_exists().run()
+            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The database token 'token_{uid}' already exists", res.result, res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.remove_token(f"token_{uid}").run()
+            self.assertEqual(f"The database access method 'token_{uid}' already exists", res.result, res)
+            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_access(f"token_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count)
-
-    def test_remove_non_existent_token(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            res = db.remove_token("not_exists").if_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_token("not_exists").run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual("The database token 'not_exists' does not exist", res.result)
 
     def test_define_relate(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -415,27 +429,29 @@ class TestUseCases(TestCase):
             self.assertEqual(res.get("out"), "ws_article:main")
 
     def test_define_table(self):
+        uid = get_random_series(8)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             from surrealist import Where
             select = Where(published=True).OR(user="$auth.id")
             create = Where(user="$auth.id")
             delete = Where(user="$auth.id").OR("$auth.admin = true")
-            res = db.define_table("post").schemaless().permissions_for(select=select, create=create, update=create,
-                                                                       delete=delete).run()
-            self.assertFalse(res.is_error())
+            res = db.define_table(f"post_{uid}").schemaless().permissions_for(select=select, create=create,
+                                                                              update=create, delete=delete).run()
+            self.assertFalse(res.is_error(), res)
 
     def test_define_tables_with_types(self):
+        uid = get_random_series(11)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            res = db.define_table("any_type").type_any().run()
-            self.assertFalse(res.is_error())
-            res = db.define_table("normal_type").type_normal().run()
-            self.assertFalse(res.is_error())
-            res = db.define_table("relation_type").type_relation().run()
-            self.assertFalse(res.is_error())
-            res = db.define_table("relation_type_from_to").type_relation(("user", "post")).run()
-            self.assertFalse(res.is_error())
-            res = db.define_table("relation_type_in_out").type_relation(("user", "post"), use_from_to=False).run()
-            self.assertFalse(res.is_error())
+            res = db.define_table(f"any_type_{uid}").type_any().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.define_table(f"normal_type_{uid}").type_normal().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.define_table(f"relation_type_{uid}").type_relation().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.define_table(f"relation_type_from_to_{uid}").type_relation(("user", "post")).run()
+            self.assertFalse(res.is_error(), res)
+            res = db.define_table(f"relation_type_in_out_{uid}").type_relation(("user", "post"), use_from_to=False).run()
+            self.assertFalse(res.is_error(), res)
 
     def test_define_field_and_remove(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -444,10 +460,12 @@ class TestUseCases(TestCase):
             res = db.define_field(f"field_{uid}", "user").type("bool").read_only().run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["fields"]), ind_count + 1)
-            res = db.define_field(f"field_{uid}", "user").type("bool").read_only().if_not_exists().run()
+            res = db.define_field(f"field_{uid}", "user").type("bool").read_only().run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The field 'field_{uid}' already exists", res.result, res)
             self.assertEqual(len(db.user.info()["fields"]), ind_count + 1)
+            res = db.define_field(f"field_{uid}", "user").type("bool").read_only().if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
             res = db.remove_field(f"field_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["fields"]), ind_count)
@@ -501,7 +519,7 @@ class TestUseCases(TestCase):
     def test_for_full_text_search(self):  # https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             # DEFINE ANALYZER custom_analyzer TOKENIZERS blank FILTERS lowercase, snowball(english);
-            db.define_analyzer("custom_analyzer").tokenizers("blank").filters("lowercase, snowball(english)").run()
+            db.define_analyzer("custom_analyzer").tokenizer_blank().filter_snowball("english").filter_lowercase().run()
             # DEFINE INDEX book_title ON book FIELDS title SEARCH ANALYZER custom_analyzer BM25;
             # DEFINE INDEX book_content ON book FIELDS content SEARCH ANALYZER custom_analyzer BM25;
             db.define_index("book_title", "book").fields("title").search_analyzer("custom_analyzer").bm25().run()

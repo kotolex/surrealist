@@ -397,7 +397,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             res = connection.select(f"ws_article:{uid}")
             self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [{'id': f"ws_article:{uid}", 'field': 'old'}])
+            self.assertEqual(res.result, [])
 
     def test_upsert_creates_if_not_exists(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -408,15 +408,16 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [{'id': f"ws_article:{uid}", 'field': 'old'}])
 
-    def test_merge_creates_if_not_exists(self):
+    def test_merge_not_creates_if_not_exists(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
             self.assertFalse(res.is_error())
+            print(res)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
+            self.assertEqual(res.result, [])
 
     def test_delete_unexisting(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'))

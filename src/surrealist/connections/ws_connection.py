@@ -8,7 +8,7 @@ from surrealist.connections.connection import Connection, connected
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, ConnectionParametersError,
                                WebSocketConnectionClosedError, CompatibilityError)
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB, AC
 
 logger = getLogger("surrealist.connections.websocket")
 
@@ -34,16 +34,14 @@ class WebSocketConnection(Connection):
         super().__init__(db_params, credentials, timeout)
         self._url = url
         base_url = urllib.parse.urlparse(url.lower())
-        self._params = {}
+        self._db_params = {}
         if db_params:
             if NS in db_params:
-                self._params[NS] = db_params[NS]
+                self._db_params[NS] = db_params[NS]
             if DB in db_params:
-                self._params[DB] = db_params[DB]
-            if not self._params:
-                message = "Connection parameters namespace and database required"
-                logger.error(message)
-                raise ConnectionParametersError(message)
+                self._db_params[DB] = db_params[DB]
+            if AC in db_params:
+                self._db_params[DB] = db_params[AC]
         if base_url.scheme in ("ws", "wss"):
             self._base_url = url
         if base_url.scheme in ("http", "https"):
@@ -67,23 +65,26 @@ class WebSocketConnection(Connection):
                     masked_creds, timeout)
 
     def _use_or_sign_on_params(self, credentials):
-        if self._params:
+        if self._db_params:
+            ns = self._db_params.get(NS)
+            db = self._db_params.get(DB)
+            ac = self._db_params.get(AC)
             if credentials:
                 self._user, self._pass = self._credentials
-                signin_result = self.signin(self._user, self._pass, *list(self._params.values()))
+                signin_result = self._signin(self._user, self._pass, ns, db, ac)
                 if signin_result.is_error():
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
                     raise WebSocketConnectionError(f"Error on connecting to {self._base_url}.\n"
                                                    f"Info: {signin_result.result}")
             else:
-                use_result = self.use(self._params["NS"], self._params["DB"])
+                use_result = self.use(ns, db)
                 if use_result.is_error():
-                    logger.error("Error on use %s. Info %s", self._params, use_result)
-                    raise WebSocketConnectionError(f"Error on use '{self._params}'.\nInfo: {use_result.result}")
+                    logger.error("Error on use %s. Info %s", self._db_params, use_result)
+                    raise WebSocketConnectionError(f"Error on use '{self._db_params}'.\nInfo: {use_result.result}")
         else:
             if credentials:
                 self._user, self._pass = self._credentials
-                signin_result = self.signin(self._user, self._pass)
+                signin_result = self._signin(self._user, self._pass)
                 if signin_result.is_error():
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
                     raise WebSocketConnectionError(f"Error on connecting to '{self._base_url}'.\nInfo: {signin_result}")
@@ -116,12 +117,12 @@ class WebSocketConnection(Connection):
         result = self._run(data)
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
-            self._params = {"NS": namespace, "DB": database}
+            self._db_params = {"NS": namespace, "DB": database}
         return result
 
     @connected
-    def signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
-               scope: Optional[str] = None) -> SurrealResult:
+    def _signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
+                access: Optional[str] = None) -> SurrealResult:
         """
         This method allows you to sign in a root, namespace, database or scope user against SurrealDB
 
@@ -135,43 +136,18 @@ class WebSocketConnection(Connection):
         :param password: password for auth
         :param namespace: name of the namespace to use
         :param database: name of the database to use
-        :param scope: name of the scope to use
+        :param access: name of the access method to use
         :return: result of request
         """
         params = {"user": user, "pass": password}
         if namespace is not None:
-            params["NS"] = namespace
+            params[NS] = namespace
         if database is not None:
-            params["DB"] = database
-        if scope is not None:
-            params["SC"] = scope
+            params[DB] = database
+        if access is not None:
+            params[AC] = access
         data = {"method": "signin", "params": [params]}
         logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(params))))
-        return self._run(data)
-
-    @connected
-    def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
-        """
-        This method allows you to sign up a user
-
-        Refer to: https://docs.surrealdb.com/docs/integration/websocket#signup
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-
-        Example:
-        websocket_connection.signup(namespace='test', database='test', scope='user_scope',
-                              params={'user': 'john:doe', 'pass': '123456'})
-
-        :param namespace: name of the namespace to use
-        :param database: name of the database to use
-        :param scope: name of the scope to use
-        :param params: dict with user and pass, for example {"user":"root", "pass":"root"}
-        :return: result of request
-        """
-        params = params or {}
-        params = {"NS": namespace, "DB": database, "SC": scope, **params}
-        data = {"method": "signup", "params": [params]}
-        logger.info("Operation: SIGNUP. Data: %s", crop_data(mask_pass(str(params))))
         return self._run(data)
 
     @connected

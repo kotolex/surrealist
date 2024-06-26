@@ -238,7 +238,7 @@ class Connection(ABC):
         :param limit: amount of changes to get
         :return: result of the query
         """
-        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE "{since}" LIMIT {limit};'
+        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE d"{since}" LIMIT {limit};'
         return self.query(query)
 
     @abstractmethod

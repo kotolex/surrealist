@@ -63,4 +63,4 @@ class Show(Statement):
         if not self._since:
             self._since = to_surreal_datetime_str(datetime.now(timezone.utc))  # default value
         limit = f" LIMIT {self._limit}" if self._limit else ""
-        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE {json.dumps(self._since)}{limit}'
+        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE d{json.dumps(self._since)}{limit}'

@@ -18,6 +18,7 @@
 - add DEFINE ACCESS JWT and DEFINE ACCESS RECORD statements
 - add REMOVE ACCESS statement
 - deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
+- let and unset now raises CompatibilityError for http
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples
