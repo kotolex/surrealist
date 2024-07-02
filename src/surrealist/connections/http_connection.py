@@ -162,9 +162,9 @@ class HttpConnection(Connection):
     @connected
     def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
-        This method can be used to update or create record in the database. So all old fields will be deleted, and new
-        will be added, if you wand just to add field to record, keeping old ones - use **merge** method instead.If
-        record with specified id does not exist it will be created, if it exists - all fields will be replaced
+        This method can be used to update record in the database. So all old fields will be deleted, and new
+        will be added, if you wand just to add field to record, keeping old ones - use **merge** method instead.
+        If a record with specified id does not exist, it will NOT be created, use **upsert** method instead.
 
         Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
         not in data parameters.
@@ -193,6 +193,40 @@ class HttpConnection(Connection):
         url = f"key/{table_name}" if record_id is None else f"key/{table_name}/{record_id}"
         logger.info("Operation: UPDATE. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
         _, text = self._simple_request("PUT", url, data)
+        return to_result(text)
+
+    @connected
+    def upsert(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        """
+        This method can be used to update or create record in the database. So all old fields will be deleted, and new
+        will be added, if you wand just to add field to record, keeping old ones - use **merge** method instead.
+        If record with specified id does not exist it will be created, if it exists - all fields will be replaced
+
+        Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
+        not in data parameters.
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/2.x/integration/rpc#upsert
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
+
+        Example:
+        http_connection.upsert("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
+        {"name": "Alex Doe"}, all data stored in record before will be deleted
+
+        Notice: do not specify id twice, for example, in table name and in record_id, it will cause error
+
+        :param table_name: table name or table name with record_id to update
+        :param data: dict with data to create
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        if ":" in table_name:
+            table_name, record_id = table_name.split(":")
+        url = "rpc"
+        data = {"method": "upsert", "params": [f"{table_name}:{record_id}", data]}
+        logger.info("Operation: UPSERT. Path: %s, data: %s", crop_data(url), crop_data(str(data)))
+        _, text = self._simple_request("POST", url, data)
         return to_result(text)
 
     @connected

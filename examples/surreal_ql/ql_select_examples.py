@@ -5,7 +5,7 @@ from surrealist import Database
 
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
-with Database("http://127.0.0.1:8000", 'test', 'test', ('user_db', 'user_db')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("root", "root")) as db:
     print(db.table("person").select())  # SELECT * FROM person;
     print(db.table("person").select("*"))  # SELECT * FROM person;
     print(db.table("person").select().by_id("john"))  # SELECT * FROM person:john;

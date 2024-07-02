@@ -5,7 +5,7 @@ from surrealist import Database
 
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root'), use_http=True) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("root", "root")) as db:
     print(db.person.delete())  # DELETE person;
     print(db.person.delete("tobie"))  # DELETE person:tobie;
     print(db.table("person").delete("tobie").only())  # DELETE ONLY person:tobie;

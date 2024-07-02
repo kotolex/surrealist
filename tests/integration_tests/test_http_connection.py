@@ -90,7 +90,7 @@ class TestHttpConnection(TestCase):
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result["id"], f"article:⟨{uid}⟩")
         res = connection.select("article", uid)
-        self.assertTrue(res.result != [])
+        self.assertTrue(res.result != [], f"{uid} - {res}")
         self.assertEqual(res.status, "OK")
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
 
@@ -134,6 +134,16 @@ class TestHttpConnection(TestCase):
         self.assertEqual(len(res.result[0]), 2, res)
         self.assertEqual(res.result[0]["id"], f"article:⟨{uid}⟩", res)
         self.assertEqual(res.result[0]["author"], "inserted", res)
+
+    def test_upsert_one(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'), use_http=True)
+        with surreal.connect() as connection:
+            uid = get_random_series(11)
+            res = connection.upsert("http_article", {"author": "upsert_new2", "title": "upsert_new", "text": "new"}, uid)
+            self.assertFalse(res.is_error(), res)
+            res = connection.select(f"http_article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result[0]['author'], "upsert_new2")
 
     def test_update_z_all(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)

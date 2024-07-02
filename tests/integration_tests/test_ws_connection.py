@@ -156,6 +156,16 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(res.result[0]['author'], "new")
 
+    def test_upsert_one(self):
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        with surreal.connect() as connection:
+            uid = get_random_series(16)
+            res = connection.upsert("article", {"author": "upsert_new", "title": "upsert_new", "text": "new"}, uid)
+            self.assertFalse(res.is_error(), res)
+            res = connection.select(f"article:{uid}")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result[0]['author'], "upsert_new")
+
     def test_merge_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:

@@ -321,6 +321,56 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count)
 
+    def test_define_access_jwt_and_remove(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uid = get_random_series(7)
+            count = len(db.info()["accesses"])
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration("24h").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration("24h").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The database access method 'access_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration("24h").if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_access(f"access_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count)
+
+    def test_define_access_record_and_remove(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uid = get_random_series(8)
+            count = len(db.info()["accesses"])
+            res = db.define_access_record(f"access_{uid}").duration_for_token("24h").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
+            res = db.define_access_record(f"access_{uid}").duration_for_token("24h").run()
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual(f"The database access method 'access_{uid}' already exists", res.result, res)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
+            res = db.define_access_record(f"access_{uid}").duration_for_token("24h").if_not_exists().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.remove_access(f"access_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count)
+
+    def test_define_access_masked_in_info(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uid = get_random_series(8)
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue("some_key" not in str(db.info()["accesses"]))
+
     def test_define_index_and_remove(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             ind_count = len(db.user.info()["indexes"])

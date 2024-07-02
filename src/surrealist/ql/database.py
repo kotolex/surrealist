@@ -67,7 +67,7 @@ class Database:
             raise SurrealConnectionError("Cant use connection which is not active")
         db_params = connection._db_params
         if not db_params or db_params.get(NS) is None or db_params.get(DB) is None:
-            raise SurrealConnectionError("Can use only database level connection here, specify namespace and database")
+            raise SurrealConnectionError("Can use only database level connections, specify namespace and database")
         ns = db_params[NS]
         db = db_params[DB]
         access = db_params.get(AC)

@@ -5,7 +5,7 @@ from surrealist import Database
 
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("root", "root")) as db:
     # print here - is a callback
     print(db.person.live(print))  # LIVE SELECT * FROM person;
     print(db.person.live(print, use_diff=True))  # LIVE SELECT DIFF FROM person;

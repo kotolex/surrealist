@@ -1,7 +1,7 @@
 from surrealist import Database
 
 # we connect to a database via Database object
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     # we need some tables to work with, it is OK if tables not exist yet
     author = db.table("author")
     book = db.table("book")

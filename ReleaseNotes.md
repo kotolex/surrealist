@@ -19,6 +19,9 @@
 - add REMOVE ACCESS statement
 - deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
 - let and unset now raises CompatibilityError for http
+- add upsert method to Connection
+- more examples and tests, fix old examples
+- fix Readme, add compatibility table
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples

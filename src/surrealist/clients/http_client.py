@@ -25,7 +25,8 @@ class HttpClient:
         headers = headers or {}
         headers = {k: v for k, v in headers.items() if v is not None}
         headers = {k if k not in (NS, DB) else f"surreal-{k}": v for k, v in headers.items()}
-        self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
+        self._headers = {"Content-Type": "application/json", "Accept": "application/json",
+                         "User-Agent": "surrealist http-client", **headers}
         self._token = None
 
     def set_token(self, token: str) -> None:

@@ -29,7 +29,19 @@ Via pip:
 ### Before you start ###
 Please make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
 
+**Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
+Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
+
+|     SurrealDB version     |     2.0.0      | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
+|:-------------------------:|:--------------:| :---: |----------|----------|----------|----------|
+|    Surrealist version     |     1.0.0      | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
+|      Python versions      |    3.8-3.12    |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+
+
+
 You can find a lot of examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
+
+A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
 ## Transports ##
 First of all, you should know that SurrealDB can work with websocket or http "transports", we chose to support both transports here, 
@@ -59,7 +71,7 @@ from surrealist import Surreal
 
 # we create a surreal object, it can be used to create one or more connections with websockets (use_http=False)
 # with timeout 10 seconds
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"),
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"),
                   use_http=False, timeout=10)
 print(surreal.is_ready())  # prints True if server up and running on that url
 print(surreal.version())  # prints server version
@@ -109,7 +121,7 @@ You should always close created connections, when you do not need them anymore, 
 ```python
 from surrealist import Surreal
 
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as ws_connection:  # create context manager, it will close connection for us
     result = ws_connection.select("person")  # select from db
     print(result)  # print result
@@ -122,7 +134,7 @@ You can do the same by itself:
 ```python
 from surrealist import Surreal
 
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 ws_connection = surreal.connect()  # open connection
 result = ws_connection.select("person")  # select from db
 print(result)  # print result
@@ -144,7 +156,7 @@ It is simple, readable and can be the way to learn QL
 from surrealist import Database
 
 # connects to Database (it is not connection)
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db: 
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: 
     table = db.table("person") # switch to table level, no problem if it is not exists
     print(table.count()) # 0, table is empty or not exists
     # let's add record
@@ -184,7 +196,7 @@ Iterator can be used with **next** method or in **for** statement
 ```python
 from surrealist import Database
 
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db: # connects to Database
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: # connects to Database
     iterator = db.table("user").select().iter(limit=20) # get an iterator, nothing executes on this line
     for result in iterator: # here, where actions actually start
         print(result.count()) # just print count of results, but you cand do anything here
@@ -257,14 +269,14 @@ from surrealist import Surreal, LOG_FORMAT  # LOG_FORMAT is used for simplicity,
 
 basicConfig(format=LOG_FORMAT, level=INFO)  # we specify a format and level of events to catch
 
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     res = connection.create("article", {"author": "John Doe", "title": "In memoriam", "text": "text"})
 ```
 if you run it, you get in the console:
 ```
 2024-05-29 15:59:41,759 : Thread-1 : websocket : INFO : Websocket connected
-2024-05-29 15:59:41,762 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
+2024-05-29 15:59:41,762 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'user_db', 'pass': '******', 'NS': 'test', 'DB': 'test'}
 2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=c3fcebbc-359f-47d0-822b-a4ad8043f64b, status=OK, result=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODAzODEsIm5iZiI6MTcxNjk4MDM4MSwiZXhwIjoxNzE2OTgzOTgxLCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiI0YTQyNWFiNy00NGEyLTQ4OGItYjM4MS05YjUyNDQzYTI5OTQiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRC...
 2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Connected to ws://127.0.0.1:8000/rpc, params: {'NS': 'test', 'DB': 'test'}, credentials: ('root', '******'), timeout: 15
 2024-05-29 15:59:41,788 : MainThread : surrealist.connections.websocket : INFO : Operation: CREATE. Path: article, data: {'author': 'John Doe', 'title': 'In memoriam', 'text': 'text'}
@@ -276,7 +288,7 @@ but if in the example above (example 7) you choose "DEBUG" for level, you will s
 2024-05-29 16:03:58,438 : MainThread : surrealist.clients.websocket : DEBUG : Connecting to ws://127.0.0.1:8000/rpc
 2024-05-29 16:03:58,445 : Thread-1 : websocket : INFO : Websocket connected
 2024-05-29 16:03:58,458 : MainThread : surrealist.clients.websocket : DEBUG : Connected to ws://127.0.0.1:8000/rpc, timeout is 15 seconds
-2024-05-29 16:03:58,458 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'root', 'pass': '******', 'NS': 'test', 'DB': 'test'}
+2024-05-29 16:03:58,458 : MainThread : surrealist.connections.websocket : INFO : Operation: SIGNIN. Data: {'user': 'user_db', 'pass': '******', 'NS': 'test', 'DB': 'test'}
 2024-05-29 16:03:58,458 : MainThread : surrealist.clients.websocket : DEBUG : Send data: {"id": "1d5758bb-0879-4d8d-9e14-37c9117669a3", "method": "signin", "params": [{"user": "root", "pass": "******", "NS": "test", "DB": "test"}]}
 2024-05-29 16:03:58,484 : Thread-1 : surrealist.clients.websocket : DEBUG : Get message b'{"id":"1d5758bb-0879-4d8d-9e14-37c9117669a3","result":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODA2MzgsIm5iZiI6MTcxNjk4MDYzOCwiZXhwIjoxNzE2OTg0MjM4LCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiIwODhhMWY0My04YzY3LTQ5NjYtYTdjNC02ZGI5NjA0MGNkYmIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRCI6InJvb3QifQ.1pSbJ'...
 2024-05-29 16:03:58,484 : MainThread : surrealist.connections.websocket : INFO : Got result: SurrealResult(id=1d5758bb-0879-4d8d-9e14-37c9117669a3, status=OK, result=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTY5ODA2MzgsIm5iZiI6MTcxNjk4MDYzOCwiZXhwIjoxNzE2OTg0MjM4LCJpc3MiOiJTdXJyZWFsREIiLCJqdGkiOiIwODhhMWY0My04YzY3LTQ5NjYtYTdjNC02ZGI5NjA0MGNkYmIiLCJOUyI6InRlc3QiLCJEQiI6InRlc3QiLCJJRC...
@@ -328,7 +340,7 @@ def call_back(response: dict) -> None:
 
 
 # you need websockets for a live query
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     res = connection.live("person", callback=call_back)  # here we subscribe on person table
     live_id = res.result  # live_id is a LQ id, we need it to kill a query
@@ -351,7 +363,7 @@ def call_back(response: dict) -> None:
 
 
 # you need websockets for a live query
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # here we subscribe on person table and specify we need DIFF
     res = connection.live("person", callback=call_back, return_diff=True)
@@ -381,7 +393,7 @@ def call_back(response: dict) -> None:
 
 
 # you need websockets for a live query
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # here we subscribe and specify a custom query for persons
     res = connection.custom_live("LIVE SELECT * FROM ws_person WHERE age > 18;", callback=call_back)
@@ -412,7 +424,7 @@ def call_back(response: dict) -> None:
 
 
 # you need websockets for a live query
-with Database("http://127.0.0.1:8000", 'test', 'test', ('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     table = db.table("ws_person")
     # here we subscribe and specify a custom query for persons
     result = table.live(callback=call_back).where("age > 18").run()
@@ -453,7 +465,7 @@ DEFINE TABLE reading CHANGEFEED 1d;
 from surrealist import Surreal
 
 
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
     res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
@@ -476,7 +488,7 @@ from datetime import datetime, timezone
 from surrealist import Database, to_surreal_datetime_str
 
 
-with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root')) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     tm = to_surreal_datetime_str(datetime.now(timezone.utc)) # Again, here is a moment AFTER the table was created
     res = db.table("reading").show_changes().since(tm).run()
     print(res.result) # it will be [] cause no events happen
@@ -518,7 +530,7 @@ but never can shrink. It is because of Live Queries, as you remember: LQ always 
 from surrealist import DatabaseConnectionsPool
 
 
-with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'), min_connections=10, 
+with DatabaseConnectionsPool("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db"), min_connections=10, 
                              max_connections=40) as db: # create pool, it creates 10 connections on start
     make_something_with_a_lot_of_threads_or_data(db) # use pool everywhere we need as a simple Database object
 ```
