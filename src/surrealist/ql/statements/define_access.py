@@ -91,18 +91,19 @@ class DefineAccessRecord(Statement):
 
     Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record
 
-    DEFINE ACCESS [ IF NOT EXISTS ] @name
-    ON DATABASE TYPE RECORD
-    [ SIGNUP @expression ]
-    [ SIGNIN @expression ]
-    [ WITH JWT
-      [ ALGORITHM @algorithm KEY @key | URL @url ]
-      [ WITH ISSUER KEY @key ]
-    ]
-    [ DURATION
-    [ FOR TOKEN @duration ]
-    [ FOR SESSION @duration ]
-    ]
+        DEFINE ACCESS [ IF NOT EXISTS ] @name
+      ON DATABASE TYPE RECORD
+        [ SIGNUP @expression ]
+        [ SIGNIN @expression ]
+        [ AUTHENTICATE @expression ]
+        [ WITH JWT
+          [ ALGORITHM @algorithm KEY @key | URL @url ]
+          [ WITH ISSUER KEY @key ]
+        ]
+      [ DURATION
+        [ FOR TOKEN @duration ]
+        [ FOR SESSION @duration ]
+      ]
     """
 
     def __init__(self, connection: Connection, name: str):
@@ -115,6 +116,7 @@ class DefineAccessRecord(Statement):
         self._url = None
         self._signup = None
         self._signin = None
+        self._auth = None
 
     def if_not_exists(self) -> "DefineAccessRecord":
         """
@@ -136,6 +138,18 @@ class DefineAccessRecord(Statement):
         Represents the SIGNUP clause in a final statement. Can be raw string or Select object
         """
         self._signin = expression
+        return self
+
+    def authenticate(self, raw_expression: str) -> "DefineAccessRecord":
+        """
+        Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record#with-authenticate-clause
+
+
+        """
+        self._auth = raw_expression
         return self
 
     def algorithm(self, algorithm: Algorithm, key: str, issuer_key: Optional[str] = None) -> "DefineAccessRecord":
@@ -215,4 +229,5 @@ class DefineAccessRecord(Statement):
             access = f" URL '{self._url[0]}'"
             if self._url[1]:
                 access = f"{access} WITH ISSUER KEY '{self._url[1]}'"
-        return f"DEFINE ACCESS{exists} {self._name} ON DATABASE TYPE RECORD{sin}{sup}{access}{duration}"
+        auth = "" if not self._auth else f" AUTHENTICATE {self._auth}"
+        return f"DEFINE ACCESS{exists} {self._name} ON DATABASE TYPE RECORD{sin}{sup}{auth}{access}{duration}"

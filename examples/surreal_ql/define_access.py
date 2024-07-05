@@ -52,6 +52,10 @@ iCTjhbIDEBHySSSc/pQ4ftHQmhToTlQeOdEy4LYiaEIgl1X+hzRH1hBYvWlNKe4EY1nMCKcjgt0=
     # DEFINE ACCESS token ON DATABASE TYPE RECORD ALGORITHM RS256 KEY 'some_key' WITH ISSUER KEY 'issuer_key';
     print(db.define_access_record("token").algorithm(Algorithm.RS256, "some_key", issuer_key="issuer_key"))
 
+    # DEFINE ACCESS user ON DATABASE TYPE RECORD AUTHENTICATE IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth; ALGORITHM HS512 KEY 'secret';
+    raw = 'IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth;'
+    print(db.define_access_record("user").authenticate(raw).algorithm(Algorithm.HS512, "secret"))
+
     # You can remove any type of ACCESS with
     print(db.remove_access("token"))  # REMOVE ACCESS token ON DATABASE;
 

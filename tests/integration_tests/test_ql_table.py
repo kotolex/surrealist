@@ -7,17 +7,19 @@ from tests.integration_tests.utils import URL, get_random_series
 
 class TestTable(TestCase):
     def test_count(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             author = db.author
-            self.assertEqual(2, author.count())
-            author = db.table("author")
-            self.assertEqual(2, author.count())
+            count = author.count()
+            author.create().content({"author": "author:john", "title": "1"}).return_none().run()
+            self.assertEqual(count+1, author.count())
 
     def test_select(self):
+        uid = get_random_series(11)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            result = db.table("author").select().run()
+            db.author.create(uid).content({"author": "author", "title": "select test"}).return_none().run()
+            result = db.table("author").select().by_id(uid).run()
             self.assertFalse(result.is_error())
-            self.assertEqual(result.result[0]["id"], "author:john")
+            self.assertEqual(result.result[0]["id"], f"author:{uid}", result)
 
     def test_create(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:

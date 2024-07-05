@@ -296,6 +296,22 @@ PERMISSIONS
         text= "DEFINE ACCESS token ON DATABASE TYPE RECORD ALGORITHM RS256 KEY 'some_key' WITH ISSUER KEY 'issuer_key';"
         self.assertEqual(text, DefineAccessRecord(None, "token").algorithm(Algorithm.RS256, "some_key", issuer_key="issuer_key").to_str())
 
+        raw = """{
+        RETURN IF $auth.id {
+            RETURN $auth.id;
+        } ELSE IF $token.email {
+            RETURN SELECT * FROM user WHERE email = $token.email;
+        };
+    }"""
+        text = """DEFINE ACCESS user ON DATABASE TYPE RECORD AUTHENTICATE {
+        RETURN IF $auth.id {
+            RETURN $auth.id;
+        } ELSE IF $token.email {
+            RETURN SELECT * FROM user WHERE email = $token.email;
+        };
+    } ALGORITHM HS512 KEY 'secret';"""
+        self.assertEqual(text, DefineAccessRecord(None, "user").authenticate(raw).algorithm(Algorithm.HS512, "secret").to_str())
+
 
 if __name__ == '__main__':
     main()

@@ -35,20 +35,18 @@ class TestWebSocketConnection(TestCase):
             res = connection.ns_info()
             self.assertTrue(res.is_error(), res)
 
-    # TODO uncomment when bug fix
-    # def test_let(self):
-    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
-    #     with surreal.connect() as connection:
-    #         res = connection.let("value151", "42")
-    #         self.assertFalse(res.is_error(), res)
-    #         self.assertIsNone(res.result)
-
-    def test_unset(self):
+    def test_let_unset(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
-            res = connection.unset("value151")
+            res = connection.let("value151", "text")
             self.assertFalse(res.is_error(), res)
             self.assertIsNone(res.result)
+            res = connection.query("RETURN $value151")
+            self.assertEqual("text", res.result)
+            res = connection.unset("value151")
+            self.assertFalse(res.is_error(), res)
+            res = connection.query("RETURN $value151")
+            self.assertEqual(None, res.result)
 
     def test_query(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -291,24 +289,34 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(a_list[1]['result']['result'], {**opts, "id": f"ws_article2:{uid}"})
 
     def test_count(self):
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
-            res = connection.count("author")
+            connection.use("test", "test")
+            res = connection.count("not_exists")
             self.assertFalse(res.is_error())
-            self.assertEqual(2, res.result)
-            self.assertEqual("SELECT count() FROM author GROUP ALL;", res.query)
+            self.assertEqual(0, res.result)
+            self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
+            count = connection.count("article").result
+            uid = get_random_series(6)
+            connection.create("article", {"author": uid, "title": uid, "text": uid})
+            new_count = connection.count("article").result
+            self.assertEqual(new_count, count + 1)
 
     def test_count_is_zero_if_wrong(self):
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
+            connection.use("test", "test")
             res = connection.count("wrong")
             self.assertFalse(res.is_error())
             self.assertEqual(0, res.result)
 
     def test_count_returns_fields(self):
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
-            res = connection.count("author:john")
+            connection.use("test", "test")
+            uid = get_random_series(6)
+            connection.create(f"author:{uid}", {"author": uid})
+            res = connection.count(f"author:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(1, res.result)
 
@@ -424,7 +432,6 @@ class TestWebSocketConnection(TestCase):
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
             self.assertFalse(res.is_error())
-            print(res)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])

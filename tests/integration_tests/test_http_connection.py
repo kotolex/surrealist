@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, WS_URL, get_random_series
 from surrealist import Surreal, get_uuid
+from tests.integration_tests.utils import URL, WS_URL, get_random_series
 
 
 class TestSurreal(TestCase):
@@ -139,7 +139,8 @@ class TestHttpConnection(TestCase):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'), use_http=True)
         with surreal.connect() as connection:
             uid = get_random_series(11)
-            res = connection.upsert("http_article", {"author": "upsert_new2", "title": "upsert_new", "text": "new"}, uid)
+            res = connection.upsert("http_article", {"author": "upsert_new2", "title": "upsert_new", "text": "new"},
+                                    uid)
             self.assertFalse(res.is_error(), res)
             res = connection.select(f"http_article:{uid}")
             self.assertFalse(res.is_error(), res)
@@ -246,7 +247,6 @@ class TestHttpConnection(TestCase):
         self.assertTrue(len(res.result) > 10)
         self.assertEqual(res.status, "OK")
 
-
     def test_use(self):
         db = Surreal(URL, credentials=("root", "root"), use_http=True)
         with db.connect() as connection:
@@ -262,12 +262,9 @@ class TestHttpConnection(TestCase):
             res = connection.insert("article", {"id": uid, "author": uid, "title": uid, "text": uid})
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
-            print(res)
-            # self.assertFalse(res.result == [], res)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
-            print(res)
 
     def test_insert_bulk(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -291,10 +288,15 @@ class TestHttpConnection(TestCase):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
         with surreal.connect() as connection:
             connection.use("test", "test")
-            res = connection.count("author")
+            res = connection.count("not_exists")
             self.assertFalse(res.is_error())
-            self.assertEqual(2, res.result)
-            self.assertEqual("SELECT count() FROM author GROUP ALL;", res.query)
+            self.assertEqual(0, res.result)
+            self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
+            count = connection.count("article").result
+            uid = get_random_series(6)
+            connection.create("article", {"author": uid, "title": uid, "text": uid})
+            new_count = connection.count("article").result
+            self.assertEqual(new_count, count + 1)
 
     def test_count_is_zero_if_wrong(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -308,7 +310,9 @@ class TestHttpConnection(TestCase):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
         with surreal.connect() as connection:
             connection.use("test", "test")
-            res = connection.count("author:john")
+            uid = get_random_series(6)
+            connection.create(f"author:{uid}", {"author": uid})
+            res = connection.count(f"author:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(1, res.result)
 
