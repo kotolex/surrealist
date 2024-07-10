@@ -5,17 +5,6 @@ from surrealist.ql.statements.create_statements import CreateUseSetContent
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
-"""
-CREATE [ ONLY ] @targets
-    [ CONTENT @value
-      | SET @field = @value ...
-    ]
-    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
-    [ TIMEOUT @duration ]
-    [ PARALLEL ]
-;
-"""
-
 
 class Create(Statement, CreateUseSetContent):
     """
@@ -25,6 +14,13 @@ class Create(Statement, CreateUseSetContent):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_create_examples.py
 
+    CREATE [ ONLY ] @targets
+    [ CONTENT @value
+      | SET @field = @value ...
+    ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ];
     """
 
     def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):

@@ -20,6 +20,7 @@ class Timeout(FinishedStatement, CanUseParallel):
     """
     Represents a 'TIMEOUT' statement. Allowed durations are (ms, s, m)
     """
+
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration
@@ -41,29 +42,46 @@ class CanUseTimeout(CanUseParallel):
 
 
 class ReturnNone(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN NONE' statement.
+    """
+
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN NONE"
 
 
 class ReturnBefore(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN BEFORE' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN BEFORE"
 
 
 class ReturnAfter(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN AFTER' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN AFTER"
 
 
 class ReturnDiff(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN DIFF' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN DIFF"
 
 
 class Return(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN' statement.
+    """
+
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args
@@ -93,6 +111,9 @@ class CanUseReturn(CanUseTimeout):
 
 
 class Where(FinishedStatement, CanUseReturn):
+    """
+    Represents a 'WHERE' statement.
+    """
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._predicate = predicate

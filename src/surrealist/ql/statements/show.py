@@ -1,14 +1,10 @@
 import json
 from datetime import datetime, timezone
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from surrealist.connections import Connection
 from surrealist.utils import OK, DATE_FORMAT, DATE_FORMAT_NS, to_surreal_datetime_str
 from .statement import Statement
-
-"""
-SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" [LIMIT @number]
-"""
 
 
 class Show(Statement):
@@ -18,6 +14,9 @@ class Show(Statement):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/show
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
+
+    SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" [LIMIT @number]
+
     """
 
     def __init__(self, connection: Connection, table_name: str, since: Optional[str] = None):

@@ -7,6 +7,9 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 # This module contains classes with duplicate code. This is made specifically for IDE hints
 
 class Comment(FinishedStatement):
+    """
+    Represents a COMMENT clause in DEFINE INDEX statement.
+    """
     def __init__(self, statement: Statement, text: str):
         super().__init__(statement)
         self._text = text

@@ -19,4 +19,3 @@ class Algorithm(Enum):
     RS256 = auto()
     RS384 = auto()
     RS512 = auto()
-

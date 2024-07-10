@@ -7,7 +7,7 @@
 - you can now specify access method on connecting via a Surreal/Database object
 - now use Bearer instead of Basic for Authorization
 - database argument is now optional for USE method, but raises for websocket if a database is not specified
-- all QL-statements now have SurrealQL Syntax in documentation for module or for class
+- all QL-statements now have SurrealQL Syntax in documentation for class
 - all DEFINE statements now have COMMENT finished statement
 - now DEFINE TOKEN use Algorithm enum
 - Database object can be created from active connection with `Database.from_connection(connection)`

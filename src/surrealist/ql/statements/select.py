@@ -5,8 +5,19 @@ from surrealist.utils import OK
 from .select_statements import SelectUseIndex, SelectUseTempfiles
 from .statement import Statement, IterableStatement
 
-"""
-SELECT [ VALUE ] @fields [ AS @alias ]
+
+class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):
+    """
+    Represents SELECT statement, it should be able to use any statements from documentation.
+    It can use iterator to traverse results
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
+
+    Iterator example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
+
+    SELECT [ VALUE ] @fields [ AS @alias ]
     [ OMIT @fields ...]
     FROM [ ONLY ] @targets
     [ WITH [ NOINDEX | INDEX @indexes ... ]]
@@ -26,21 +37,7 @@ SELECT [ VALUE ] @fields [ AS @alias ]
     [ TIMEOUT @duration ]
     [ PARALLEL ]
     [TEMPFILES]
-    [ EXPLAIN [ FULL ]]
-;
-"""
-
-
-class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):
-    """
-    Represents SELECT statement, it should be able to use any statements from documentation.
-    It can use iterator to traverse results
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
-
-    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
-
-    Iterator example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
+    [ EXPLAIN [ FULL ]];
     """
 
     def __init__(self, connection: Connection, table_name: Union[str, Statement], *args,

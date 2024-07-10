@@ -4,8 +4,16 @@ from surrealist.connections import Connection
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
-"""
-REMOVE [
+
+class Remove(Statement):
+    """
+    Represents REMOVE statement, it should be able to use any statements from documentation
+
+    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    REMOVE [
     NAMESPACE [ IF EXISTS ] @name
     | DATABASE [ IF EXISTS] @name
     | USER [ IF EXISTS ] @name ON [ ROOT | NAMESPACE | DATABASE ]
@@ -16,18 +24,7 @@ REMOVE [
     | ANALYZER [ IF EXISTS ] @name
     | FUNCTION [ IF EXISTS ] fn::@name
     | PARAM [ IF EXISTS ] $@name
-    | TABLE [ IF EXISTS ] @name
-]
-"""
-
-
-class Remove(Statement):
-    """
-    Represents REMOVE statement, it should be able to use any statements from documentation
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
-
-    Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    | TABLE [ IF EXISTS ] @name]
     """
     _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN", "ACCESS")
 

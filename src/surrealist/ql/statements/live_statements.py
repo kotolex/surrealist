@@ -3,6 +3,9 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
 class Fetch(FinishedStatement):
+    """
+    Represents a FETCH clause in final statement.
+    """
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args

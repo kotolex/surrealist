@@ -5,17 +5,6 @@ from surrealist.ql.statements.create_statements import CreateUseSetContent
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
-"""
-RELATE [ ONLY ] @from_record -> @table -> @to_record
-    [ CONTENT @value
-      | SET @field = @value ...
-    ]
-    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
-    [ TIMEOUT @duration ]
-    [ PARALLEL ]
-;
-"""
-
 
 class Relate(Statement, CreateUseSetContent):
     """
@@ -24,6 +13,14 @@ class Relate(Statement, CreateUseSetContent):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/relate
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_relate_examples.py
+
+    RELATE [ ONLY ] @from_record -> @table -> @to_record
+    [ CONTENT @value
+      | SET @field = @value ...
+    ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ];
 
     """
 

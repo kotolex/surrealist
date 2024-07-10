@@ -5,20 +5,6 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update_statements import UpdateUseMethods
 from surrealist.utils import OK
 
-"""
-UPDATE [ ONLY ] @targets
-    [ CONTENT @value
-      | MERGE @value
-      | PATCH @value
-      | SET @field = @value ...
-    ]
-    [ WHERE @condition ]
-    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
-    [ TIMEOUT @duration ]
-    [ PARALLEL ]
-;
-"""
-
 
 class Update(Statement, UpdateUseMethods):
     """
@@ -29,6 +15,17 @@ class Update(Statement, UpdateUseMethods):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_update_examples.py
+
+    UPDATE [ ONLY ] @targets
+    [ CONTENT @value
+      | MERGE @value
+      | PATCH @value
+      | SET @field = @value ...
+    ]
+    [ WHERE @condition ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ];
     """
 
     def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):

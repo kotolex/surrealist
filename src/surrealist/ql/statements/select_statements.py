@@ -26,6 +26,10 @@ class SelectUseExplain:
 
 
 class Tempfiles(IterableStatement, SelectUseExplain):
+    """
+    Represent a TEMPFILES clause in CREATE statement.
+    """
+
     def _clean_str(self):
         return f"{self._statement._clean_str()} TEMPFILES"
 
@@ -45,6 +49,9 @@ class SelectUseTempfiles(SelectUseExplain):
 
 
 class Parallel(IterableStatement):
+    """
+    Represent a PARALLEL clause in CREATE statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} PARALLEL"
@@ -56,6 +63,10 @@ class SelectUseParallel(SelectUseTempfiles):
 
 
 class Timeout(IterableStatement, SelectUseParallel):
+    """
+    Represent a TIMEOUT clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration
@@ -77,6 +88,10 @@ class SelectUseTimeout(SelectUseParallel):
 
 
 class Fetch(IterableStatement, SelectUseTimeout):
+    """
+    Represent a FETCH clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args
@@ -94,6 +109,10 @@ class SelectUseFetch(SelectUseTimeout):
 
 
 class Start(IterableStatement, SelectUseFetch):
+    """
+    Represent a START clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, offset: int):
         super().__init__(statement)
         self._offset = offset
@@ -113,6 +132,10 @@ class SelectUseStart(SelectUseFetch):
 
 
 class Limit(IterableStatement, SelectUseStart):
+    """
+    Represent a LIMIT clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, limit: int):
         super().__init__(statement)
         self._limit = limit
@@ -132,6 +155,10 @@ class SelectUseLimit(SelectUseStart):
 
 
 class OrderByRand(IterableStatement, SelectUseLimit):
+    """
+    Represent ORDER BY RAND() clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -141,6 +168,10 @@ class OrderByRand(IterableStatement, SelectUseLimit):
 
 
 class OrderBy(IterableStatement, SelectUseLimit):
+    """
+    Represent a ORDER BY clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._statement = statement
@@ -162,6 +193,10 @@ class SelectUseOrder(SelectUseLimit):
 
 
 class GroupBy(IterableStatement, SelectUseOrder):
+    """
+    Represent a GROUP BY clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, *args):
         super().__init__(statement)
         self._statement = statement
@@ -175,6 +210,10 @@ class GroupBy(IterableStatement, SelectUseOrder):
 
 
 class GroupAll(IterableStatement, SelectUseOrder):
+    """
+    Represent a GROUP ALL clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement
@@ -192,6 +231,10 @@ class SelectUseGroup(SelectUseOrder):
 
 
 class Split(IterableStatement, SelectUseGroup):
+    """
+    Represent a SPLIT clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, field: str):
         super().__init__(statement)
         self._statement = statement
@@ -239,6 +282,10 @@ class And(IterableStatement, SelectUseSplit):
 
 
 class Where(IterableStatement, SelectUseSplit):
+    """
+    Represent a WHERE clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._statement = statement
@@ -260,6 +307,10 @@ class SelectUseWhere(SelectUseSplit):
 
 
 class WithIndex(IterableStatement, SelectUseWhere):
+    """
+    Represent WITH INDEX clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement, *index_names: str):
         super().__init__(statement)
         self._statement = statement
@@ -273,6 +324,10 @@ class WithIndex(IterableStatement, SelectUseWhere):
 
 
 class WithNoIndex(IterableStatement, SelectUseWhere):
+    """
+    Represent WITH NO INDEX clause in CREATE statement.
+    """
+
     def __init__(self, statement: Statement):
         super().__init__(statement)
         self._statement = statement

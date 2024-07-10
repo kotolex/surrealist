@@ -1,7 +1,7 @@
 from .create import Create
 from .define import DefineEvent, DefineParam
-from .define_user import DefineUser
 from .define_analyzer import DefineAnalyzer
+from .define_user import DefineUser
 from .delete import Delete
 from .insert import Insert
 from .live import Live

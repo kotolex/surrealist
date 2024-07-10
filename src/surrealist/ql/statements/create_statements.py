@@ -7,6 +7,9 @@ from surrealist.ql.statements.utils import combine
 
 
 class Set(FinishedStatement, CanUseReturn):
+    """
+    Represents a SET clause for CREATE statements.
+    """
     def __init__(self, statement: Statement, result: Optional[str] = None, **kwargs):
         super().__init__(statement)
         self._kw = kwargs
@@ -20,6 +23,9 @@ class Set(FinishedStatement, CanUseReturn):
 
 
 class Content(FinishedStatement, CanUseReturn):
+    """
+    Represents a CONTENT clause for CREATE statements.
+    """
     def __init__(self, statement: Statement, content: Dict):
         super().__init__(statement)
         self._content = content

@@ -30,10 +30,18 @@ class HttpClient:
         self._token = None
 
     def set_token(self, token: str) -> None:
+        """
+        Stores token for future requests
+        :param token: token to use
+        """
         self._token = token
         self._headers["Authorization"] = f"Bearer {token}"
 
     def set_db_params(self, params: Dict) -> None:
+        """
+        Stores params for future requests
+        :param params: params to use (ns, db, ac)
+        """
         # We have to remove `db`, 'ns' and `ac` params from headers, before add new
         self._headers = {k: v for k, v in self._headers.items() if k not in (DB, AC, NS)}
         self._headers = {**self._headers, **params}

@@ -3,10 +3,6 @@ from typing import List
 from .define import Define, Connection
 from ...utils import OK
 
-"""
-DEFINE ANALYZER [ IF NOT EXISTS ] @name [ TOKENIZERS @tokenizers ] [ FILTERS @filters ] [ COMMENT @string ]
-"""
-
 ALLOWED_LANGUAGES = ('Arabic', 'Danish', 'Dutch', 'English', 'French', 'German', 'Greek', 'Hungarian',
                      'Italian', 'Norwegian', 'Portuguese', 'Romanian', 'Russian', 'Spanish', 'Swedish',
                      'Tamil', 'Turkish')
@@ -19,6 +15,8 @@ class DefineAnalyzer(Define):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE ANALYZER [ IF NOT EXISTS ] @name [ TOKENIZERS @tokenizers ] [ FILTERS @filters ] [ COMMENT @string ]
 
     """
 

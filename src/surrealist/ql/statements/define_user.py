@@ -1,17 +1,8 @@
-from typing import List
+from typing import List, Dict, Optional
 
 from surrealist.connections.connection import Connection
 from surrealist.utils import OK
 from .define import Define
-
-"""
-DEFINE USER [ IF NOT EXISTS ] @name
-    ON [ ROOT | NAMESPACE | DATABASE ]
-    [ PASSWORD @pass | PASSHASH @hash ]
-    [ ROLES @roles ]
-    [ DURATION [ FOR TOKEN @duration [ , ] ] [ FOR SESSION @duration ] ]
-  [ COMMENT @string ]
-"""
 
 
 class DefineUser(Define):
@@ -22,6 +13,12 @@ class DefineUser(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
+    DEFINE USER [ IF NOT EXISTS ] @name
+    ON [ ROOT | NAMESPACE | DATABASE ]
+    [ PASSWORD @pass | PASSHASH @hash ]
+    [ ROLES @roles ]
+    [ DURATION [ FOR TOKEN @duration [ , ] ] [ FOR SESSION @duration ] ]
+    [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, user_name: str):
@@ -30,7 +27,7 @@ class DefineUser(Define):
         self._role = None
         self._pass = None
         self._hash = None
-        self._durations = {"token": None, "session": None}
+        self._durations: Dict[str, Optional[str]] = {"token": None, "session": None}
 
     def if_not_exists(self) -> "DefineUser":
         self._if_not_exists = True
@@ -47,11 +44,17 @@ class DefineUser(Define):
         return [OK]
 
     def password(self, value: str) -> "DefineUser":
+        """
+        Adds PASSWORD clause to a final statement
+        """
         self._pass = value
         self._hash = None
         return self
 
     def passhash(self, value: str) -> "DefineUser":
+        """
+        Adds PASSHASH clause to a final statement
+        """
         self._pass = None
         self._hash = value
         return self
@@ -81,10 +84,16 @@ class DefineUser(Define):
         return self
 
     def duration_token(self, duration: str) -> "DefineUser":
+        """
+        Adds DURATION FOR TOKEN clause to a final statement
+        """
         self._durations["token"] = duration
         return self
 
     def duration_session(self, duration: str) -> "DefineUser":
+        """
+        Adds DURATION FOR SESSION clause to a final statement
+        """
         self._durations["session"] = duration
         return self
 

@@ -4,12 +4,6 @@ from surrealist.connections import Connection
 from surrealist.utils import OK
 from .statement import Statement
 
-"""
-REBUILD [
-    INDEX [ IF EXISTS ] @name ON [ TABLE ] @table
-]
-"""
-
 
 class RebuildIndex(Statement):
     """
@@ -18,6 +12,8 @@ class RebuildIndex(Statement):
     Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    REBUILD [INDEX [ IF EXISTS ] @name ON [ TABLE ] @table]
     """
 
     def __init__(self, connection: Connection, index_name: str, table_name: str, if_exists: bool = False):
