@@ -26,15 +26,6 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, res.result)
 
-    def test_invalidate(self):
-        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
-        with surreal.connect() as connection:
-            res = connection.invalidate()
-            self.assertFalse(res.is_error(), res)
-            self.assertIsNone(res.result)
-            res = connection.ns_info()
-            self.assertTrue(res.is_error(), res)
-
     def test_let_unset(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
@@ -339,7 +330,7 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error())
             self.assertIsNotNone(res.query)
             self.assertEqual({'db': 'test', 'http_origin': 'http://127.0.0.1:8000', 'ip': '127.0.0.1', 'ns': 'test',
-                              'scope': None, 'session_id': None}, res.result)
+                              'access': None, 'session_id': None}, res.result)
 
     def test_db_tables(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))

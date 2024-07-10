@@ -91,7 +91,7 @@ class HttpClient:
         if method not in ("GET", "DELETE"):
             if type_of_content == "JSON":
                 try:
-                    data_to_send = json.dumps(data).encode(ENCODING)
+                    data_to_send = json.dumps(data, ensure_ascii=False).encode(ENCODING)
                 except RecursionError as e:
                     logger.error("Cant serialize object, too many nested levels")
                     raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e

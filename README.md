@@ -49,14 +49,14 @@ but websockets is preferred and default one. Websockets can use live queries and
 Each transport has functions it cannot use by itself (in a current SurrealDB version)
 
 **Http-transport cannot:**
- - invalidate, authenticate session
  - create or kill a live query
+ - use LET or UNSET methods
 
 **Websocket-transport cannot:**
  - import or export data (you should use http connection or cli tools for that)
  - import or export ML files (you should use http connection or cli tools for that)
 
-Transports use a query where it is possible for compatibility, in all other cases if you use these methods on transports -CompatibilityError will be raised
+If you use these methods on transports -CompatibilityError will be raised
 
 
 ## Connect to SurrealDB ##

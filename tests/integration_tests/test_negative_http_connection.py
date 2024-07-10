@@ -1,9 +1,9 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL
-from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError, DatabaseConnectionsPool
+from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError
 from surrealist import Surreal, get_uuid
+from tests.integration_tests.utils import URL
 
 PARAMS = (
     ('Specify a namespace to use', {'credentials': ('root', 'root'), }),
@@ -19,7 +19,7 @@ class TestHttpConnectionNegative(TestCase):
             connection.use("test", "test")
             uid = get_uuid()
             uid2 = get_uuid()
-            res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid}, record_id=uid2)
+            res = connection.create(f"article:`{uid}`", {"author": uid, "title": uid, "text": uid}, record_id=uid2)
             self.assertEqual(res.status, "ERR", res)
 
     def test_create_many_failed(self):
@@ -156,20 +156,6 @@ class TestHttpConnectionNegative(TestCase):
             with self.assertRaises(CompatibilityError):
                 connection.kill("prediction")
 
-    def test_authenticate_failed(self):
-        db = Surreal(URL, credentials=('root', 'root'), use_http=True)
-        with db.connect() as connection:
-            connection.use("test", "test")
-            with self.assertRaises(CompatibilityError):
-                connection.authenticate("prediction")
-
-    def test_invalidate_failed(self):
-        db = Surreal(URL, credentials=('root', 'root'), use_http=True)
-        with db.connect() as connection:
-            connection.use("test", "test")
-            with self.assertRaises(CompatibilityError):
-                connection.invalidate()
-
     def test_delete_all_failed(self):
         for expected, opts in PARAMS:
             with self.subTest(f"delete all failed on data{opts}"):
@@ -200,7 +186,7 @@ class TestHttpConnectionNegative(TestCase):
                     res = connection.import_data(file_path)
                     self.assertTrue(res.is_error())
 
-    def test_ml_import_failed(self):
+    def test_ml_import_failed(self):  # https://github.com/surrealdb/surrealdb/issues/4236
         for expected, opts in PARAMS:
             with self.subTest(f"ml import failed on data{opts}"):
                 db = Surreal(URL, use_http=True, **opts)
@@ -219,16 +205,7 @@ class TestHttpConnectionNegative(TestCase):
                         connection.export()
                     self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
 
-    def test_ml_export_failed_on_fields(self):
-        for expected, opts in PARAMS:
-            with self.subTest(f"export failed on data{opts}"):
-                db = Surreal(URL, use_http=True, **opts)
-                with db.connect() as connection:
-                    with self.assertRaises(HttpConnectionError) as e:
-                        connection.ml_export("prediction", "1.0.0")
-                    self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
-
-    def test_import_empty(self):
+    def test_import_empty(self):  # https://github.com/surrealdb/surrealdb/issues/4263
         params = (
             ("Specify some SQL code to execute", "empty.surql"),
             ("Unexpected token", "wrong.surql")
@@ -255,7 +232,7 @@ class TestHttpConnectionNegative(TestCase):
         with surreal.connect() as connection:
             res = connection.insert("new_table:new_insert", {'new_field2': 'field2'})
             self.assertTrue(res.is_error())
-            self.assertEqual(400, res.code)
+            self.assertEqual(-32000, res.code)
 
     def test_root_info_failed(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True)
@@ -270,7 +247,6 @@ class TestHttpConnectionNegative(TestCase):
             res = connection.ns_info()
             self.assertTrue(res.is_error())
             self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
-
 
     # TODO uncomment after bugfix
     # def test_ml_import_failed_wrong_file(self):

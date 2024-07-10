@@ -69,8 +69,6 @@ class TestUseCases(TestCase):
             (False, "use", ["some", "some"]),
             (False, "patch", ["some", {}]),
             (False, "insert", ["some", {}]),
-            (False, "invalidate", []),
-            (False, "authenticate", ["token"]),
             (False, "live", ["token", print]),
             (False, "kill", ["token"]),
         )

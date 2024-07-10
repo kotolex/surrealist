@@ -200,7 +200,8 @@ def to_result(content: Union[str, Dict, List]) -> SurrealResult:
         return SurrealResult(result=[SurrealResult(**e) for e in content])
     if _is_result_inside(content):
         res = SurrealResult(**content["result"][0])
-        res.ws_id = content["id"]
+        if "id" in content:
+            res.ws_id = content["id"]
         return res
     return SurrealResult(**content)
 
@@ -209,5 +210,5 @@ def _is_result_inside(a_dict) -> bool:
     """
     Helper predicate for deep nested objects
     """
-    return len(a_dict) == 2 and set(a_dict.keys()) == {"id", "result"} and isinstance(a_dict["result"], List) \
+    return len(a_dict) in (1, 2) and "result" in a_dict and isinstance(a_dict["result"], List) \
         and len(a_dict["result"]) == 1 and set(a_dict["result"][0].keys()) == {"time", "status", "result"}

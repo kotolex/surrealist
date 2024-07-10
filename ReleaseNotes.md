@@ -1,16 +1,17 @@
 ## Release Notes ##
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0):**
-- both http and ws connections lost signin and signup methods, sign in now happen under the hood on connecting
+- both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
-- for root user now you should connect only with credentials and then call use method (see examples)
+- http now uses rpc-protocol instead of different endpoints and methods
+- for root user now you should connect only with credentials and then call use method (see [examples](https://github.com/kotolex/surrealist/tree/master/examples/connect.py))
 - you can now specify access method on connecting via a Surreal/Database object
 - now use Bearer instead of Basic for Authorization
-- database argument is now optional for USE method, but raises for websocket if database is not specified
+- database argument is now optional for USE method, but raises for websocket if a database is not specified
 - all QL-statements now have SurrealQL Syntax in documentation for module or for class
 - all DEFINE statements now have COMMENT finished statement
 - now DEFINE TOKEN use Algorithm enum
-- Database object can be created from active connection with Database.from_connection(connection)
-- Connection can be extracted from Database with Database.get_connection()
+- Database object can be created from active connection with `Database.from_connection(connection)`
+- Connection can be extracted from Database with `Database.get_connection()`
 - improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of them
 - SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
 - update DEFINE USER statement
@@ -20,6 +21,7 @@
 - deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
 - let and unset now raises CompatibilityError for http
 - add upsert method to Connection
+- Connection objects now store token after authorize
 - more examples and tests, fix old examples
 - fix Readme, add compatibility table
 

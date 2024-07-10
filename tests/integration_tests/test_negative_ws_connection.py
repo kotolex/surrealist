@@ -26,14 +26,6 @@ class TestNegativeWebSocketConnection(TestCase):
         with self.assertRaises(WebSocketConnectionError):
             surreal.connect()
 
-    def test_authenticate_failed_wrong_token(self):
-        surreal = Surreal(URL, namespace="test", database="test")
-        with surreal.connect() as connection:
-            res = connection.authenticate("wrong")
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, 'There was a problem with authentication')
-            self.assertEqual(res.code, -32000)
-
     def test_live_failed_on_id(self):
         a_list = []
         function = lambda mess: a_list.append(mess)
