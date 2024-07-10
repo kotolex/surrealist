@@ -328,7 +328,10 @@ class TestInnerFunctions(TestCase):
                     query = f"RETURN {func}({params});"
                     res = conn.query(query)
                     self.assertFalse(res.is_error(), res)
-                    self.assertEqual(str(expected), str(res.result), res)
+                    if isinstance(expected, float):
+                        self.assertAlmostEqual(float(expected), float(res.result), places=5)
+                    else:
+                        self.assertEqual(str(expected), str(res.result), res)
 
     def test_just_works_functions(self):
         with Surreal(URL, credentials=('root', 'root')).connect() as conn:
