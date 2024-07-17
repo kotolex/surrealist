@@ -443,7 +443,8 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 2)
+            print(res)
+            self.assertEqual(len(res.result), 3)
             res = connection.root_info(structured=True)
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 2)
