@@ -1,5 +1,37 @@
+import json
+from typing import List
+
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.utils import OK
+
+
+class Comment(FinishedStatement):
+    """
+    Represents a COMMENT clause in statements.
+    """
+
+    def __init__(self, statement: Statement, text: str):
+        super().__init__(statement)
+        self._text = text
+
+    def validate(self) -> List[str]:
+        if not self._text:
+            return ["Comment text is empty"]
+        return [OK]
+
+    def _clean_str(self):
+        text = f" COMMENT {json.dumps(self._text)}" if self._text else ""
+        return f"{self._statement._clean_str()}{text}"
+
+
+class CanUseComment:
+    def comment(self, comment: str) -> Comment:
+        """
+        Adds COMMENT statement to the query
+        :param comment: comment text
+        :return: self
+        """
+        return Comment(self, comment)
 
 
 class Parallel(FinishedStatement):
@@ -114,6 +146,7 @@ class Where(FinishedStatement, CanUseReturn):
     """
     Represents a 'WHERE' statement.
     """
+
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._predicate = predicate

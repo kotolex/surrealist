@@ -38,16 +38,14 @@ class TestNegativeWebSocketConnection(TestCase):
 
     def test_kill(self):
         surreal = Surreal(URL, "test", "test", credentials=('user_db', 'user_db'),)
-        err = "KILL received a parameter that could not be converted to a UUID"
         with surreal.connect() as connection:
             res = connection.kill("wrong")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, f"Can not execute KILL statement using id '{err}'")
+            self.assertEqual(res.result, "Can not execute KILL statement using id '$id'")
             self.assertEqual(res.code, -32000)
             res = connection.kill("0189d6e3-8eac-703a-9a48-d9faa78b44b9")
             self.assertTrue(res.is_error(), res)
-            err = "KILL statement uuid did not exist"
-            self.assertEqual(res.result, f"Can not execute KILL statement using id '{err}'")
+            self.assertEqual(res.result, "Can not execute KILL statement using id '$id'")
             self.assertEqual(res.code, -32000)
 
     def test_export_failed(self):

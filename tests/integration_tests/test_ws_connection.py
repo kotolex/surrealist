@@ -443,11 +443,10 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
-            print(res)
-            self.assertEqual(len(res.result), 3)
+            self.assertEqual(len(res.result), 4)
             res = connection.root_info(structured=True)
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 2)
+            self.assertEqual(len(res.result), 4)
 
     def test_info_ns(self):
         surreal = Surreal(URL, 'test', credentials=('user_ns', 'user_ns'))

@@ -657,6 +657,25 @@ class TestUseCases(TestCase):
             res = connection.query(text)
             self.assertTrue(res.is_error(), res)
 
+    def test_alter_table(self):
+        uid = get_random_series(7)
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            res = db.define_table(f"alter_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            res = db.alter_table(f"alter_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            res = db.alter_table(f"alter_{uid}").drop().comment("test").run()
+            self.assertFalse(res.is_error(), res)
+            res = db.alter_table(f"alter_{uid}").schema_less().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.alter_table(f"alter_{uid}").schema_full().run()
+            self.assertFalse(res.is_error(), res)
+            res = db.alter_table(f"alter_{uid}").permissions_full().run()
+            self.assertFalse(res.is_error(), res)
+            # select = db.table("users").select("name").where("age > 10").group_by("country")
+            # res = db.alter_table("user").as_select(select).run()
+            # self.assertFalse(res.is_error(), res)
+
 
 if __name__ == '__main__':
     main()

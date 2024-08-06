@@ -1,10 +1,11 @@
 from typing import Optional, Union
 
 from surrealist.ql.statements.simple_statements import Where
+from surrealist.ql.statements.common_statements import CanUseComment
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 
-class PermissionsNone(FinishedStatement):
+class PermissionsNone(FinishedStatement, CanUseComment):
     """
     Represents a `PERMISSIONS NONE` statement
     """
@@ -12,7 +13,7 @@ class PermissionsNone(FinishedStatement):
         return f"{self._statement._clean_str()} PERMISSIONS NONE"
 
 
-class PermissionsFull(FinishedStatement):
+class PermissionsFull(FinishedStatement, CanUseComment):
     """
     Represents a `PERMISSIONS FULL` statement
     """
@@ -20,7 +21,7 @@ class PermissionsFull(FinishedStatement):
         return f"{self._statement._clean_str()} PERMISSIONS FULL"
 
 
-class PermissionsFor(FinishedStatement):
+class PermissionsFor(FinishedStatement, CanUseComment):
     """
     Represents a `PERMISSIONS FOR` statement
     """

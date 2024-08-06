@@ -40,6 +40,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_field("email", "resource").type("string").asserts("string::is::email($value)"))
     # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;
     print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full())
+    # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL COMMENT "text";
+    print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full().comment("text"))
 
     # on database object we can use DEFINE EVENT with sub-query
     # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/event

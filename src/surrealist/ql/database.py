@@ -6,6 +6,7 @@ from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm
 from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
+from surrealist.ql.statements.alter import Alter
 from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
 from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
@@ -545,6 +546,19 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, table_name, type_="TABLE", name="")
+
+    def alter_table(self, table_name: str) -> Alter:
+        """
+        Represents ALTER TABLE statement
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/alter
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_alter_examples.py
+
+        :param table_name: name of the table
+        :return: Alter object
+        """
+        return Alter(self._connection, table_name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

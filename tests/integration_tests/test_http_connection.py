@@ -422,7 +422,7 @@ class TestHttpConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 3)
+            self.assertEqual(len(res.result), 4)
 
     def test_info_ns(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
