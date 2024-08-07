@@ -13,7 +13,7 @@ class DefineUser(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE USER [ IF NOT EXISTS ] @name
+    DEFINE USER [ OVERWRITE | IF NOT EXISTS ] @name
     ON [ ROOT | NAMESPACE | DATABASE ]
     [ PASSWORD @pass | PASSHASH @hash ]
     [ ROLES @roles ]
@@ -31,6 +31,14 @@ class DefineUser(Define):
 
     def if_not_exists(self) -> "DefineUser":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineUser":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def validate(self) -> List[str]:

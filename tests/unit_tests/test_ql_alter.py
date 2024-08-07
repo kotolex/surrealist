@@ -22,25 +22,16 @@ class TestAlter(TestCase):
         self.assertEqual(alter.to_str(), "ALTER TABLE IF NOT EXISTS user;")
 
     def test_schemafull(self):
-        alter = Alter(None, "user").schema_full()
+        alter = Alter(None, "user").schemafull()
         self.assertEqual(alter.to_str(), "ALTER TABLE user SCHEMAFULL;")
 
     def test_schemaless(self):
-        alter = Alter(None, "user").schema_less()
+        alter = Alter(None, "user").schemaless()
         self.assertEqual(alter.to_str(), "ALTER TABLE user SCHEMALESS;")
 
     def test_perm_full_comment(self):
         alter = Alter(None, "user").permissions_full().comment("comment")
         self.assertEqual(alter.to_str(), 'ALTER TABLE user PERMISSIONS FULL COMMENT "comment";')
-
-    def test_raw_select(self):
-        alter = Alter(None, "user").as_raw_select("name", "users", "age > 10", "country")
-        self.assertEqual(alter.to_str(), 'ALTER TABLE user AS SELECT name FROM users WHERE age > 10 GROUP BY country;')
-
-    def test_as_select(self):
-        select = Select(None, "users", "name").where("age > 10").group_by("country")
-        alter = Alter(None, "user").as_select(select)
-        self.assertEqual(alter.to_str(), 'ALTER TABLE user AS SELECT name FROM users WHERE age > 10 GROUP BY country;')
 
 
 if __name__ == '__main__':

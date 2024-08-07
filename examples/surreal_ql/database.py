@@ -25,6 +25,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_field("new_field", "some_table"))  # DEFINE FIELD new_field ON TABLE some_table;
     # DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;
     print(db.define_field("new_field", "some_table").if_not_exists())
+    # DEFINE FIELD OVERWRITE new_field ON TABLE some_table;
+    print(db.define_field("new_field", "some_table").overwrite())
     print(db.define_field("field", "user").type("string"))  # DEFINE FIELD field ON TABLE user TYPE string;
     # DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;
     print(db.define_field("field", "user").type("bool", is_flexible=True))
@@ -57,6 +59,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/param
     print(db.define_param("key", 1000))  # DEFINE PARAM $key VALUE 1000;
     print(db.define_param("key", 1000).if_not_exists())  # DEFINE PARAM IF NOT EXISTS $key VALUE 1000;
+    print(db.define_param("key", 1000).overwrite())  # DEFINE PARAM OVERWRITE $key VALUE 1000;
     # we can remove parameter
     print(db.remove_param("key"))  # REMOVE PARAM $key;
 
@@ -66,6 +69,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_analyzer("example_ascii").tokenizer_class().filter_ascii())
     # DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;
     print(db.define_analyzer("example_ascii").if_not_exists().tokenizer_class().filter_ascii())
+    # DEFINE ANALYZER OVERWRITE example_ascii TOKENIZERS class FILTERS ascii;
+    print(db.define_analyzer("example_ascii").overwrite().tokenizer_class().filter_ascii())
     # DEFINE ANALYZER example_ascii TOKENIZERS class, camel FILTERS ascii, lowercase;
     print(db.define_analyzer("example_ascii").tokenizer_class().tokenizer_camel().filter_lowercase().filter_ascii())
     # DEFINE ANALYZER example_ascii FILTERS lowercase, snowball(english);

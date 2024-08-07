@@ -48,6 +48,13 @@ class TestDatabase(TestCase):
         self.assertEqual(text, DefineEvent(None, "email", table_name="user", then=then).if_not_exists().
                          when("$before.email != $after.email").to_str())
 
+    def test_define_event_over(self):
+        text = "DEFINE EVENT OVERWRITE email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event " \
+               "SET user = $value.id, time = time::now(), value = $after.email);"
+        then = Create(None, "event").set("user = $value.id, time = time::now(), value = $after.email")
+        self.assertEqual(text, DefineEvent(None, "email", table_name="user", then=then).overwrite().
+                         when("$before.email != $after.email").to_str())
+
     def test_define_user(self):
         self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456' ROLES OWNER;",
                          DefineUser(None, "john").password("123456").role_owner().to_str())
@@ -60,9 +67,13 @@ class TestDatabase(TestCase):
         self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER;",
                          DefineUser(None, "john").password("123456").if_not_exists().role_owner().to_str())
 
+    def test_define_user_over(self):
+        self.assertEqual("DEFINE USER OVERWRITE john ON DATABASE PASSWORD '123456' ROLES OWNER;",
+                         DefineUser(None, "john").password("123456").overwrite().role_owner().to_str())
+
     def test_define_user_comment(self):
-        self.assertEqual("DEFINE USER IF NOT EXISTS john ON DATABASE PASSWORD '123456' ROLES OWNER COMMENT \"some\";",
-                         DefineUser(None, "john").password("123456").if_not_exists().role_owner().comment("some").to_str())
+        self.assertEqual("DEFINE USER john ON DATABASE PASSWORD '123456' ROLES OWNER COMMENT \"some\";",
+                         DefineUser(None, "john").password("123456").role_owner().comment("some").to_str())
 
     def test_define_param(self):
         self.assertEqual("DEFINE PARAM $user VALUE john;", DefineParam(None, "user", "john").to_str())
@@ -74,6 +85,10 @@ class TestDatabase(TestCase):
     def test_define_param_exists(self):
         self.assertEqual("DEFINE PARAM IF NOT EXISTS $user VALUE john;", DefineParam(None, "user", "john").
                          if_not_exists().to_str())
+
+    def test_define_param_over(self):
+        self.assertEqual("DEFINE PARAM OVERWRITE $user VALUE john;", DefineParam(None, "user", "john").
+                         overwrite().to_str())
 
     def test_define_analyzer(self):
         self.assertEqual("DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;",
@@ -88,6 +103,11 @@ class TestDatabase(TestCase):
     def test_define_analyzer_exists(self):
         self.assertEqual("DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS lowercase;",
                          DefineAnalyzer(None, "example_ascii").if_not_exists().tokenizer_class().
+                         filter_lowercase().to_str())
+
+    def test_define_analyzer_over(self):
+        self.assertEqual("DEFINE ANALYZER OVERWRITE example_ascii TOKENIZERS class FILTERS lowercase;",
+                         DefineAnalyzer(None, "example_ascii").overwrite().tokenizer_class().
                          filter_lowercase().to_str())
 
     def test_define_scope(self):
@@ -175,6 +195,11 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").if_not_exists().columns("name").
                          search_analyzer("ascii").to_str())
 
+    def test_define_index_over(self):
+        text = "DEFINE INDEX OVERWRITE userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").overwrite().columns("name").
+                         search_analyzer("ascii").to_str())
+
     def test_define_token(self):
         text = """DEFINE TOKEN token_name ON DATABASE 
 TYPE RS256 
@@ -228,6 +253,10 @@ PERMISSIONS
         text = "DEFINE TABLE IF NOT EXISTS table_name;"
         self.assertEqual(text, DefineTable(None, "table_name").if_not_exists().to_str())
 
+    def test_define_table_over(self):
+        text = "DEFINE TABLE OVERWRITE table_name;"
+        self.assertEqual(text, DefineTable(None, "table_name").overwrite().to_str())
+
     def test_define_field(self):
         text = "DEFINE FIELD new_field ON TABLE some_table;"
         self.assertEqual(text, DefineField(None, "new_field", "some_table").to_str())
@@ -252,10 +281,13 @@ PERMISSIONS
         text = "DEFINE FIELD updated ON TABLE resource DEFAULT time::now() COMMENT \"some\";"
         self.assertEqual(text, DefineField(None, "updated", "resource").default("time::now()").comment("some").to_str())
 
-
     def test_define_field_exists(self):
         text = "DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;"
         self.assertEqual(text, DefineField(None, "new_field", "some_table").if_not_exists().to_str())
+
+    def test_define_field_over(self):
+        text = "DEFINE FIELD OVERWRITE new_field ON TABLE some_table;"
+        self.assertEqual(text, DefineField(None, "new_field", "some_table").overwrite().to_str())
 
     def test_define_table_type(self):
         self.assertEqual(DefineTable(None, "person").type_any().to_str(), "DEFINE TABLE person TYPE ANY;")
@@ -280,6 +312,14 @@ PERMISSIONS
         self.assertEqual(text, DefineAccessJwt(None, "token_name").url("http://example.com").to_str())
         text = "DEFINE ACCESS token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'sNSYneezcr8kqphfOC6NwwraUHJCVAt' DURATION FOR SESSION 1h;"
         self.assertEqual(text, DefineAccessJwt(None, "token_name").algorithm(Algorithm.HS512, key).duration("1h").to_str())
+
+    def test_define_access_jwt_exists_over(self):
+        text = "DEFINE ACCESS IF NOT EXISTS token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'secret';"
+        self.assertEqual(text, DefineAccessJwt(None, "token_name").algorithm(Algorithm.HS512, "secret").if_not_exists().to_str())
+        text = "DEFINE ACCESS OVERWRITE token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'secret';"
+        self.assertEqual(text, DefineAccessJwt(None, "token_name").algorithm(Algorithm.HS512,
+                                                                             "secret").overwrite().to_str())
+
 
     def test_define_access_record(self):
         # Examples for DEFINE ACCESS ... RECORD
@@ -311,6 +351,13 @@ PERMISSIONS
         };
     } ALGORITHM HS512 KEY 'secret';"""
         self.assertEqual(text, DefineAccessRecord(None, "user").authenticate(raw).algorithm(Algorithm.HS512, "secret").to_str())
+
+    def test_define_access_rec_exists_over(self):
+        text = "DEFINE ACCESS IF NOT EXISTS token_name ON DATABASE TYPE RECORD ALGORITHM HS512 KEY 'secret';"
+        self.assertEqual(text, DefineAccessRecord(None, "token_name").algorithm(Algorithm.HS512, "secret").if_not_exists().to_str())
+        text = "DEFINE ACCESS OVERWRITE token_name ON DATABASE TYPE RECORD ALGORITHM HS512 KEY 'secret';"
+        self.assertEqual(text, DefineAccessRecord(None, "token_name").algorithm(Algorithm.HS512,
+                                                                             "secret").overwrite().to_str())
 
 
 if __name__ == '__main__':

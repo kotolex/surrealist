@@ -16,7 +16,8 @@ class DefineAnalyzer(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE ANALYZER [ IF NOT EXISTS ] @name [ TOKENIZERS @tokenizers ] [ FILTERS @filters ] [ COMMENT @string ]
+    DEFINE ANALYZER [ OVERWRITE | IF NOT EXISTS ] @name [ TOKENIZERS @tokenizers ] [ FILTERS @filters ]
+    [ COMMENT @string ]
 
     """
 
@@ -29,6 +30,14 @@ class DefineAnalyzer(Define):
 
     def if_not_exists(self) -> "DefineAnalyzer":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineAnalyzer":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def tokenizer_blank(self) -> "DefineAnalyzer":

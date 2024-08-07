@@ -8,6 +8,10 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
 
     # DEFINE ACCESS token ON DATABASE TYPE JWT ALGORITHM HS256 KEY 'some_key' DURATION FOR SESSION 1h;
     print(db.define_access_jwt("token").algorithm(Algorithm.HS256, "some_key").duration("1h"))
+    # DEFINE ACCESS IF NOT EXISTS token ON DATABASE TYPE JWT ALGORITHM HS256 KEY 'some_key';
+    print(db.define_access_jwt("token").algorithm(Algorithm.HS256, "some_key").if_not_exists())
+    # DEFINE ACCESS OVERWRITE token ON DATABASE TYPE JWT ALGORITHM HS256 KEY 'some_key';
+    print(db.define_access_jwt("token").algorithm(Algorithm.HS256, "some_key").overwrite())
 
     key = """-----BEGIN PUBLIC KEY-----
 MUO52Me9HEB4ZyU+7xmDpnixzA/CUE7kyUuE0b7t38oCh+sQouREqIjLwgHhFdhh3cQAwr6GH07D
@@ -37,6 +41,11 @@ iCTjhbIDEBHySSSc/pQ4ftHQmhToTlQeOdEy4LYiaEIgl1X+hzRH1hBYvWlNKe4EY1nMCKcjgt0=
     # DEFINE ACCESS token_name ON DATABASE TYPE JWT URL 'https://example.com/.well-known/jwks.json';
     print(db.define_access_jwt("token_name").url("https://example.com/.well-known/jwks.json"))
 
+    # DEFINE ACCESS token_name ON DATABASE TYPE JWT ALGORITHM HS512 KEY 'secret'
+    # AUTHENTICATE IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth;
+    raw = 'IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth'
+    print(db.define_access_jwt("token_name").authenticate(raw).algorithm(Algorithm.HS512, "secret"))
+
     # Examples for DEFINE ACCESS ... RECORD
     create = db.user.create().set(email="$email", passw="crypto::argon2::generate($pass)")
     select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
@@ -52,7 +61,8 @@ iCTjhbIDEBHySSSc/pQ4ftHQmhToTlQeOdEy4LYiaEIgl1X+hzRH1hBYvWlNKe4EY1nMCKcjgt0=
     # DEFINE ACCESS token ON DATABASE TYPE RECORD ALGORITHM RS256 KEY 'some_key' WITH ISSUER KEY 'issuer_key';
     print(db.define_access_record("token").algorithm(Algorithm.RS256, "some_key", issuer_key="issuer_key"))
 
-    # DEFINE ACCESS user ON DATABASE TYPE RECORD AUTHENTICATE IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth; ALGORITHM HS512 KEY 'secret';
+    # DEFINE ACCESS user ON DATABASE TYPE RECORD AUTHENTICATE
+    # IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth; ALGORITHM HS512 KEY 'secret';
     raw = 'IF !$auth.enabled {THROW "This user is not enabled";};RETURN $auth;'
     print(db.define_access_record("user").authenticate(raw).algorithm(Algorithm.HS512, "secret"))
 

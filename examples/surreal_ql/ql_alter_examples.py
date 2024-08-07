@@ -18,10 +18,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.alter_table("user").permissions_none().comment("text_of_comment"))
     # ALTER TABLE IF NOT EXISTS user SCHEMAFULL;
     print(db.alter_table("user").if_not_exists().schema_full())
-    # ALTER TABLE user DROP AS SELECT name FROM users WHERE age > 10 GROUP BY country;
-    print(db.alter_table("user").as_raw_select("name", "users", "age > 10", "country"))
-    select = db.table("users").select("name").where("age > 10").group_by("country")
-    print(db.alter_table("user").as_select(select))
+
 
 
 

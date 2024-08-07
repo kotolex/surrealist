@@ -17,11 +17,13 @@ class Define(Statement, ABC):
 
     def __init__(self, connection: Connection):
         super().__init__(connection)
-        self._if_not_exists = False
+        self._if_not_exists = None
         self._text = None
 
     def _exists(self) -> str:
-        return " IF NOT EXISTS" if self._if_not_exists else ""
+        if self._if_not_exists is None:
+            return ""
+        return " IF NOT EXISTS" if self._if_not_exists else " OVERWRITE"
 
     def _comment(self) -> str:
         return f" COMMENT {json.dumps(self._text)}" if self._text else ""
@@ -32,6 +34,14 @@ class Define(Statement, ABC):
         :return: self
         """
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "Define":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def comment(self, comment: str) -> FinishedStatement:
@@ -52,7 +62,8 @@ class DefineEvent(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE EVENT [ IF NOT EXISTS ] @name ON [ TABLE ] @table [ WHEN @expression ] THEN @expression [ COMMENT @string ]
+    DEFINE EVENT [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ WHEN @expression ] THEN @expression
+    [ COMMENT @string ]
 
     """
 
@@ -65,6 +76,14 @@ class DefineEvent(Define):
 
     def if_not_exists(self) -> "DefineEvent":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineEvent":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def when(self, predicate: str) -> "DefineEvent":
@@ -93,7 +112,7 @@ class DefineParam(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE PARAM [ IF NOT EXISTS ] $@name VALUE @value [ COMMENT @string ]
+    DEFINE PARAM [ OVERWRITE | IF NOT EXISTS ] $@name VALUE @value [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, param_name: str, value: Any):
@@ -103,6 +122,14 @@ class DefineParam(Define):
 
     def if_not_exists(self) -> "DefineParam":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineParam":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def validate(self) -> List[str]:
@@ -122,7 +149,8 @@ class DefineScope(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE SCOPE [ IF NOT EXISTS ] @name SESSION @duration SIGNUP @expression SIGNIN @expression [ COMMENT @string ]
+    DEFINE SCOPE [ OVERWRITE | IF NOT EXISTS ] @name SESSION @duration SIGNUP @expression SIGNIN @expression
+    [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, name: str, duration: str, signup: Union[str, Statement],
@@ -135,6 +163,14 @@ class DefineScope(Define):
 
     def if_not_exists(self) -> "DefineScope":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineScope":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def validate(self) -> List[str]:
@@ -155,7 +191,7 @@ class DefineIndex(Define, CanUseIndexTypes):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE INDEX [ IF NOT EXISTS ] @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields
+    DEFINE INDEX [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields
     [ UNIQUE
         | SEARCH ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
         | MTREE DIMENSION @dimension [ TYPE @type ] [ DIST @distance ] [ CAPACITY @capacity]
@@ -174,6 +210,14 @@ class DefineIndex(Define, CanUseIndexTypes):
 
     def if_not_exists(self) -> "DefineIndex":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineIndex":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def fields(self, fields: str) -> "DefineIndex":
@@ -213,7 +257,7 @@ class DefineToken(Define):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE TOKEN [ IF NOT EXISTS ] @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
+    DEFINE TOKEN [ OVERWRITE | IF NOT EXISTS ] @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
     [ COMMENT @string ]
     """
 
@@ -245,7 +289,7 @@ class DefineTable(Define, CanUsePermissions):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     
-    DEFINE TABLE [ IF NOT EXISTS ] @name
+    DEFINE TABLE [ OVERWRITE | IF NOT EXISTS ] @name
     [ DROP ]
     [ SCHEMAFULL | SCHEMALESS ]
     [ TYPE [ ANY | NORMAL | RELATION [ IN | FROM ] @table [ OUT | TO ] @table ] ]
@@ -279,6 +323,14 @@ class DefineTable(Define, CanUsePermissions):
         Represents IF NOT EXISTS statement
         """
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineTable":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def drop(self) -> "DefineTable":
@@ -396,7 +448,7 @@ class DefineField(Define, CanUsePermissions):
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-    DEFINE FIELD [ IF NOT EXISTS ] @name ON [ TABLE ] @table
+    DEFINE FIELD [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table
     [ [ FLEXIBLE ] TYPE @type ]
     [ DEFAULT @expression ]
   [ READONLY ]
@@ -424,6 +476,14 @@ class DefineField(Define, CanUsePermissions):
 
     def if_not_exists(self) -> "DefineField":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineField":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def type(self, type_name: str, is_flexible: bool = False) -> "DefineField":

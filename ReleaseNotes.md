@@ -22,6 +22,7 @@
 - deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
 - let and unset now raises CompatibilityError for http
 - add upsert method to Connection
+- all DEFINE statements except SCOPE/TOKEN now have OVERWRITE clause
 - Connection objects now store token after authorize
 - more examples and tests, fix old examples
 - fix Readme, add compatibility table

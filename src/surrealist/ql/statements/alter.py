@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from surrealist.connections import Connection
 from surrealist.utils import OK
@@ -18,11 +18,6 @@ class Alter(Statement, CanUsePermissions, CanUseComment):
     | TABLE [ IF NOT EXISTS ] @name
     [ DROP ]
         [ SCHEMAFULL | SCHEMALESS ]
-        [ AS SELECT @projections
-            FROM @tables
-            [ WHERE @condition ]
-            [ GROUP [ BY ] @groups ]
-        ]
         [ PERMISSIONS [ NONE | FULL
             | FOR select @expression
             | FOR create @expression
@@ -59,41 +54,18 @@ class Alter(Statement, CanUsePermissions, CanUseComment):
         self._drop = True
         return self
 
-    def schema_full(self) -> "Alter":
+    def schemafull(self) -> "Alter":
         """
         Represents SCHEMAFULL statement
         """
         self._schema_full = True
         return self
 
-    def schema_less(self) -> "Alter":
+    def schemaless(self) -> "Alter":
         """
         Represents SCHEMALESS statement
         """
         self._schema_full = False
-        return self
-
-    def as_select(self, select: Statement) -> "Alter":
-        """
-        Represents AS SELECT statement, Select statement expected here
-        """
-        self._as_select = select._clean_str()
-        return self
-
-    def as_raw_select(self, projections: str, from_tables: str, where: Optional[str] = None,
-                      group_by: Optional[str] = None) -> "Alter":
-        """
-        Represents AS SELECT statement, all parameters will be used as is in the result statement
-
-        [ AS SELECT @projections
-            FROM @tables
-            [ WHERE @condition ]
-            [ GROUP BY @groups ]
-        ]
-        """
-        wh = "" if not where else f" WHERE {where}"
-        group = "" if not group_by else f" GROUP BY {group_by}"
-        self._as_select = f"SELECT {projections} FROM {from_tables}{wh}{group}"
         return self
 
     def _clean_str(self):
@@ -104,5 +76,4 @@ class Alter(Statement, CanUsePermissions, CanUseComment):
             schema = " SCHEMAFULL"
         elif self._schema_full is False:
             schema = " SCHEMALESS"
-        select = "" if not self._as_select else f" AS {self._as_select}"
-        return f"ALTER {self._type}{exists} {self._name}{drop}{schema}{select}"
+        return f"ALTER {self._type}{exists} {self._name}{drop}{schema}"

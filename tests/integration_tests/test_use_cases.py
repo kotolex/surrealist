@@ -3,7 +3,8 @@ import time
 from datetime import datetime, timezone
 from unittest import TestCase, main
 
-from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str, Algorithm
+from surrealist import OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str, \
+    Algorithm
 from tests.integration_tests.utils import URL, get_random_series
 
 
@@ -198,7 +199,8 @@ class TestUseCases(TestCase):
                 "$before.email != $after.email").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count + 1)
-            res = db.define_event(f"email_{uid}", table_name="user", then=then).when("$before.email != $after.email").run()
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).when(
+                "$before.email != $after.email").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The event 'email_{uid}' already exists", res.result, res)
             self.assertEqual(len(db.user.info()["events"]), events_count + 1)
@@ -210,6 +212,23 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["events"]), events_count)
 
+    def test_define_event_overwrite(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            events_count = len(db.user.info()["events"])
+            uid = get_random_series(6)
+            then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).when(
+                "$before.email != $after.email").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["events"]), events_count + 1)
+            res = db.define_event(f"email_{uid}", table_name="user", then=then).overwrite().when(
+                "$before.email != $after.email").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["events"]), events_count + 1)
+
     def test_remove_non_existent_event(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_event("not_exists", table_name="user").if_exists().run()
@@ -217,6 +236,16 @@ class TestUseCases(TestCase):
             res = db.remove_event("not_exists", table_name="user").run()
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The event 'not_exists' does not exist", res.result)
+
+    def test_overwrite_non_existent_event_has_action(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            events_count = len(db.user.info()["events"])
+            uid = get_random_series(6)
+            then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
+            res = db.define_event(f"evet_{uid}", table_name="user", then=then).overwrite().when(
+                "$before.email != $after.email").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.user.info()["events"]), events_count+1)
 
     def test_define_user_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
@@ -236,6 +265,31 @@ class TestUseCases(TestCase):
             res = db.define_user(f"user_{uid}").password("123456").if_not_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_user(f"user_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(db.info()["users"]), count)
+
+    def test_define_user_and_overwrite(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uid = get_random_series(8)
+            count = len(db.info()["users"])
+            res = db.define_user(f"user_{uid}").password("123456").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(db.info()["users"]), count + 1)
+            res = db.define_user(f"user_{uid}").password("123123").overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(len(db.info()["users"]), count + 1)
+
+    def test_overwrite_non_existent_user_no_action(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            uid = get_random_series(8)
+            db = Database.from_connection(connection)
+            count = len(db.info()["users"])
+            res = db.define_user(f"user_{uid}").password("123123").overwrite().run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(len(db.info()["users"]), count)
 
@@ -265,6 +319,22 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(None, db.raw_query(f"RETURN $param_{uid};").result)
 
+    def test_define_param_and_overwrite(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            uid = get_random_series(8)
+            res = db.define_param(f"param_{uid}", 1000).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(1000, db.raw_query(f"RETURN $param_{uid};").result)
+            res = db.define_param(f"param_{uid}", 5000).overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(5000, db.raw_query(f"RETURN $param_{uid};").result)
+
+    def test_overwrite_non_existent_param_has_action(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            res = db.define_param(f"param_non_exists", 1000).overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(1000, db.raw_query(f"RETURN $param_non_exists;").result)
+
     def test_remove_non_existent_param(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.remove_param("not_exists").if_exists().run()
@@ -288,6 +358,24 @@ class TestUseCases(TestCase):
             res = db.remove_analyzer(f"anal_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["analyzers"]), count)
+
+    def test_define_analyzer_and_overwrite(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            uid = get_random_series(4)
+            count = len(db.info()["analyzers"])
+            res = db.define_analyzer(f"anal_{uid}").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["analyzers"]), count + 1)
+            res = db.define_analyzer(f"anal_{uid}").overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["analyzers"]), count+1)
+
+    def test_overwrite_non_existent_analyzer_has_action(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            count = len(db.info()["analyzers"])
+            res = db.define_analyzer(f"anal_not_exists").overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["analyzers"]), count+1)
 
     def test_remove_non_existent_analyzer(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -333,11 +421,38 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual(f"The access method 'access_{uid}' already exists in the database 'test'", res.result, res)
             self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration("24h").if_not_exists().run()
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration(
+                "24h").if_not_exists().run()
             self.assertFalse(res.is_error(), res)
             res = db.remove_access(f"access_{uid}").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count)
+
+    def test_define_access_jwt_and_overwrite(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uid = get_random_series(7)
+            count = len(db.info()["accesses"])
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "some_key").duration("24h").run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count + 1)
+            res = db.define_access_jwt(f"access_{uid}").algorithm(Algorithm.HS512, "other_key").duration("11h").overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count +1)
+            self.assertTrue("11h" in db.info()["accesses"][f"access_{uid}"],  db.info()["accesses"][f"access_{uid}"])
+
+    def test_overwrite_non_existent_access_jwt_has_action(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            count = len(db.info()["accesses"])
+            res = db.define_access_jwt(f"access_not_exists").algorithm(Algorithm.HS512, "some_key").duration("24h").overwrite().run()
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(len(db.info()["accesses"]), count+1)
+
 
     def test_define_access_record_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
@@ -402,7 +517,8 @@ class TestUseCases(TestCase):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(11)
             ind_count = len(db.table(f"user{uid}").info()["indexes"])
-            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc(150).max_connections(2).run()
+            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").hnsw(4).distance_euclidean().efc(
+                150).max_connections(2).run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
             res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
@@ -498,7 +614,8 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             res = db.define_table(f"relation_type_from_to_{uid}").type_relation(("user", "post")).run()
             self.assertFalse(res.is_error(), res)
-            res = db.define_table(f"relation_type_in_out_{uid}").type_relation(("user", "post"), use_from_to=False).run()
+            res = db.define_table(f"relation_type_in_out_{uid}").type_relation(("user", "post"),
+                                                                               use_from_to=False).run()
             self.assertFalse(res.is_error(), res)
 
     def test_define_field_and_remove(self):
@@ -620,7 +737,6 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
-
     def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
         text = """
             FOR $person IN (SELECT id, age FROM person) {
@@ -666,15 +782,12 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").drop().comment("test").run()
             self.assertFalse(res.is_error(), res)
-            res = db.alter_table(f"alter_{uid}").schema_less().run()
+            res = db.alter_table(f"alter_{uid}").schemaless().run()
             self.assertFalse(res.is_error(), res)
-            res = db.alter_table(f"alter_{uid}").schema_full().run()
+            res = db.alter_table(f"alter_{uid}").schemafull().run()
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").permissions_full().run()
             self.assertFalse(res.is_error(), res)
-            # select = db.table("users").select("name").where("age > 10").group_by("country")
-            # res = db.alter_table("user").as_select(select).run()
-            # self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table
     print(db.define_table("reading"))  # DEFINE TABLE reading;
     print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
+    print(db.define_table("reading").overwrite())  # DEFINE TABLE OVERWRITE reading;
     print(db.define_table("reading").drop())  # DEFINE TABLE reading DROP;
     print(db.define_table("reading").changefeed("1h"))  # DEFINE TABLE reading CHANGEFEED 1h;
     # DEFINE TABLE reading CHANGEFEED 1h COMMENT "Some comment";

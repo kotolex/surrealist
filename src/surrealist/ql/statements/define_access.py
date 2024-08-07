@@ -14,19 +14,21 @@ class DefineAccessJwt(Statement):
 
     Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/jwt
 
-    DEFINE ACCESS [ IF NOT EXISTS ] @name
+    DEFINE ACCESS [ OVERWRITE | IF NOT EXISTS ] @name
     ON [ NAMESPACE | DATABASE ]
     TYPE JWT [ ALGORITHM @algorithm KEY @key | URL @url ]
+    [ AUTHENTICATE @expression ]
     [ DURATION FOR SESSION @duration ]
     """
 
     def __init__(self, connection: Connection, name: str):
         super().__init__(connection)
         self._name = name
-        self._if_not_exists = False
+        self._if_not_exists = None
         self._algo = None
         self._duration = None
         self._url = None
+        self._auth = None
 
     def if_not_exists(self) -> "DefineAccessJwt":
         """
@@ -34,6 +36,25 @@ class DefineAccessJwt(Statement):
         :return: DefineAccessJwt object
         """
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineAccessJwt":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
+        return self
+
+    def authenticate(self, raw_expression: str) -> "DefineAccessJwt":
+        """
+        Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/access/jwt#with-authenticate-clause
+
+        """
+        self._auth = raw_expression
         return self
 
     def algorithm(self, algorithm: Algorithm, key: str) -> "DefineAccessJwt":
@@ -73,14 +94,19 @@ class DefineAccessJwt(Statement):
         return [OK]
 
     def _clean_str(self):
-        exists = " IF NOT EXISTS" if self._if_not_exists else ""
+        exists = ""
+        if self._if_not_exists:
+            exists = " IF NOT EXISTS"
+        elif self._if_not_exists is False:
+            exists = " OVERWRITE"
         access = ""
         if self._algo:
             access = f" ALGORITHM {self._algo[0].name} KEY '{self._algo[1]}'"
         if self._url:
             access = f" URL '{self._url}'"
+        auth = "" if not self._auth else f" AUTHENTICATE {self._auth}"
         duration = f" DURATION FOR SESSION {self._duration}" if self._duration else ""
-        return f"DEFINE ACCESS{exists} {self._name} ON DATABASE TYPE JWT{access}{duration}"
+        return f"DEFINE ACCESS{exists} {self._name} ON DATABASE TYPE JWT{access}{auth}{duration}"
 
 
 class DefineAccessRecord(Statement):
@@ -91,7 +117,7 @@ class DefineAccessRecord(Statement):
 
     Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record
 
-        DEFINE ACCESS [ IF NOT EXISTS ] @name
+        DEFINE ACCESS [ OVERWRITE | IF NOT EXISTS ] @name
       ON DATABASE TYPE RECORD
         [ SIGNUP @expression ]
         [ SIGNIN @expression ]
@@ -109,7 +135,7 @@ class DefineAccessRecord(Statement):
     def __init__(self, connection: Connection, name: str):
         super().__init__(connection)
         self._name = name
-        self._if_not_exists = False
+        self._if_not_exists = None
         self._algo = None
         self._duration_token = None
         self._duration_session = None
@@ -124,6 +150,14 @@ class DefineAccessRecord(Statement):
         :return: DefineAccessJwt object
         """
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineAccessRecord":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def signup(self, expression: Union[str, Create]) -> "DefineAccessRecord":
@@ -202,7 +236,11 @@ class DefineAccessRecord(Statement):
         return [OK]
 
     def _clean_str(self):
-        exists = " IF NOT EXISTS" if self._if_not_exists else ""
+        exists = ""
+        if self._if_not_exists:
+            exists = " IF NOT EXISTS"
+        elif self._if_not_exists is False:
+            exists = " OVERWRITE"
         sin = ""
         if self._signin:
             if isinstance(self._signin, str):
