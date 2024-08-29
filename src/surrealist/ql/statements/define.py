@@ -292,7 +292,7 @@ class DefineTable(Define, CanUsePermissions):
     DEFINE TABLE [ OVERWRITE | IF NOT EXISTS ] @name
     [ DROP ]
     [ SCHEMAFULL | SCHEMALESS ]
-    [ TYPE [ ANY | NORMAL | RELATION [ IN | FROM ] @table [ OUT | TO ] @table ] ]
+    [ TYPE [ ANY | NORMAL | RELATION [ IN | FROM ] @table [ OUT | TO ] @table ] [ ENFORCED ]]
     [ AS SELECT @projections
         FROM @tables
         [ WHERE @condition ]
@@ -394,7 +394,8 @@ class DefineTable(Define, CanUsePermissions):
         self._type = "NORMAL"
         return self
 
-    def type_relation(self, from_to: Optional[Tuple] = None, use_from_to: bool = True) -> "DefineTable":
+    def type_relation(self, from_to: Optional[Tuple] = None, use_from_to: bool = True,
+                      enforced: bool = False) -> "DefineTable":
         """
         Represents TYPE RELATE statement
 
@@ -403,8 +404,9 @@ class DefineTable(Define, CanUsePermissions):
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-        :param from_to: optional pair of source and target table, both must be provided(not None)
+        :param from_to: optional pair of source and target table, both must be provided (not None)
         :param use_from_to: if True, FROM TO syntax will be used, if False, IN OUT syntax will be used
+        :param enforced: if True, adds ENFORCED statement to query
         """
         if from_to and from_to[0] and from_to[1]:
             if use_from_to:
@@ -413,6 +415,8 @@ class DefineTable(Define, CanUsePermissions):
                 self._type = f"RELATION IN {from_to[0]} OUT {from_to[1]}"
         else:
             self._type = "RELATION"
+        if enforced:
+            self._type = f"{self._type} ENFORCED"
         return self
 
     def validate(self) -> List[str]:

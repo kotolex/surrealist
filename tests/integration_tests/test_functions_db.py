@@ -21,7 +21,9 @@ names = [
     ("array::distinct", '[ 1, 2, 1, 3, 3, 4 ]', [1, 2, 3, 4]),
     ("array::flatten", "[ [1,2], [3, 4], 'SurrealDB', [5, 6, [7, 8]] ]", [1, 2, 3, 4, 'SurrealDB', 5, 6, [7, 8]]),
     ("array::find_index", "['a', 'b', 'c', 'b', 'a'], 'b'", 1),
+    ("array::filter", "[ 1, 2, 1, 3, 3, 4 ], 1", [1, 1]),
     ("array::filter_index", "['a', 'b', 'c', 'b', 'a'], 'b'", [1, 3]),
+    ("array::find", "['a', 'b', 'c', 'b', 'a'], 'b'", 'b'),
     ("array::first", "[ 's', 'u', 'r', 'r', 'e', 'a', 'l' ]", "s"),
     ("array::group", "[1, 2, 3, 4, [3,5,6], [2,4,5,6], 7, 8, 8, 9]", [1, 2, 3, 4, 5, 6, 7, 8, 9]),
     ("array::insert", "[1,2,3,4], 5, 2", [1, 2, 5, 3, 4]),
@@ -119,8 +121,9 @@ names = [
     ("math::top", '[1, 40, 60, 10, 2, 901], 3', [40, 901, 60]),
     ("math::variance", '[ 1, 40, 60, 10, 2, 901 ]', 129148.0),
     ("math::trimean", '[ 1, 40, 60, 10, 2, 901 ]', 27.25),
-    ("meta::id", 'person:tobie', "tobie"),
-    ("meta::tb", 'person:tobie', "person"),
+    ("record::id", 'person:tobie', "tobie"),
+    ("record::tb", 'person:tobie', "person"),
+    ("record::exists", 'person:tobie', False),
     ("parse::email::host", '"info@surrealdb.com"', "surrealdb.com"),
     ("parse::email::user", '"info@surrealdb.com"', "info"),
     ("parse::url::domain", '"https://surrealdb.com:80/features?some=option#fragment"', "surrealdb.com"),
@@ -131,7 +134,7 @@ names = [
     ("parse::url::query", '"https://surrealdb.com:80/features?some=option#fragment"', "some=option"),
     ("string::concat", "'this', ' ', 'is', ' ', 'a', ' ', 'test'", "this is a test"),
     ("string::contains", "'abcdefg', 'cde'", True),
-    ("string::endsWith", "'some test', 'test'", True),
+    ("string::ends_with", "'some test', 'test'", True),
     ("string::join", "', ', 'a', 'list', 'of', 'items'", "a, list, of, items"),
     ("string::len", "'this is a test'", 14),
     ("string::lowercase", "'THIS IS A TEST'", "this is a test"),
@@ -141,7 +144,7 @@ names = [
     ("string::slice", "'this is a test', 10, 4", "test"),
     ("string::slug", "'SurrealDB has launched #database #awesome'", "surrealdb-has-launched-database-awesome"),
     ("string::split", "'this, is, a, list', ', '", ["this", "is", "a", "list"]),
-    ("string::startsWith", "'some test', 'some'", True),
+    ("string::starts_with", "'some test', 'some'", True),
     ("string::trim", "'    this is a test    '", "this is a test"),
     ("string::uppercase", "'this is a test'", "THIS IS A TEST"),
     ("string::words", "'this is a test'", ["this", "is", "a", "test"]),
@@ -210,7 +213,8 @@ names = [
     ("type::string", '12345', "12345"),
     ("type::table", '"ert"', "ert"),
     ("type::thing", '"one","two"', 'one:two'),
-    ("type::range", '"product_price","10", "100", { begin: "excluded", end: "included" }', "{'tb': 'product_price', 'beg': {'Excluded': {'String': '10'}}, 'end': {'Included': {'String': '100'}}}"),
+    # https://github.com/surrealdb/surrealdb/issues/4639
+    # ("type::range", '"product_price","10", "100", { begin: "excluded", end: "included" }', "{'tb': 'product_price', 'beg': {'Excluded': {'String': '10'}}, 'end': {'Included': {'String': '100'}}}"),
     ("type::is::array", "[ 'a', 'b', 'c' ]", True),
     ("type::is::array", "12345", False),
     ("type::is::bool", "true", True),
@@ -238,6 +242,7 @@ names = [
     ("type::is::record", "user:tobie, 'user'", True),
     ("type::is::string", "'user'", True),
     ("type::is::uuid", 'u"018a6680-bef9-701b-9025-e1754f296a0f"', True),
+    ("value::diff", '"tobie", "tobias"', [{'op': 'change', 'path': '/', 'value': '@@ -1,5 +1,6 @@\n tobi\n-e\n+as\n'}]),
     ("vector::add", '[1, 2, 3], [1, 2, 3]', [2, 4, 6]),
     ("vector::angle", '[5, 10, 15], [10, 5, 20]', 0.36774908225917935),
     ("vector::cross", '[1, 2, 3], [4, 5, 6]', [-3, 6, -3]),
@@ -329,6 +334,7 @@ constants = [
 class TestInnerFunctions(TestCase):
     def test_functions(self):
         with Surreal(URL, credentials=('root', 'root')).connect() as conn:
+            conn.use("test", "test")
             for func, params, expected in names:
                 with self.subTest(f"function {func}({params})"):
                     query = f"RETURN {func}({params});"

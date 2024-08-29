@@ -22,6 +22,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
 
     # DEFINE TABLE likes TYPE RELATION FROM user TO post;
     print(db.define_table("likes").type_relation(from_to=("user", "post")))
+    # DEFINE TABLE likes TYPE RELATION FROM user TO post ENFORCED;
+    print(db.define_table("likes").type_relation(from_to=("user", "post"), enforced=True))
     # DEFINE TABLE likes TYPE RELATION IN user OUT post;
     print(db.define_table("likes").type_relation(from_to=("user", "post"), use_from_to=False))
 

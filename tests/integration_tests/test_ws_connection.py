@@ -329,8 +329,11 @@ class TestWebSocketConnection(TestCase):
             res = connection.session_info()
             self.assertFalse(res.is_error())
             self.assertIsNotNone(res.query)
+            self.assertIsNotNone(res.result['session_id'])
+            deleted = res.result
+            deleted.pop('session_id')
             self.assertEqual({'db': 'test', 'http_origin': 'http://127.0.0.1:8000', 'ip': '127.0.0.1', 'ns': 'test',
-                              'access': None, 'session_id': None}, res.result)
+                              'access': None}, deleted)
 
     def test_db_tables(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
