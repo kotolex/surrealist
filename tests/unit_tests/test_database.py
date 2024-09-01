@@ -190,6 +190,10 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE COMMENT \"some\";"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().comment("some").to_str())
 
+    def test_define_index_hnsw_concurrently(self):
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name HNSW DIMENSION 4 DIST COSINE CONCURRENTLY;"
+        self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().concurrently().to_str())
+
     def test_define_index_exists(self):
         text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").if_not_exists().columns("name").

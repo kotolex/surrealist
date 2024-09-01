@@ -4,7 +4,7 @@ from typing import List, Union, Any, Optional, Tuple
 
 from surrealist.connections import Connection
 from surrealist.enums import Algorithm
-from surrealist.ql.statements.define_index_statements import CanUseIndexTypes
+from surrealist.ql.statements.define_index_statements import CanUseIndexTypes, CanUseConcurrently
 from surrealist.ql.statements.permissions import CanUsePermissions
 from surrealist.ql.statements.statement import Statement, FinishedStatement
 from surrealist.utils import OK
@@ -183,7 +183,7 @@ class DefineScope(Define):
                f"\nSIGNIN {self._signin}{self._comment()}"
 
 
-class DefineIndex(Define, CanUseIndexTypes):
+class DefineIndex(Define, CanUseIndexTypes, CanUseConcurrently):
     """
     Represents DEFINE INDEX statement
 
@@ -198,6 +198,7 @@ class DefineIndex(Define, CanUseIndexTypes):
         | HNSW DIMENSION @dimension [ TYPE @type ] [DIST @distance] [ EFC @efc ] [ M @m ]
     ]
     [ COMMENT @string ]
+    [ CONCURRENTLY ]
     """
 
     def __init__(self, connection: Connection, name: str, table_name: str):

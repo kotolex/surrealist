@@ -20,6 +20,7 @@
 - add REMOVE ACCESS statement
 - add ALTER TABLE statement
 - add ENFORCED statement for DEFINE TABLE
+- add CONCURRENTLY statement for DEFINE INDEX
 - deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
 - let and unset now raises CompatibilityError for http
 - add upsert method to Connection

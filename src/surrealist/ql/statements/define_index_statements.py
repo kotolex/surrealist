@@ -6,8 +6,29 @@ from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 # This module contains classes with duplicate code. This is made specifically for IDE hints
 
+class Concurrently(FinishedStatement):
+    """
+    Represents CONCURRENTLY statement
 
-class Unique(FinishedStatement, CanUseComment):
+    Refer to:
+    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#using-concurrently-clause
+    """
+    def __init__(self, statement: Statement):
+        super().__init__(statement)
+
+    def _clean_str(self):
+        return f"{self._statement._clean_str()} CONCURRENTLY"
+
+
+class CanUseConcurrently:
+    def concurrently(self):
+        """
+        Adds CONCURRENTLY clause to a statement
+        """
+        return Concurrently(self)
+
+
+class Unique(FinishedStatement, CanUseComment, CanUseConcurrently):
     """
     Represents UNIQUE statement
 
@@ -19,7 +40,7 @@ class Unique(FinishedStatement, CanUseComment):
         return f"{self._statement._clean_str()} UNIQUE"
 
 
-class SearchAnalyzer(FinishedStatement, CanUseComment):
+class SearchAnalyzer(FinishedStatement, CanUseComment, CanUseConcurrently):
     """
     Represents SEARCH ANALYZER statement
 
@@ -71,7 +92,7 @@ class SearchAnalyzer(FinishedStatement, CanUseComment):
         return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name}{bm25}{hl}"
 
 
-class MTree(FinishedStatement, CanUseComment):
+class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
     """
     Represents MTREE index.
     There is code duplication in this class. This is made specifically for IDE hints
@@ -223,7 +244,7 @@ class MTree(FinishedStatement, CanUseComment):
         return f"{self._statement._clean_str()} MTREE DIMENSION {self._num}{type_}{dist}{cap}"
 
 
-class HNSW(FinishedStatement, CanUseComment):
+class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
     """
     Represents HNSW index
     There is code duplication in this class. This is made specifically for IDE hints

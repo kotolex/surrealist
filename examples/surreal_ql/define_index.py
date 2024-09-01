@@ -12,6 +12,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_index("userEmailIndex", "user").if_not_exists().columns("email").unique())
     # DEFINE INDEX OVERWRITE userEmailIndex ON TABLE user COLUMNS email UNIQUE;
     print(db.define_index("userEmailIndex", "user").overwrite().columns("email").unique())
+    # DEFINE INDEX OVERWRITE userEmailIndex ON TABLE user COLUMNS email CONCURRENTLY;
+    print(db.define_index("userEmailIndex", "user").overwrite().columns("email").unique().concurrently())
     # DEFINE INDEX userAgeIndex ON TABLE user COLUMNS age;
     print(db.define_index("userAgeIndex", "user").columns("age"))
     # DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;
@@ -25,6 +27,8 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_index("hnsw", "user").fields("name").hnsw(4).distance_cosine().efc(150).max_connections(2))
     # DEFINE INDEX IF NOT EXISTS mtree ON TABLE user FIELDS name MTREE DIMENSION 3 DIST MANHATTAN;
     print(db.define_index("mtree", "user").if_not_exists().fields("name").mtree(3).distance_manhattan())
+    # DEFINE INDEX IF NOT EXISTS mtree ON TABLE user FIELDS name MTREE DIMENSION 3 DIST MANHATTAN CONCURRENTLY;
+    print(db.define_index("mtree", "user").if_not_exists().fields("name").mtree(3).distance_manhattan().concurrently())
     # DEFINE INDEX idx_mtree_embedding ON TABLE Document FIELDS items.embedding MTREE DIMENSION 4 TYPE I64;
     print(db.define_index("idx_mtree_embedding", "Document").fields("items.embedding").mtree(4).type_i64())
 

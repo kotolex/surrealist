@@ -533,11 +533,11 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The index 'not_exists' does not exist", res.result)
 
-    def test_define_index_and_rebuilds(self):
+    def test_define_index_concurrently_and_rebuilds(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(9)
             db.define_analyzer("ascii2").run()
-            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").run()
+            res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").concurrently().run()
             self.assertFalse(res.is_error(), res)
             res = db.rebuild_index(f"index_{uid}", "user").run()
             self.assertFalse(res.is_error(), res)
