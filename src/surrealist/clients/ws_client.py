@@ -101,7 +101,8 @@ class WebSocketClient:
 
         :return: None
         """
-        self._ws = websocket.WebSocketApp(self._base_url, on_open=self.on_open, on_message=self.on_message,
+        self._ws = websocket.WebSocketApp(self._base_url, header={'sec-websocket-protocol': 'json'},
+                                          on_open=self.on_open, on_message=self.on_message,
                                           on_error=self.on_error, on_close=self.on_close)
         self._ws.run_forever(skip_utf8_validation=True)  # works faster
 

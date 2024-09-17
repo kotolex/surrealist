@@ -48,7 +48,7 @@ class DefineAnalyzer(Define):
         For example, if you had the text "hello world", the blank tokenizer would create two tokens,
         ["hello" and "world"].
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#blank
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#blank
         """
         self._tokenizers.add("blank")
         return self
@@ -61,7 +61,7 @@ class DefineAnalyzer(Define):
         to split them into meaningful words.
         For example, if you had the text "helloWorld", the camel tokenizer would create two tokens, ["hello", "World"].
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#camel
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#camel
         """
         self._tokenizers.add("camel")
         return self
@@ -75,7 +75,7 @@ class DefineAnalyzer(Define):
         For example, if you had the text "123abc!XYZ", the class tokenizer would create four tokens,
         ["123", "abc", "!", "XYZ"].
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#class
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#class
         """
         self._tokenizers.add("class")
         return self
@@ -88,7 +88,7 @@ class DefineAnalyzer(Define):
         For example, if you had the text "Hello, World!", the punct tokenizer would create four tokens,
         ["Hello", ",", "World", "!"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#punct
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#punct
         """
         self._tokenizers.add("punct")
         return self
@@ -101,7 +101,7 @@ class DefineAnalyzer(Define):
         ASCII equivalents, making it more suitable for various text analysis tasks.
         For example, if you had the text "résumé café", the ascii filter would create two tokens, ["resume", "cafe"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#ascii
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#ascii
         """
         self._filters.add("ascii")
         return self
@@ -113,7 +113,7 @@ class DefineAnalyzer(Define):
         This is often used to make text case-insensitive for search and analysis purposes.
         For example, if you had the text "Hello World", the lowercase filter would create two tokens, ["hello", "world"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#lowercase
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#lowercase
         """
         self._filters.add("lowercase")
         return self
@@ -125,7 +125,7 @@ class DefineAnalyzer(Define):
         useful when case-insensitivity is required for specific analysis or search operations.
         For example, if you had the text "Hello World", the uppercase filter would create two tokens, ["HELLO", "WORLD"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#uppercase
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#uppercase
         """
         self._filters.add("uppercase")
         return self
@@ -140,7 +140,7 @@ class DefineAnalyzer(Define):
         ["a", "p", "p", "l", "e", "ap", "pp", "pl", "le", "app", "ppl", "ple", "b", "a", "n", "a", "n", "a", "ba", "an",
          "na", "an", "na", "ban", "ana", "nan", "ana"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#ngramminmax
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#ngramminmax
         """
         self._filters.add(f"ngram({minimum},{maximum})")
         return self
@@ -154,7 +154,7 @@ class DefineAnalyzer(Define):
         For example, if you had the text "apple banana", the edgengram filter would create six tokens,
         ["a", "ap", "app", "b", "ba", "ban"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#edgengramminmax
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#edgengramminmax
         """
         self._filters.add(f"edgengram({minimum},{maximum})")
         return self
@@ -168,7 +168,7 @@ class DefineAnalyzer(Define):
         Tamil, Turkish.
         For example, if you had the text "running cats", the snowball filter would create two tokens, ["run", "cat"]
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/analyzer#snowballlanguage
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer#snowballlanguage
         """
         if not any(language.lower() == lang.lower() for lang in ALLOWED_LANGUAGES):
             self._error = language

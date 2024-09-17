@@ -12,7 +12,7 @@ class DefineAccessJwt(Statement):
     A JWT access method allows accessing SurrealDB with a token signed by a trusted issuer.
     The contents of the token will be trusted by SurrealDB as long as it has been signed with a trusted credential.
 
-    Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/jwt
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/jwt
 
     DEFINE ACCESS [ OVERWRITE | IF NOT EXISTS ] @name
     ON [ NAMESPACE | DATABASE ]
@@ -115,7 +115,7 @@ class DefineAccessRecord(Statement):
     Record users allow SurrealDB to operate as a web database by offering mechanisms to define custom signin and signup
     logic as well as custom table and field permissions.
 
-    Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/record
 
         DEFINE ACCESS [ OVERWRITE | IF NOT EXISTS ] @name
       ON DATABASE TYPE RECORD
@@ -179,7 +179,7 @@ class DefineAccessRecord(Statement):
         Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record#with-authenticate-clause
+        https://surrealdb.com/docs/surrealql/statements/define/access/record#with-authenticate-clause
 
 
         """

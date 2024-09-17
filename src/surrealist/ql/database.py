@@ -323,7 +323,7 @@ class Database:
         :return: DefineScope object
         """
         msg = "Deprecated since SurrealDB 2.x, use define_access_record instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access"
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
         warnings.warn(msg)
         logger.warning(msg)
         return DefineScope(self._connection, name, duration, signup, signin)
@@ -338,7 +338,7 @@ class Database:
         :return: Remove object
         """
         msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/remove"
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
         warnings.warn(msg)
         logger.warning(msg)
         return Remove(self._connection, "", type_="SCOPE", name=name)
@@ -396,7 +396,7 @@ class Database:
         :return: DefineToken object
         """
         msg = "Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access"
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
         warnings.warn(msg)
         logger.warning(msg)
         return DefineToken(self._connection, name, token_type, value)
@@ -411,7 +411,7 @@ class Database:
         :return: Remove object
         """
         msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/remove"
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
         warnings.warn(msg)
         logger.warning(msg)
         return Remove(self._connection, "", type_="TOKEN", name=name)
@@ -421,7 +421,7 @@ class Database:
         Represents DEFINE ACCESS ... JWT statement.
         Use this method instead of define_token
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/jwt
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/jwt
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
 
@@ -435,7 +435,7 @@ class Database:
         Represents DEFINE ACCESS ... RECORD statement.
         Use this method instead of define_token or define_scope
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/define/access/record
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/record
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
 

@@ -1,6 +1,6 @@
 from .connections import WebSocketConnection, HttpConnection, Connection
-from .errors import *
 from .enums import Algorithm
+from .errors import *
 from .ql import Database, DatabaseConnectionsPool, Table, Where
 from .result import SurrealResult
 from .surreal import Surreal
@@ -11,6 +11,3 @@ __all__ = ("Surreal", "SurrealResult", "WebSocketConnection", "HttpConnection", 
            "ConnectionParametersError", "CompatibilityError", "OperationOnClosedConnectionError", "WrongCallError",
            "DATA_LENGTH_FOR_LOGS", "Connection", "get_uuid", "Database", "Table", "Where", "DatabaseConnectionsPool",
            "to_surreal_datetime_str", "to_datetime", "LOG_FORMAT", "Algorithm")
-
-
-# TODO change all docs url with 2.x.x

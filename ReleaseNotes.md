@@ -2,6 +2,7 @@
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0):**
 - both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
+- websocket client under the hood uses explicit "sec-websocket-protocol"="json" header
 - http now uses rpc-protocol instead of different endpoints and methods
 - for root user now you should connect only with credentials and then call use method (see [examples](https://github.com/kotolex/surrealist/tree/master/examples/connect.py))
 - you can now specify access method on connecting via a Surreal/Database object

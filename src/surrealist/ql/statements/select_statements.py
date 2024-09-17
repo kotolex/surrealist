@@ -43,7 +43,7 @@ class SelectUseTempfiles(SelectUseExplain):
         the statement should be processed in temporary files rather than memory. This significantly reduces memory
         usage, though it will also result in slower performance
 
-        Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/select#the-tempfiles-clause
+        Refer to: https://surrealdb.com/docs/surrealql/statements/select#the-tempfiles-clause
         """
         return Tempfiles(self)
 

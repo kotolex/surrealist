@@ -9,7 +9,7 @@ class Upsert(Update):
     exist, it will be created.
     This is different from the UPDATE statement, which will fail if the record does not exist.
 
-    Refer to: https://surrealdb.com/docs/surrealdb/2.x/surrealql/statements/upsert
+    Refer to: https://surrealdb.com/docs/surrealql/statements/upsert
 
     UPSERT [ ONLY ] @targets
     [ CONTENT @value

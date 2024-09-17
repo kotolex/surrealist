@@ -12,8 +12,6 @@ logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
 
 
-# TODO check all links
-
 def connected(func):
     """
     Decorator for methods to make sure the underlying connection is alive (connected to DB)
