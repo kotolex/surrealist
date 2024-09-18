@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -13,6 +14,9 @@ class Show(Statement):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/show
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
+
+    SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" [LIMIT @number]
+
     """
 
     def __init__(self, connection: Connection, table_name: str, since: Optional[str] = None):
@@ -23,7 +27,7 @@ class Show(Statement):
 
     def validate(self) -> List[str]:
         result = []
-        if self._since:
+        if self._since and isinstance(self._since, str):
             try:
                 format_ = DATE_FORMAT if "." not in self._since else DATE_FORMAT_NS
                 datetime.strptime(self._since, format_)
@@ -45,6 +49,9 @@ class Show(Statement):
     def since(self, timestamp: str) -> "Show":
         """
         Init timestamp since is to show updates
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/show#basic-usage
+
         :param timestamp: surreal timestamp
         :return: Show object
         """
@@ -55,4 +62,4 @@ class Show(Statement):
         if not self._since:
             self._since = to_surreal_datetime_str(datetime.now(timezone.utc))  # default value
         limit = f" LIMIT {self._limit}" if self._limit else ""
-        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE "{self._since}"{limit}'
+        return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE d{json.dumps(self._since)}{limit}'

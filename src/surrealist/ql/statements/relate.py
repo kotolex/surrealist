@@ -14,6 +14,14 @@ class Relate(Statement, CreateUseSetContent):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_relate_examples.py
 
+    RELATE [ ONLY ] @from_record -> @table -> @to_record
+    [ CONTENT @value
+      | SET @field = @value ...
+    ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ];
+
     """
 
     def __init__(self, connection: Connection, value: str):

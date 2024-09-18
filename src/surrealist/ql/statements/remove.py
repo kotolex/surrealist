@@ -12,8 +12,21 @@ class Remove(Statement):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    REMOVE [
+    NAMESPACE [ IF EXISTS ] @name
+    | DATABASE [ IF EXISTS] @name
+    | USER [ IF EXISTS ] @name ON [ ROOT | NAMESPACE | DATABASE ]
+    | ACCESS [ IF EXISTS ] @name ON [ NAMESPACE | DATABASE ]
+    | EVENT [ IF EXISTS ] @name ON [ TABLE ] @table
+    | FIELD [ IF EXISTS ] @name ON [ TABLE ] @table
+    | INDEX [ IF EXISTS ] @name ON [ TABLE ] @table
+    | ANALYZER [ IF EXISTS ] @name
+    | FUNCTION [ IF EXISTS ] fn::@name
+    | PARAM [ IF EXISTS ] $@name
+    | TABLE [ IF EXISTS ] @name]
     """
-    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN")
+    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN", "ACCESS")
 
     def __init__(self, connection: Connection, table_name: str, type_: str = "TABLE", name: Optional[str] = None):
         if type_ not in Remove._variants:
@@ -44,9 +57,9 @@ class Remove(Statement):
 
     def _clean_str(self):
         add = "" if not self._on_exists else " IF EXISTS"
-        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN"):
+        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN", "ACCESS"):
             what = f"{self._type}{add} {self._name}"
-            if self._type in ("USER", "TOKEN"):
+            if self._type in ("USER", "TOKEN", "ACCESS"):
                 what = f"{what} ON DATABASE"
             if self._type == "PARAM":
                 what = f"{self._type}{add} ${self._name}"

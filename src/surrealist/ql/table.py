@@ -12,6 +12,7 @@ from surrealist.ql.statements.select import Select
 from surrealist.ql.statements.show import Show
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update import Update
+from surrealist.ql.statements.upsert import Upsert
 from surrealist.result import SurrealResult
 
 
@@ -224,6 +225,22 @@ class Table:
         :return: Update object
         """
         return Update(self._connection, self._name, record_id)
+
+    def upsert(self, record_id: Optional[str] = None) -> Upsert:
+        """
+        Represent UPSERT object
+
+        Example:
+        db.table("user").upsert("alex").only().merge({"active": True}).run()
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_upsert_examples.py
+
+        :param record_id: optional, if specified transform to 'table_name:record_id'
+        :return: Upsert object
+        """
+        return Upsert(self._connection, self._name, record_id)
 
     def rebuild_index(self, index_name: str, if_exists: bool = False) -> RebuildIndex:
         """

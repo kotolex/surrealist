@@ -12,7 +12,7 @@ def call_back(response: dict) -> None:
 
 
 # you need websockets for a live query
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # here we subscribe on person table
     res = connection.live("person", callback=call_back)

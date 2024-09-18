@@ -1,4 +1,5 @@
 from .connections import WebSocketConnection, HttpConnection, Connection
+from .enums import Algorithm
 from .errors import *
 from .ql import Database, DatabaseConnectionsPool, Table, Where
 from .result import SurrealResult
@@ -9,4 +10,4 @@ __all__ = ("Surreal", "SurrealResult", "WebSocketConnection", "HttpConnection", 
            "HttpClientError", "SurrealConnectionError", "WebSocketConnectionError", "WebSocketConnectionClosedError",
            "ConnectionParametersError", "CompatibilityError", "OperationOnClosedConnectionError", "WrongCallError",
            "DATA_LENGTH_FOR_LOGS", "Connection", "get_uuid", "Database", "Table", "Where", "DatabaseConnectionsPool",
-           "to_surreal_datetime_str", "to_datetime", "LOG_FORMAT")
+           "to_surreal_datetime_str", "to_datetime", "LOG_FORMAT", "Algorithm")

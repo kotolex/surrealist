@@ -1,2 +1,2 @@
 #!/bin/bash
-surreal start memory --auth --user root --pass root
+surreal start memory --user root --pass root

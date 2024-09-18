@@ -1,9 +1,17 @@
 import logging
+import warnings
 from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
+from surrealist.connections.connection import Connection
+from surrealist.enums import Algorithm
+from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
-from surrealist.ql.statements.define import (DefineEvent, DefineUser, DefineParam, DefineAnalyzer, DefineScope,
+from surrealist.ql.statements.alter import Alter
+from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineScope,
                                              DefineIndex, DefineToken, DefineTable, DefineField)
+from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
+from surrealist.ql.statements.define_analyzer import DefineAnalyzer
+from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
 from surrealist.ql.statements.returns import Return
@@ -12,7 +20,7 @@ from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
 from surrealist.result import SurrealResult
 from surrealist.surreal import Surreal
-from surrealist.utils import DEFAULT_TIMEOUT
+from surrealist.utils import DEFAULT_TIMEOUT, NS, DB, AC
 
 logger = logging.getLogger("surrealist.databaseQL")
 
@@ -26,13 +34,48 @@ class Database:
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     """
 
-    def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
-                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT):
-        self._namespace = namespace
-        self._database = database
-        self._connection = Surreal(url, namespace, database, credentials, use_http, timeout).connect()
+    def __init__(self, url: str, namespace: str, database: str, access: Optional[str] = None,
+                 credentials: Optional[Tuple[str, str]] = None,
+                 use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
+                 active_connection: Optional[Connection] = None):
+        """
+        Creates a new connection to the database or uses existing connection
+        :param url: url of the SurrealDB
+        :param namespace: name of the namespace
+        :param database: name of the database
+        :param access: access method
+        :param credentials: pair of username and password
+        :param use_http: uses http-transport if True, websockets otherwise
+        :param timeout: timeout for the queries
+        :param active_connection: existing and active (connected) connection to use, If specified, all other
+        parameters are ignored
+        """
+        if active_connection is None:
+            self._namespace = namespace
+            self._database = database
+            self._access = access
+            self._connection = Surreal(url, namespace, database, access=access, credentials=credentials,
+                                       use_http=use_http, timeout=timeout).connect()
+            logger.info("DatabaseQL is up")
+        else:
+            self._connection = self._use_connection(active_connection)
+            logger.info("DatabaseQL is up, using existing connection")
         self._connected = True
-        logger.info("DatabaseQL is up")
+
+    def _use_connection(self, connection: Connection) -> Connection:
+        is_connected = connection.is_connected()
+        if not is_connected:
+            raise SurrealConnectionError("Cant use connection which is not active")
+        db_params = connection._db_params
+        if not db_params or db_params.get(NS) is None or db_params.get(DB) is None:
+            raise SurrealConnectionError("Can use only database level connections, specify namespace and database")
+        ns = db_params[NS]
+        db = db_params[DB]
+        access = db_params.get(AC)
+        self._namespace = ns
+        self._database = db
+        self._access = access
+        return connection
 
     def __enter__(self):
         return self
@@ -46,6 +89,13 @@ class Database:
         :return: True if connection is active, False otherwise
         """
         return self._connected
+
+    def get_connection(self) -> Connection:
+        """
+        Returns the underlying connection
+        :return: Connection object
+        """
+        return self._connection
 
     @property
     def namespace(self) -> str:
@@ -70,6 +120,15 @@ class Database:
         logger.info("DatabaseQL is closed")
         self._connection.close()
         self._connected = False
+
+    @classmethod
+    def from_connection(cls, connection: Connection) -> "Database":
+        """
+        Builds a database object from an active existing connection
+        :param connection: connection to use
+        :return: Database object
+        """
+        return Database("", "", "", None, None, False, 0, connection)
 
     def tables(self) -> List[str]:
         """
@@ -179,7 +238,7 @@ class Database:
         """
         return Remove(self._connection, table_name=table_name, type_="EVENT", name=name)
 
-    def define_user(self, user_name: str, password: str) -> DefineUser:
+    def define_user(self, user_name: str) -> DefineUser:
         """
         Allow defining user for a current database
 
@@ -188,10 +247,9 @@ class Database:
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
         :param user_name: name for the new user
-        :param password: password for user
         :return: DefineUser object
         """
-        return DefineUser(self._connection, user_name=user_name, password=password)
+        return DefineUser(self._connection, user_name=user_name)
 
     def remove_user(self, user_name: str) -> Remove:
         """
@@ -250,6 +308,8 @@ class Database:
     def define_scope(self, name: str, duration: str, signup: Union[str, Statement],
                      signin: Union[str, Statement]) -> DefineScope:
         """
+        Deprecated since SurrealDB 2.x, use define_access_record instead!
+
         Represents DEFINE SCOPE statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
@@ -262,15 +322,25 @@ class Database:
         :param signin: Select statement with string or Statement representation
         :return: DefineScope object
         """
+        msg = "Deprecated since SurrealDB 2.x, use define_access_record instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
+        warnings.warn(msg)
+        logger.warning(msg)
         return DefineScope(self._connection, name, duration, signup, signin)
 
     def remove_scope(self, name: str) -> Remove:
         """
+        Do not work since SurrealDB 2.x, use remove_access instead!
+
         Remove the scope
 
         :param name: name of the scope
         :return: Remove object
         """
+        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
+        warnings.warn(msg)
+        logger.warning(msg)
         return Remove(self._connection, "", type_="SCOPE", name=name)
 
     def define_index(self, name: str, table_name: str) -> DefineIndex:
@@ -310,8 +380,10 @@ class Database:
         """
         return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
 
-    def define_token(self, name: str, token_type: str, value: str) -> DefineToken:
+    def define_token(self, name: str, token_type: Algorithm, value: str) -> DefineToken:
         """
+        Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
+
         Represents DEFINE TOKEN statement
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
@@ -319,20 +391,67 @@ class Database:
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
         :param name: name for the token
-        :param token_type: type of the token, for example, RS256
+        :param token_type: type of the token, for example, Algorithm.RS256
         :param value: value of the token
-        :return: DefineIndex object
+        :return: DefineToken object
         """
+        msg = "Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
+        warnings.warn(msg)
+        logger.warning(msg)
         return DefineToken(self._connection, name, token_type, value)
 
     def remove_token(self, name: str) -> Remove:
         """
+        Do not work since SurrealDB 2.x, use remove_access instead!
+
         Remove token by name for the database
 
         :param name: name of the token
         :return: Remove object
         """
+        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
+              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
+        warnings.warn(msg)
+        logger.warning(msg)
         return Remove(self._connection, "", type_="TOKEN", name=name)
+
+    def define_access_jwt(self, name: str) -> DefineAccessJwt:
+        """
+        Represents DEFINE ACCESS ... JWT statement.
+        Use this method instead of define_token
+
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/jwt
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
+
+        :param name: name for the access
+        :return: DefineAccessJwt object
+        """
+        return DefineAccessJwt(self._connection, name)
+
+    def define_access_record(self, name: str) -> DefineAccessRecord:
+        """
+        Represents DEFINE ACCESS ... RECORD statement.
+        Use this method instead of define_token or define_scope
+
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/record
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
+
+        :param name: name for the access
+        :return: DefineAccessRecord object
+        """
+        return DefineAccessRecord(self._connection, name)
+
+    def remove_access(self, name: str) -> Remove:
+        """
+        Remove access by name for the database
+
+        :param name: name of the access
+        :return: Remove object
+        """
+        return Remove(self._connection, "", type_="ACCESS", name=name)
 
     def relate(self, value: str) -> Relate:
         """
@@ -427,6 +546,19 @@ class Database:
         :return: Remove object
         """
         return Remove(self._connection, table_name, type_="TABLE", name="")
+
+    def alter_table(self, table_name: str) -> Alter:
+        """
+        Represents ALTER TABLE statement
+
+        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/alter
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_alter_examples.py
+
+        :param table_name: name of the table
+        :return: Alter object
+        """
+        return Alter(self._connection, table_name)
 
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

@@ -1,10 +1,12 @@
+import json
 from abc import ABC
 from typing import List, Union, Any, Optional, Tuple
 
 from surrealist.connections import Connection
-from surrealist.ql.statements.define_index_statements import CanUseIndexTypes
+from surrealist.enums import Algorithm
+from surrealist.ql.statements.define_index_statements import CanUseIndexTypes, CanUseConcurrently
 from surrealist.ql.statements.permissions import CanUsePermissions
-from surrealist.ql.statements.statement import Statement
+from surrealist.ql.statements.statement import Statement, FinishedStatement
 from surrealist.utils import OK
 
 
@@ -15,10 +17,16 @@ class Define(Statement, ABC):
 
     def __init__(self, connection: Connection):
         super().__init__(connection)
-        self._if_not_exists = False
+        self._if_not_exists = None
+        self._text = None
 
     def _exists(self) -> str:
-        return " IF NOT EXISTS" if self._if_not_exists else ""
+        if self._if_not_exists is None:
+            return ""
+        return " IF NOT EXISTS" if self._if_not_exists else " OVERWRITE"
+
+    def _comment(self) -> str:
+        return f" COMMENT {json.dumps(self._text)}" if self._text else ""
 
     def if_not_exists(self) -> "Define":
         """
@@ -28,6 +36,23 @@ class Define(Statement, ABC):
         self._if_not_exists = True
         return self
 
+    def overwrite(self) -> "Define":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
+        return self
+
+    def comment(self, comment: str) -> FinishedStatement:
+        """
+        Adds COMMENT statement to the query
+        :param comment: comment text
+        :return: self
+        """
+        self._text = comment
+        return FinishedStatement(self)
+
 
 class DefineEvent(Define):
     """
@@ -36,6 +61,9 @@ class DefineEvent(Define):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE EVENT [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ WHEN @expression ] THEN @expression
+    [ COMMENT @string ]
 
     """
 
@@ -48,6 +76,14 @@ class DefineEvent(Define):
 
     def if_not_exists(self) -> "DefineEvent":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineEvent":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def when(self, predicate: str) -> "DefineEvent":
@@ -64,49 +100,8 @@ class DefineEvent(Define):
 
     def _clean_str(self):
         when = f"WHEN {self._when} " if self._when else ""
-        return f"DEFINE EVENT{self._exists()} {self._name} ON TABLE {self._table_name} {when}THEN {self._then}"
-
-
-class DefineUser(Define):
-    """
-    Represents DEFINE USER statement
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-    """
-
-    def __init__(self, connection: Connection, user_name: str, password: str):
-        super().__init__(connection)
-        self._name = user_name
-        self._pass = password
-        self._role = "VIEWER"
-
-    def if_not_exists(self) -> "DefineUser":
-        self._if_not_exists = True
-        return self
-
-    def role_owner(self) -> "DefineUser":
-        """
-        Represents role OWNER
-
-        """
-        self._role = "OWNER"
-        return self
-
-    def role_editor(self) -> "DefineUser":
-        """
-        Represents role EDITOR
-
-        """
-        self._role = "EDITOR"
-        return self
-
-    def validate(self) -> List[str]:
-        return [OK]
-
-    def _clean_str(self):
-        return f"DEFINE USER{self._exists()} {self._name} ON DATABASE PASSWORD '{self._pass}' ROLES {self._role}"
+        return f"DEFINE EVENT{self._exists()} {self._name} ON TABLE {self._table_name} {when}" \
+               f"THEN {self._then}{self._comment()}"
 
 
 class DefineParam(Define):
@@ -116,6 +111,8 @@ class DefineParam(Define):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE PARAM [ OVERWRITE | IF NOT EXISTS ] $@name VALUE @value [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, param_name: str, value: Any):
@@ -127,62 +124,33 @@ class DefineParam(Define):
         self._if_not_exists = True
         return self
 
-    def validate(self) -> List[str]:
-        return [OK]
-
-    def _clean_str(self):
-        return f"DEFINE PARAM{self._exists()} ${self._name} VALUE {self._value}"
-
-
-class DefineAnalyzer(Define):
-    """
-    Represents DEFINE ANALYZER statement
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-    """
-
-    def __init__(self, connection: Connection, name: str):
-        super().__init__(connection)
-        self._name = name
-        self._tokenizers = None
-        self._filters = None
-
-    def if_not_exists(self) -> "DefineAnalyzer":
-        self._if_not_exists = True
-        return self
-
-    def tokenizers(self, value: str) -> "DefineAnalyzer":
+    def overwrite(self) -> "DefineParam":
         """
-        Represents TOKENIZERS statement
+        Adds OVERWRITE statement to the query
+        :return: self
         """
-        self._tokenizers = value
-        return self
-
-    def filters(self, value: str) -> "DefineAnalyzer":
-        """
-        Represents FILTERS statement
-        """
-        self._filters = value
+        self._if_not_exists = False
         return self
 
     def validate(self) -> List[str]:
         return [OK]
 
     def _clean_str(self):
-        tok = "" if not self._tokenizers else f" TOKENIZERS {self._tokenizers}"
-        filters = "" if not self._filters else f" FILTERS {self._filters}"
-        return f"DEFINE ANALYZER{self._exists()} {self._name}{tok}{filters}"
+        return f"DEFINE PARAM{self._exists()} ${self._name} VALUE {self._value}{self._comment()}"
 
 
 class DefineScope(Define):
     """
+    Deprecated since SurrealDB 2.x, use define_access_record instead!
+
     Represents DEFINE SCOPE statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE SCOPE [ OVERWRITE | IF NOT EXISTS ] @name SESSION @duration SIGNUP @expression SIGNIN @expression
+    [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, name: str, duration: str, signup: Union[str, Statement],
@@ -197,6 +165,14 @@ class DefineScope(Define):
         self._if_not_exists = True
         return self
 
+    def overwrite(self) -> "DefineScope":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
+        return self
+
     def validate(self) -> List[str]:
         if ' ' in self._duration:
             return ["Wrong duration format, should be like 24h"]
@@ -204,16 +180,25 @@ class DefineScope(Define):
 
     def _clean_str(self):
         return f"DEFINE SCOPE{self._exists()} {self._name} SESSION {self._duration} \nSIGNUP {self._signup} " \
-               f"\nSIGNIN {self._signin}"
+               f"\nSIGNIN {self._signin}{self._comment()}"
 
 
-class DefineIndex(Define, CanUseIndexTypes):
+class DefineIndex(Define, CanUseIndexTypes, CanUseConcurrently):
     """
     Represents DEFINE INDEX statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE INDEX [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields
+    [ UNIQUE
+        | SEARCH ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
+        | MTREE DIMENSION @dimension [ TYPE @type ] [ DIST @distance ] [ CAPACITY @capacity]
+        | HNSW DIMENSION @dimension [ TYPE @type ] [DIST @distance] [ EFC @efc ] [ M @m ]
+    ]
+    [ COMMENT @string ]
+    [ CONCURRENTLY ]
     """
 
     def __init__(self, connection: Connection, name: str, table_name: str):
@@ -226,6 +211,14 @@ class DefineIndex(Define, CanUseIndexTypes):
 
     def if_not_exists(self) -> "DefineIndex":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineIndex":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def fields(self, fields: str) -> "DefineIndex":
@@ -252,19 +245,24 @@ class DefineIndex(Define, CanUseIndexTypes):
         return [OK]
 
     def _clean_str(self):
-        return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}"
+        return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}{self._comment()}"
 
 
 class DefineToken(Define):
     """
+    Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
+
     Represents DEFINE TOKEN statement
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE TOKEN [ OVERWRITE | IF NOT EXISTS ] @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
+    [ COMMENT @string ]
     """
 
-    def __init__(self, connection: Connection, name: str, token_type: str, value: str):
+    def __init__(self, connection: Connection, name: str, token_type: Algorithm, value: str):
         super().__init__(connection)
         self._name = name
         self._type = token_type
@@ -275,10 +273,13 @@ class DefineToken(Define):
         return self
 
     def validate(self) -> List[str]:
+        if not isinstance(self._type, Algorithm):
+            return ["Invalid token type, you should use one of Algorithm enumerations"]
         return [OK]
 
     def _clean_str(self):
-        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type} \nVALUE "{self._value}"'
+        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type.name} \n' \
+               f'VALUE "{self._value}"{self._comment()}'
 
 
 class DefineTable(Define, CanUsePermissions):
@@ -288,6 +289,24 @@ class DefineTable(Define, CanUsePermissions):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    
+    DEFINE TABLE [ OVERWRITE | IF NOT EXISTS ] @name
+    [ DROP ]
+    [ SCHEMAFULL | SCHEMALESS ]
+    [ TYPE [ ANY | NORMAL | RELATION [ IN | FROM ] @table [ OUT | TO ] @table ] [ ENFORCED ]]
+    [ AS SELECT @projections
+        FROM @tables
+        [ WHERE @condition ]
+        [ GROUP [ BY ] @groups ]
+    ]
+    [CHANGEFEED @duration [INCLUDE ORIGINAL] ]
+    [ PERMISSIONS [ NONE | FULL
+        | FOR select @expression
+        | FOR create @expression
+        | FOR update @expression
+        | FOR delete @expression
+    ] ]
+    [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, name: str):
@@ -305,6 +324,14 @@ class DefineTable(Define, CanUsePermissions):
         Represents IF NOT EXISTS statement
         """
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineTable":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def drop(self) -> "DefineTable":
@@ -368,7 +395,8 @@ class DefineTable(Define, CanUsePermissions):
         self._type = "NORMAL"
         return self
 
-    def type_relation(self, from_to: Optional[Tuple] = None, use_from_to: bool = True) -> "DefineTable":
+    def type_relation(self, from_to: Optional[Tuple] = None, use_from_to: bool = True,
+                      enforced: bool = False) -> "DefineTable":
         """
         Represents TYPE RELATE statement
 
@@ -377,8 +405,9 @@ class DefineTable(Define, CanUsePermissions):
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
-        :param from_to: optional pair of source and target table, both must be provided(not None)
+        :param from_to: optional pair of source and target table, both must be provided (not None)
         :param use_from_to: if True, FROM TO syntax will be used, if False, IN OUT syntax will be used
+        :param enforced: if True, adds ENFORCED statement to query
         """
         if from_to and from_to[0] and from_to[1]:
             if use_from_to:
@@ -387,6 +416,8 @@ class DefineTable(Define, CanUsePermissions):
                 self._type = f"RELATION IN {from_to[0]} OUT {from_to[1]}"
         else:
             self._type = "RELATION"
+        if enforced:
+            self._type = f"{self._type} ENFORCED"
         return self
 
     def validate(self) -> List[str]:
@@ -411,7 +442,7 @@ class DefineTable(Define, CanUsePermissions):
             if self._changefeed[1]:
                 feed = f"{feed} INCLUDE ORIGINAL"
         type_ = "" if not self._type else f" TYPE {self._type}"
-        return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{type_}{alias}{feed}'
+        return f'DEFINE TABLE{self._exists()} {self._name}{drop}{schema}{type_}{alias}{feed}{self._comment()}'
 
 
 class DefineField(Define, CanUsePermissions):
@@ -421,6 +452,20 @@ class DefineField(Define, CanUsePermissions):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+
+    DEFINE FIELD [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table
+    [ [ FLEXIBLE ] TYPE @type ]
+    [ DEFAULT @expression ]
+  [ READONLY ]
+    [ VALUE @expression ]
+    [ ASSERT @expression ]
+    [ PERMISSIONS [ NONE | FULL
+        | FOR select @expression
+        | FOR create @expression
+        | FOR update @expression
+        | FOR delete @expression
+    ] ]
+  [ COMMENT @string ]
     """
 
     def __init__(self, connection: Connection, field_name: str, table_name: str):
@@ -436,6 +481,14 @@ class DefineField(Define, CanUsePermissions):
 
     def if_not_exists(self) -> "DefineField":
         self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineField":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
         return self
 
     def type(self, type_name: str, is_flexible: bool = False) -> "DefineField":
@@ -486,4 +539,4 @@ class DefineField(Define, CanUsePermissions):
         value = "" if not self._value else f" VALUE {self._value}"
         asserts = "" if not self._assert else f" ASSERT {self._assert}"
         return f'DEFINE FIELD{self._exists()} {self._field_name} ' \
-               f'ON TABLE {self._table_name}{type_}{default}{ro}{value}{asserts}'
+               f'ON TABLE {self._table_name}{type_}{default}{ro}{value}{asserts}{self._comment()}'

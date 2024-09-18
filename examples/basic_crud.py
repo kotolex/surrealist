@@ -1,7 +1,7 @@
 from surrealist import Surreal
 
 # using websockets by default
-surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("root", "root"))
+surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # create two records at person table
     john = connection.create("person", {"first_name": "John", "second_name": "Doe", "age": 21, "active": True})

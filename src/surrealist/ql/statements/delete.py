@@ -13,6 +13,12 @@ class Delete(Statement, CanUseWhere):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_delete_examples.py
+
+    DELETE [ ONLY ] @targets
+    [ WHERE @condition ]
+    [ RETURN NONE | RETURN BEFORE | RETURN AFTER | RETURN DIFF | RETURN @statement_param, ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ];
     """
 
     def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):

@@ -2,11 +2,11 @@ from typing import Optional, Tuple, Union, List
 
 from surrealist.connections import Connection
 from surrealist.utils import OK
-from .select_statements import SelectUseIndex
+from .select_statements import SelectUseIndex, SelectUseTempfiles
 from .statement import Statement, IterableStatement
 
 
-class Select(IterableStatement, SelectUseIndex):
+class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):
     """
     Represents SELECT statement, it should be able to use any statements from documentation.
     It can use iterator to traverse results
@@ -16,6 +16,28 @@ class Select(IterableStatement, SelectUseIndex):
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_select_examples.py
 
     Iterator example: https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql/iterator.py
+
+    SELECT [ VALUE ] @fields [ AS @alias ]
+    [ OMIT @fields ...]
+    FROM [ ONLY ] @targets
+    [ WITH [ NOINDEX | INDEX @indexes ... ]]
+    [ WHERE @conditions ]
+    [ SPLIT [ AT ] @field ... ]
+    [ GROUP [ BY ] @fields ... ]
+    [ ORDER [ BY ]
+        @fields [
+            RAND()
+            | COLLATE
+            | NUMERIC
+        ] [ ASC | DESC ] ...
+    ]
+    [ LIMIT [ BY ] @limit ]
+    [ START [ AT ] @start ]
+    [ FETCH @fields ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+    [TEMPFILES]
+    [ EXPLAIN [ FULL ]];
     """
 
     def __init__(self, connection: Connection, table_name: Union[str, Statement], *args,

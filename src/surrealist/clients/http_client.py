@@ -1,4 +1,3 @@
-import base64
 import json
 import urllib.parse
 import urllib.request
@@ -8,7 +7,7 @@ from typing import Optional, Tuple, Dict, Union, BinaryIO
 from urllib.error import URLError, HTTPError
 
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
-from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass
+from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB, AC
 
 logger = getLogger("surrealist.clients.http")
 
@@ -25,11 +24,28 @@ class HttpClient:
         self._timeout = timeout
         headers = headers or {}
         headers = {k: v for k, v in headers.items() if v is not None}
-        self._headers = {"Accept": "application/json", "User-Agent": "surrealist http-client", **headers}
-        if credentials:
-            self._user, self._pass = credentials
-            base64string = base64.encodebytes(f'{self._user}:{self._pass}'.encode(ENCODING))[:-1]
-            self._headers["Authorization"] = f"Basic {base64string.decode(ENCODING)}"
+        headers = {k if k not in (NS, DB) else f"surreal-{k}": v for k, v in headers.items()}
+        self._headers = {"Content-Type": "application/json", "Accept": "application/json",
+                         "User-Agent": "surrealist http-client", **headers}
+        self._token = None
+
+    def set_token(self, token: str) -> None:
+        """
+        Stores token for future requests
+        :param token: token to use
+        """
+        self._token = token
+        self._headers["Authorization"] = f"Bearer {token}"
+
+    def set_db_params(self, params: Dict) -> None:
+        """
+        Stores params for future requests
+        :param params: params to use (ns, db, ac)
+        """
+        # We have to remove `db`, 'ns' and `ac` params from headers, before add new
+        self._headers = {k: v for k, v in self._headers.items() if k not in (DB, AC, NS)}
+        self._headers = {**self._headers, **params}
+        self._headers = {k if k not in (NS, DB) else f"surreal-{k}": v for k, v in self._headers.items()}
 
     def get(self, path: str = '') -> HTTPResponse:
         """
@@ -83,7 +99,7 @@ class HttpClient:
         if method not in ("GET", "DELETE"):
             if type_of_content == "JSON":
                 try:
-                    data_to_send = json.dumps(data).encode(ENCODING)
+                    data_to_send = json.dumps(data, ensure_ascii=False).encode(ENCODING)
                 except RecursionError as e:
                     logger.error("Cant serialize object, too many nested levels")
                     raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
@@ -120,7 +136,7 @@ def mask_opts(options: Dict) -> Dict:
     masked_opts = {}
     for key, value in options.items():
         if key == "headers" and "Authorization" in value:
-            value = {**value, "Authorization": "Basic ******"}
+            value = {**value, "Authorization": "Bearer ******"}
         elif key == "data":
             value = crop_data(mask_pass(str(value)))
         masked_opts[key] = value

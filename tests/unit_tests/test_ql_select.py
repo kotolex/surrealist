@@ -9,6 +9,10 @@ class TestSelect(TestCase):
         select = Select(None, "person")
         self.assertEqual("SELECT * FROM person;", select.to_str())
 
+    def test_select_default_tempfiles(self):
+        select = Select(None, "person")
+        self.assertEqual("SELECT * FROM person TEMPFILES;", select.tempfiles().to_str())
+
     def test_select_default_by_id(self):
         select = Select(None, "person").by_id("john")
         self.assertEqual("SELECT * FROM person:john;", select.to_str())
@@ -79,9 +83,8 @@ class TestSelect(TestCase):
                          Select(None, "article", alias=[("tags", "array::group(tags)")]).group_all().to_str())
 
     def test_docs2(self):
-        """
-        cover https://docs.surrealdb.com/docs/surrealql/statements/select#advanced-expressions
-        """
+        text = "SELECT * FROM person ORDER BY name TEMPFILES;"
+        self.assertEqual(text, Select(None, "person").order_by("name").tempfiles().to_str())
 
     def test_omit(self):
         self.assertEqual("SELECT * OMIT password, opts.security FROM person;",

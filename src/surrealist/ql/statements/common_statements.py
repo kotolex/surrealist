@@ -1,5 +1,37 @@
+import json
+from typing import List
+
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.utils import OK
+
+
+class Comment(FinishedStatement):
+    """
+    Represents a COMMENT clause in statements.
+    """
+
+    def __init__(self, statement: Statement, text: str):
+        super().__init__(statement)
+        self._text = text
+
+    def validate(self) -> List[str]:
+        if not self._text:
+            return ["Comment text is empty"]
+        return [OK]
+
+    def _clean_str(self):
+        text = f" COMMENT {json.dumps(self._text)}" if self._text else ""
+        return f"{self._statement._clean_str()}{text}"
+
+
+class CanUseComment:
+    def comment(self, comment: str) -> Comment:
+        """
+        Adds COMMENT statement to the query
+        :param comment: comment text
+        :return: self
+        """
+        return Comment(self, comment)
 
 
 class Parallel(FinishedStatement):
@@ -20,6 +52,7 @@ class Timeout(FinishedStatement, CanUseParallel):
     """
     Represents a 'TIMEOUT' statement. Allowed durations are (ms, s, m)
     """
+
     def __init__(self, statement: Statement, duration: str):
         super().__init__(statement)
         self._duration = duration
@@ -41,29 +74,46 @@ class CanUseTimeout(CanUseParallel):
 
 
 class ReturnNone(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN NONE' statement.
+    """
+
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN NONE"
 
 
 class ReturnBefore(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN BEFORE' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN BEFORE"
 
 
 class ReturnAfter(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN AFTER' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN AFTER"
 
 
 class ReturnDiff(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN DIFF' statement.
+    """
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} RETURN DIFF"
 
 
 class Return(FinishedStatement, CanUseTimeout):
+    """
+    Represents a 'RETURN' statement.
+    """
+
     def __init__(self, statement: Statement, *args: str):
         super().__init__(statement)
         self._args = args
@@ -93,6 +143,10 @@ class CanUseReturn(CanUseTimeout):
 
 
 class Where(FinishedStatement, CanUseReturn):
+    """
+    Represents a 'WHERE' statement.
+    """
+
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
         self._predicate = predicate

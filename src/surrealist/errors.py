@@ -42,8 +42,7 @@ class WebSocketConnectionClosedError(PySurrealError):
 
 class ConnectionParametersError(PySurrealError):
     """
-    Raises only if websocket connection gets wrong namespace/database parameters, in normal situations user
-    should never see this
+    Raises only if connection gets wrong parameters and cannot be established
     """
 
 

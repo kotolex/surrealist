@@ -8,8 +8,9 @@ OPTION IMPORT;
 -- USERS
 -- ------------------------------
 
-DEFINE USER user_db ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$r0WZbChRcgQfo7al04w4/A$5M269E59tSqYkHWJJVZT9ebXTFejFiHtgRvs9SggYtc' ROLES VIEWER COMMENT 'test user';
-DEFINE USER user_ns ON NAMESPACE PASSWORD 'user_ns' ROLES VIEWER COMMENT 'test user';
+DEFINE USER user_db ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$r0WZbChRcgQfo7al04w4/A$5M269E59tSqYkHWJJVZT9ebXTFejFiHtgRvs9SggYtc' ROLES EDITOR COMMENT 'test user';
+DEFINE USER viewer ON DATABASE PASSWORD 'viewer' ROLES VIEWER COMMENT 'test user';
+DEFINE USER user_ns ON NAMESPACE PASSWORD 'user_ns' ROLES OWNER COMMENT 'test user';
 
 -- ------------------------------
 -- SCOPES

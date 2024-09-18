@@ -3,12 +3,13 @@ from unittest import TestCase, main
 from tests.integration_tests.utils import URL
 from surrealist import Surreal
 
+
 names = [
     ("array::add", '["one", "two"], "three"', ['one', 'two', 'three']),
     ("array::all", "[ 1, 2, 3, NONE, 'SurrealDB', 5 ]", False),
     ("array::any", "[ 1, 2, 3, NONE, 'SurrealDB', 5 ]", True),
     ("array::at", "['s', 'u', 'r', 'r', 'e', 'a', 'l'], 2", "r"),
-    ("array::boolean_and", '["true", "false", 1, 1], ["true", "true", 0, "true"]', [True, False, False, True]),
+    ("array::boolean_and", '["true", "false", 1, 1], ["true", "true", 0, "true"]', [True, True, False, True]),
     ("array::boolean_and", '[true, true], [false]', [False, False]),
     ("array::boolean_or", '[false, true, false, true], [false, false, true, true]', [False, True, True, True]),
     ("array::boolean_xor", '[false, true, false, true], [false, false, true, true]', [False, True, True, False]),
@@ -21,7 +22,9 @@ names = [
     ("array::distinct", '[ 1, 2, 1, 3, 3, 4 ]', [1, 2, 3, 4]),
     ("array::flatten", "[ [1,2], [3, 4], 'SurrealDB', [5, 6, [7, 8]] ]", [1, 2, 3, 4, 'SurrealDB', 5, 6, [7, 8]]),
     ("array::find_index", "['a', 'b', 'c', 'b', 'a'], 'b'", 1),
+    ("array::filter", "[ 1, 2, 1, 3, 3, 4 ], 1", [1, 1]),
     ("array::filter_index", "['a', 'b', 'c', 'b', 'a'], 'b'", [1, 3]),
+    ("array::find", "['a', 'b', 'c', 'b', 'a'], 'b'", 'b'),
     ("array::first", "[ 's', 'u', 'r', 'r', 'e', 'a', 'l' ]", "s"),
     ("array::group", "[1, 2, 3, 4, [3,5,6], [2,4,5,6], 7, 8, 8, 9]", [1, 2, 3, 4, 5, 6, 7, 8, 9]),
     ("array::insert", "[1,2,3,4], 5, 2", [1, 2, 5, 3, 4]),
@@ -49,6 +52,8 @@ names = [
     ("array::slice", '[ 1, 2, 3, 4, 5 ], 1, 2', [2, 3]),
     ("array::transpose", '[[0, 1], [2, 3]]', [[0, 2], [1, 3]]),
     ("array::union", '[1,2,1,6], [1,3,4,5,6]', [1, 2, 6, 3, 4, 5]),
+    ("array::windows", '[1,2,3,4], 2', [[1, 2], [2, 3], [3, 4]]),
+    ("array::windows", '[1,2,3,4], 5', []),
     ("count", '', 1),
     ("count", '"true"', 1),
     ("count", '10 > 15', 0),
@@ -77,6 +82,24 @@ names = [
     ("duration::from::secs", '3', "3s"),
     ("duration::from::weeks", '3', "3w"),
     ("math::abs", '-13.746189', 13.746189),
+    ("math::acos", '0.5', 1.0471975511965979),
+    ("math::acot", '1', 0.7853981633974483),
+    ("math::asin", '0.5', 0.5235987755982989),
+    ("math::atan", '1', 0.7853981633974483),
+    ("math::ln", '10', 2.302585092994046),
+    ("math::clamp", '1, 5, 10', 5),
+    ("math::log", '100, 10', 2.0),
+    ("math::log10", '1000', 3.0),
+    ("math::log2", '8', 3.0),
+    ("math::lerp", '0, 10, 0.5', 5.0),
+    ("math::lerpangle", '0, 180, 0.5', 90.0),
+    ("math::cos", '1', 0.5403023058681398),
+    ("math::cot", '1', 0.6420926159343306),
+    ("math::deg2rad", '180', 3.141592653589793),
+    ("math::rad2deg", '3.141592653589793', 180.0),
+    ("math::sign", '-42', -1),
+    ("math::sin", '1', 0.8414709848078965),
+    ("math::tan", '1', 1.5574077246549023),
     ("math::bottom", '[1, 2, 3], 2', [2, 1]),
     ("math::ceil", '13.146572', 14.0),
     ("math::fixed", '13.146572, 2', 13.15),
@@ -99,8 +122,9 @@ names = [
     ("math::top", '[1, 40, 60, 10, 2, 901], 3', [40, 901, 60]),
     ("math::variance", '[ 1, 40, 60, 10, 2, 901 ]', 129148.0),
     ("math::trimean", '[ 1, 40, 60, 10, 2, 901 ]', 27.25),
-    ("meta::id", 'person:tobie', "tobie"),
-    ("meta::tb", 'person:tobie', "person"),
+    ("record::id", 'person:tobie', "tobie"),
+    ("record::tb", 'person:tobie', "person"),
+    ("record::exists", 'person:tobie', False),
     ("parse::email::host", '"info@surrealdb.com"', "surrealdb.com"),
     ("parse::email::user", '"info@surrealdb.com"', "info"),
     ("parse::url::domain", '"https://surrealdb.com:80/features?some=option#fragment"', "surrealdb.com"),
@@ -111,7 +135,7 @@ names = [
     ("parse::url::query", '"https://surrealdb.com:80/features?some=option#fragment"', "some=option"),
     ("string::concat", "'this', ' ', 'is', ' ', 'a', ' ', 'test'", "this is a test"),
     ("string::contains", "'abcdefg', 'cde'", True),
-    ("string::endsWith", "'some test', 'test'", True),
+    ("string::ends_with", "'some test', 'test'", True),
     ("string::join", "', ', 'a', 'list', 'of', 'items'", "a, list, of, items"),
     ("string::len", "'this is a test'", 14),
     ("string::lowercase", "'THIS IS A TEST'", "this is a test"),
@@ -121,7 +145,7 @@ names = [
     ("string::slice", "'this is a test', 10, 4", "test"),
     ("string::slug", "'SurrealDB has launched #database #awesome'", "surrealdb-has-launched-database-awesome"),
     ("string::split", "'this, is, a, list', ', '", ["this", "is", "a", "list"]),
-    ("string::startsWith", "'some test', 'some'", True),
+    ("string::starts_with", "'some test', 'some'", True),
     ("string::trim", "'    this is a test    '", "this is a test"),
     ("string::uppercase", "'this is a test'", "THIS IS A TEST"),
     ("string::words", "'this is a test'", ["this", "is", "a", "test"]),
@@ -132,12 +156,21 @@ names = [
     ("string::is::domain", "'surrealdb.com'", True),
     ("string::is::email", "'info@surrealdb.com'", True),
     ("string::is::hexadecimal", "'ff009e'", True),
+    ("string::is::ip", "'192.168.1.1'", True),
+    ("string::is::ipv4", "'192.168.1.1'", True),
+    ("string::is::ipv6", "'192.168.1.1'", False),
     ("string::is::latitude", "'-0.118092'", True),
     ("string::is::longitude", "'51.509865'", True),
     ("string::is::numeric", "'1484091748'", True),
+    ("string::is::record", "'person:test'", True),
+    ("string::is::record", "'person:test', 'person'", True),
+    ("string::is::record", "'person:test', 'other'", False),
+    ("string::is::record", "'not a record'", False),
     ("string::is::semver", '"1.0.0"', True),
     ("string::is::url", '"https://surrealdb.com"', True),
     ("string::is::uuid", '"018a6680-bef9-701b-9025-e1754f296a0f"', True),
+    ("string::html::encode", '"<h1>Safe Title</h1>"', '&lt;h1&gt;Safe&#32;Title&lt;&#47;h1&gt;'),
+    ("string::html::sanitize", '"<h1>Safe Title</h1>"', '<h1>Safe Title</h1>'),
     ("string::semver::compare", '"1.0.0", "1.3.5"', -1),
     ("string::semver::major", '"3.2.6"', 3),
     ("string::semver::minor", '"3.2.6"', 2),
@@ -148,23 +181,24 @@ names = [
     ("string::semver::set::major", '"1.2.3", 9', "9.2.3"),
     ("string::semver::set::minor", '"1.2.3", 9', "1.9.3"),
     ("string::semver::set::patch", '"1.2.3", 9', "1.2.9"),
-    ("time::day", '"2021-11-01T08:30:17+00:00"', 1),
-    ("time::floor", '"2021-11-01T08:30:17+00:00", 1w', "2021-10-28T00:00:00Z"),
-    ("time::format", '"2021-11-01T08:30:17+00:00", "%Y-%m-%d"', "2021-11-01"),
-    ("time::group", '"2021-11-01T08:30:17+00:00", "year"', "2021-01-01T00:00:00Z"),
-    ("time::hour", '"2021-11-01T08:30:17+00:00"', 8),
-    ("time::max", '[ "1987-06-22T08:30:45Z", "1988-06-22T08:30:45Z" ]', '1988-06-22T08:30:45Z'),
-    ("time::min", '[ "1987-06-22T08:30:45Z", "1988-06-22T08:30:45Z" ]', "1987-06-22T08:30:45Z"),
-    ("time::minute", '"2021-11-01T08:30:17+00:00"', 30),
-    ("time::month", '"2021-11-01T08:30:17+00:00"', 11),
-    ("time::nano", '"2021-11-01T08:30:17+00:00"', 1635755417000000000),
-    ("time::second", '"2021-11-01T08:30:17+00:00"', 17),
-    ("time::round", '"2021-11-01T08:30:17+00:00", 1w', "2021-11-04T00:00:00Z"),
-    ("time::unix", '"2021-11-01T08:30:17+00:00"', 1635755417),
-    ("time::wday", '"2021-11-01T08:30:17+00:00"', 1),
-    ("time::week", '"2021-11-01T08:30:17+00:00"', 44),
-    ("time::yday", '"2021-11-01T08:30:17+00:00"', 305),
-    ("time::year", '"2021-11-01T08:30:17+00:00"', 2021),
+    ("time::day", 'd"2021-11-01T08:30:17+00:00"', 1),
+    ("time::is::leap_year", 'd"1988-11-01T08:30:17+00:00"', True),
+    ("time::floor", 'd"2021-11-01T08:30:17+00:00", 1w', "2021-10-28T00:00:00Z"),
+    ("time::format", 'd"2021-11-01T08:30:17+00:00", "%Y-%m-%d"', "2021-11-01"),
+    ("time::group", 'd"2021-11-01T08:30:17+00:00", "year"', "2021-01-01T00:00:00Z"),
+    ("time::hour", 'd"2021-11-01T08:30:17+00:00"', 8),
+    ("time::max", '[ d"1987-06-22T08:30:45Z", d"1988-06-22T08:30:45Z" ]', '1988-06-22T08:30:45Z'),
+    ("time::min", '[ d"1987-06-22T08:30:45Z", d"1988-06-22T08:30:45Z" ]', "1987-06-22T08:30:45Z"),
+    ("time::minute", 'd"2021-11-01T08:30:17+00:00"', 30),
+    ("time::month", 'd"2021-11-01T08:30:17+00:00"', 11),
+    ("time::nano", 'd"2021-11-01T08:30:17+00:00"', 1635755417000000000),
+    ("time::second", 'd"2021-11-01T08:30:17+00:00"', 17),
+    ("time::round", 'd"2021-11-01T08:30:17+00:00", 1w', "2021-11-04T00:00:00Z"),
+    ("time::unix", 'd"2021-11-01T08:30:17+00:00"', 1635755417),
+    ("time::wday", 'd"2021-11-01T08:30:17+00:00"', 1),
+    ("time::week", 'd"2021-11-01T08:30:17+00:00"', 44),
+    ("time::yday", 'd"2021-11-01T08:30:17+00:00"', 305),
+    ("time::year", 'd"2021-11-01T08:30:17+00:00"', 2021),
     ("time::from::micros", '1000000', "1970-01-01T00:00:01Z"),
     ("time::from::millis", '1000', "1970-01-01T00:00:01Z"),
     ("time::from::secs", '1000', "1970-01-01T00:16:40Z"),
@@ -181,6 +215,8 @@ names = [
     ("type::string", '12345', "12345"),
     ("type::table", '"ert"', "ert"),
     ("type::thing", '"one","two"', 'one:two'),
+    # https://github.com/surrealdb/surrealdb/issues/4639
+    # ("type::range", '"product_price","10", "100", { begin: "excluded", end: "included" }', "{'tb': 'product_price', 'beg': {'Excluded': {'String': '10'}}, 'end': {'Included': {'String': '100'}}}"),
     ("type::is::array", "[ 'a', 'b', 'c' ]", True),
     ("type::is::array", "12345", False),
     ("type::is::bool", "true", True),
@@ -207,7 +243,8 @@ names = [
     ("type::is::record", "user:tobie, 'test'", False),
     ("type::is::record", "user:tobie, 'user'", True),
     ("type::is::string", "'user'", True),
-    ("type::is::uuid", '"018a6680-bef9-701b-9025-e1754f296a0f"', True),
+    ("type::is::uuid", 'u"018a6680-bef9-701b-9025-e1754f296a0f"', True),
+    ("value::diff", '"tobie", "tobias"', [{'op': 'change', 'path': '/', 'value': '@@ -1,5 +1,6 @@\n tobi\n-e\n+as\n'}]),
     ("vector::add", '[1, 2, 3], [1, 2, 3]', [2, 4, 6]),
     ("vector::angle", '[5, 10, 15], [10, 5, 20]', 0.36774908225917935),
     ("vector::cross", '[1, 2, 3], [4, 5, 6]', [-3, 6, -3]),
@@ -298,16 +335,20 @@ constants = [
 
 class TestInnerFunctions(TestCase):
     def test_functions(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root')).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root')).connect() as conn:
+            conn.use("test", "test")
             for func, params, expected in names:
                 with self.subTest(f"function {func}({params})"):
                     query = f"RETURN {func}({params});"
                     res = conn.query(query)
                     self.assertFalse(res.is_error(), res)
-                    self.assertEqual(str(expected), str(res.result), res)
+                    if isinstance(expected, float):
+                        self.assertAlmostEqual(float(expected), float(res.result), places=5)
+                    else:
+                        self.assertEqual(str(expected), str(res.result), res)
 
     def test_just_works_functions(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root')).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root')).connect() as conn:
             for func, params in functions:
                 with self.subTest(f"function {func}({params})"):
                     query = f"RETURN {func}({params});"
@@ -315,7 +356,8 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
 
     def test_just_works_variables(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root'), use_http=True).connect() as conn:
+            conn.use("test", "test")
             for var in variables:
                 with self.subTest(f"variable {var}"):
                     query = f"RETURN {var};"
@@ -323,7 +365,7 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
 
     def test_constants(self):
-        with Surreal(URL, 'test', 'test', ('root', 'root'), use_http=True).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root'), use_http=True).connect() as conn:
             for const, expected in constants:
                 with self.subTest(f"constant {const}"):
                     query = f"RETURN {const};"
@@ -332,8 +374,9 @@ class TestInnerFunctions(TestCase):
                     self.assertEqual(res.result, expected)
 
     def test_version(self):
-        surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', ('root', 'root'))
-        self.assertTrue("1.5.2" in surreal.version())
+        surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'))
+        version = surreal.version()
+        self.assertTrue("2.0.1" in version, version)
 
 
 if __name__ == '__main__':

@@ -24,7 +24,8 @@ class DatabaseConnectionsPool(Database):
 
     """
 
-    def __init__(self, url: str, namespace: str, database: str, credentials: Optional[Tuple[str, str]],
+    def __init__(self, url: str, namespace: str, database: str, access: Optional[str] = None,
+                 credentials: Optional[Tuple[str, str]] = None,
                  use_http: bool = False, timeout: int = DEFAULT_TIMEOUT,
                  min_connections: int = CORES_COUNT, max_connections: int = 50):
         """
@@ -34,10 +35,11 @@ class DatabaseConnectionsPool(Database):
         :param max_connections: maximum number of connections, it cannot be more than 50
         """
         self._options = {
-            "url": url, "namespace": namespace, "database": database, "credentials": credentials, "use_http": use_http,
-            "timeout": timeout, "min_connections": min_connections, "max_connections": max_connections
+            "url": url, "namespace": namespace, "database": database, "access": access, "credentials": credentials,
+            "use_http": use_http, "timeout": timeout, "min_connections": min_connections,
+            "max_connections": max_connections
         }
-        super().__init__(url, namespace, database, credentials, use_http, timeout)
+        super().__init__(url, namespace, database, access, credentials, use_http, timeout)
         self._connection = Pool(self._connection, **self._options)
         self._connected = True
         self._min = min_connections

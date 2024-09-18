@@ -6,6 +6,10 @@ from surrealist.ql.statements.insert_statements import InsertUseDuplicate
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
+"""
+
+"""
+
 
 class Insert(Statement, InsertUseDuplicate):
     """
@@ -14,6 +18,12 @@ class Insert(Statement, InsertUseDuplicate):
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_insert_examples.py
+
+    INSERT [ IGNORE ] INTO @what
+    [ @value
+      | (@fields) VALUES (@values)
+        [ ON DUPLICATE KEY UPDATE @field = @value ... ]
+    ];
     """
 
     def __init__(self, connection: Connection, table_name: str, *args):

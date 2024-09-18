@@ -14,6 +14,15 @@ class Live(Statement, LiveUseWhere):
     Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
+
+    LIVE SELECT
+    [
+        [ VALUE ] @fields [ AS @alias ]
+        | DIFF
+    ]
+    FROM @targets
+    [ WHERE @conditions ]
+    [ FETCH @fields ... ];
     """
 
     def __init__(self, connection: Connection, table_name: str, callback: Callable, select: Optional[str] = None,

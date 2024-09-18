@@ -1,4 +1,35 @@
 ## Release Notes ##
+**Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
+- both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
+- USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
+- websocket client under the hood uses explicit "sec-websocket-protocol"="json" header
+- http now uses rpc-protocol instead of different endpoints and methods
+- for root user now you should connect only with credentials and then call use method (see [examples](https://github.com/kotolex/surrealist/tree/master/examples/connect.py))
+- you can now specify access method on connecting via a Surreal/Database object
+- now use Bearer instead of Basic for Authorization
+- database argument is now optional for USE method, but raises for websocket if a database is not specified
+- all QL-statements now have SurrealQL Syntax in documentation for class
+- all DEFINE statements now have COMMENT finished statement
+- now DEFINE TOKEN use Algorithm enum
+- Database object can be created from active connection with `Database.from_connection(connection)`
+- Connection can be extracted from Database with `Database.get_connection()`
+- improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of them
+- SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
+- update DEFINE USER statement
+- add UPSERT statement
+- add DEFINE ACCESS JWT and DEFINE ACCESS RECORD statements
+- add REMOVE ACCESS statement
+- add ALTER TABLE statement
+- add ENFORCED statement for DEFINE TABLE
+- add CONCURRENTLY statement for DEFINE INDEX
+- deprecate DEFINE TOKEN-REMOVE TOKEN and DEFINE SCOPE-REMOVE SCOPE
+- let and unset now raises CompatibilityError for http
+- add upsert method to Connection
+- all DEFINE statements except SCOPE/TOKEN now have OVERWRITE clause
+- Connection objects now store token after authorize
+- more examples and tests, fix old examples
+- fix Readme, add compatibility table
+
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
 - minor fixes for docs and examples
 

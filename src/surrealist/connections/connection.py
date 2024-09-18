@@ -6,7 +6,7 @@ from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass
 
 logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
@@ -49,6 +49,7 @@ class Connection(ABC):
         self._credentials = credentials
         self._connected = False
         self._timeout = timeout
+        self._token = None
 
     def close(self):
         """
@@ -173,8 +174,8 @@ class Connection(ABC):
 
         :return: full session information
         """
-        query = 'return {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), ' \
-                '"ns" : session::ns(), "http_origin" : session::origin(), "scope" : session::sc()};'
+        query = 'RETURN {"db" : session::db(), "session_id" : session::id(), "ip" : session::ip(), ' \
+                '"ns" : session::ns(), "http_origin" : session::origin(), "access" : session::ac()};'
         logger.info("Query-Operation: SESSION_INFO")
         return self.query(query)
 
@@ -206,7 +207,7 @@ class Connection(ABC):
     def remove_table(self, table_name: str, if_exists: bool = True) -> SurrealResult:
         """
         Fully removes table, even if it contains some records, analog of SQL "DROP table". You should have permissions
-        for this action.This method cannot remove any other resource if you need to remove db, ns or scope -
+        for this action.This method cannot remove any other resource if you need to remove db, ns or access -
         use **query**
 
         If if_exists parameter is False and the table does not exist - error will be returned at a result.
@@ -238,44 +239,86 @@ class Connection(ABC):
         :param limit: amount of changes to get
         :return: result of the query
         """
-        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE "{since}" LIMIT {limit};'
+        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE d"{since}" LIMIT {limit};'
         return self.query(query)
 
     @abstractmethod
-    def use(self, namespace: str, database: str) -> SurrealResult:
+    def _use_rpc(self, data) -> SurrealResult:
         """
-        This method specifies the namespace and database for the current connection
+        Actual use of RPC protocol for a current connection type
+        """
+
+    def _signin(self, user: str, password: str, namespace: Optional[str] = None, database: Optional[str] = None,
+                access: Optional[str] = None) -> SurrealResult:
+        """
+        This method allows you to sign in a root, namespace, database or scope user against SurrealDB
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#signin
+
+        Example:
+        connection.signin('root', 'root') # sign in as root user
+        connection.signin('user_db', 'user_db', namespace='test', database='test') # sign in as db user
+
+        :param user: name of the user
+        :param password: password for auth
+        :param namespace: name of the namespace to use
+        :param database: name of the database to use
+        :param access: name of the access method to use
+        :return: result of request
+        """
+        params = {"user": user, "pass": password}
+        if user is None or password is None:
+            params = {}
+        if namespace is not None:
+            params[NS] = namespace
+        if database is not None:
+            params[DB] = database
+        if access is not None:
+            params[AC] = access
+        data = {"method": "signin", "params": [params]}
+        logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(params))))
+        return self._use_rpc(data)
+
+    @abstractmethod
+    def use(self, namespace: str, database: Optional[str] = None) -> SurrealResult:
+        """
+        This method specifies the namespace and optionally database for the current connection
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
         """
 
-    @abstractmethod
-    def authenticate(self, token: str) -> SurrealResult:
+    @connected
+    def let(self, name: str, value: Any) -> SurrealResult:
         """
-        This method authenticates user with given token.
-        Http connections cannot use it
-        """
+        This method sets and stores a value which can then be used in a subsequent query.
+        Http-transport cannot use the let method
 
-    @abstractmethod
-    def invalidate(self) -> SurrealResult:
-        """
-        This method will invalidate the user's session for the current connection
-        Http connections cannot use it
-        """
-
-    @abstractmethod
-    def let(self, name: str, value) -> SurrealResult:
-        """
-        This method sets and stores a value which can then be used in a subsequent query
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
-        """
 
-    @abstractmethod
+        :param name: name for the variable (without $ sign!)
+        :param value: value for the variable
+        :return: result of request
+        """
+        data = {"method": "let", "params": [name, value]}
+        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
+        return self._use_rpc(data)
+
+    @connected
     def unset(self, name: str) -> SurrealResult:
         """
-        This method unsets value, which was previously stored
+        This method unsets value, which was previously stored.
+        Http-transport cannot use the unset method
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#unset
+
+        :param name: name for the variable (without $ sign!)
+        :return: result of request
         """
+        data = {"method": "unset", "params": [name]}
+        logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
+        return self._use_rpc(data)
 
     @abstractmethod
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
@@ -310,86 +353,204 @@ class Connection(ABC):
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
         """
 
-    @abstractmethod
-    def signup(self, namespace: str, database: str, scope: str, params: Optional[Dict] = None) -> SurrealResult:
-        """
-        This method allows you to sign up a user
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-        """
-
-    @abstractmethod
-    def signin(self, user: str, password: str, namespace: Optional[str] = None,
-               database: Optional[str] = None, scope: Optional[str] = None) -> SurrealResult:
-        """
-        This method allows you to sign in a root, namespace, database or scope user against SurrealDB
-        """
-
-    @abstractmethod
+    @connected
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method selects either all records in a table or a single record
 
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#select
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
 
-        Notice: do not specify id twice: in table name and in record_id, it will cause error on SurrealDB side
-        """
+        Examples:
+        connection.select("article") # select all records in article table
+        connection.select("article:first") # select one article with id 'first'
+        connection.select("article", "first") # select one article with id 'first', analog of previous
 
-    @abstractmethod
+        Notice: do not specify id twice: in table name and in record_id, it will cause error on SurrealDB side
+
+        :param table_name: table name or table name with record_id to select
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        data = {"method": "select", "params": [table_name]}
+        logger.info("Operation: SELECT. Table: %s", crop_data(table_name))
+        result = self._use_rpc(data)
+        if not isinstance(result.result, List) and not result.is_error():
+            result.result = [result.result] if result.result else []
+        return result
+
+    @connected
     def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method creates a record either with a random or specified record_id. If no id specified in record_id or
         in data arguments, then id will be generated by SurrealDB
 
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#create
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/create
 
-        Notice: do not specify id twice, for example, in table name and in data, it will cause error on SurrealDB side
-        """
+        Examples:
+        connection.create("person", {"name": "John Doe"}) # create one record in person table with random id
+        connection.create("person", {"id":"my_id", "name": "John Doe"}) # create one record in person table
+        with specified id
+        connection.create("person", {"name": "John Doe"}, "my_id") # create one record in person table with specified id
+        connection.create("person:my_id", {"name": "John Doe"}) # create one record in person table with specified id
 
-    @abstractmethod
-    def insert(self, table_name: str, data: Union[Dict, List]) -> SurrealResult:
+        Notice: do not specify id twice, for example, in table name and in data, it will cause error on SurrealDB side
+
+        :param table_name: table name or table name with record_id to create
+        :param data: dict with data to create
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        if record_id is not None:
+            data["id"] = record_id
+        _data = {"method": "create", "params": [table_name, data]}
+        logger.info("Operation: CREATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        result = self._use_rpc(_data)
+        if isinstance(result.result, List) and len(result.result) == 1:
+            result.result = result.result[0]
+        return result
+
+    @connected
+    def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        """
+        This method can be used to update or modify records in the database. So all old fields will be deleted, and new
+        will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.
+        If a record with specified id does not exist, it will NOT be created, use **upsert** for that.
+
+        Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
+        not in data parameters.
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+
+        Example:
+        connection.update("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
+        {"name": "Alex Doe"}, all data stored in record before will be deleted
+        connection.update("person", {"name": "Alex Doe"}, "my_id") # record with specified id will be now
+        {"name": "Alex Doe"}, all data stored in record before will be deleted
+
+        Notice: do not specify id twice, for example, in table name and in record_id, it will cause error
+
+        :param table_name: table name or table name with record_id to update
+        :param data: dict with data to create
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        _data = {"method": "update", "params": [table_name, data]}
+        logger.info("Operation: UPDATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        return self._use_rpc(_data)
+
+    @connected
+    def upsert(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+        """
+        This method can be used to create or update records in the database. So all old fields will be deleted, and new
+        will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.
+        If a record with specified id does not exist, it will be created, if it exists - all fields will be replaced
+
+        Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
+        not in data parameters.
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#upsert
+
+        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
+
+        Example:
+        connection.upsert("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
+        {"name": "Alex Doe"}, all data stored in record before will be deleted
+
+        Notice: do not specify id twice, for example, in table name and in record_id, it will cause error
+
+        :param table_name: table name or table name with record_id to upsert
+        :param data: dict with data to create
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        _data = {"method": "upsert", "params": [table_name, data]}
+        logger.info("Operation: UPSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        return self._use_rpc(_data)
+
+    @connected
+    def insert(self, table_name: str, data: Union[List, Dict]) -> SurrealResult:
         """
         This method inserts one or more records. If you specify recordID in data and record with that id already
         exists - no inserts or updates will happen and the content of the existing record will be returned. If you need
         to change existing record, please consider **update** or **merge**
 
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
+
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
 
+        Examples:
+        connection.insert("person", {"name": "John Doe"}) # inserts one record with random id
+        connection.insert("person", [{"name": "John Doe"}, {"name", "Jane Doe"}]) # inserts two records with random ids
+
         Note: do not use record id in table_name parameter (table:recordID) - it will cause error on SurrealDB side
+
+        :param table_name: table name or table name with record_id to insert
+        :param data: dict or list(many records) with data to create
+        :return: result of request
         """
+        _data = {"method": "insert", "params": [table_name, data]}
+        logger.info("Operation: INSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        return self._use_rpc(_data)
 
-    @abstractmethod
-    def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
-        """
-        This method can be used to update or create record in the database. So all old fields will be deleted, and new
-        will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead. If
-        a record with specified id does not exist, it will be created, if exist - all fields will be replaced
-
-        Note: if you want to create/replace one record, you should specify recordID in table_name or in record_id, but
-        not in data parameters.
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
-        """
-
-    @abstractmethod
+    @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
-        This method merges specified data into either all records in a table or a single record. Old fields in records
-        will not be deleted if you want to replace old data with new - use **update** method. If a record with
-        specified id does not exist, it will be created.
-        """
+        This method merges specified data into either all records in a table or a single record. Old data in records
+        will not be deleted, if you want to replace old data with new - use **update** method.If
+        record with specified id does not exist, it will be created.
 
-    @abstractmethod
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#merge
+
+        Examples:
+        connection.merge("person",{"active": True}) # "active" will be added to all records in person table
+        connection.merge("person:my_id", {"active": True}) # "active" will be added to one record in person
+        table with specified id
+
+        :param table_name: table name or table name with record_id to merge
+        :param data: dict with data to add
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        _data = {"method": "merge", "params": [table_name, data]}
+        logger.info("Operation: MERGE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        return self._use_rpc(_data)
+
+    @connected
     def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method deletes all records in a table or a single record, be careful and don't forget to specify id if you
-        do not want to delete all records. This method does not remove table itself, only records in it.
-        As a result of this method, you will get all deleted records or None if no such record or table
+        do not want to delete all records. This method does not remove table itself, only records in it.As a result of
+        this method you will get all deleted records or None if no such record or table
+
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
-        """
 
-    @abstractmethod
+        Examples:
+        connection.delete("person:my_id") # deletes one record in person table
+        connection.delete("person", "my_id") # deletes one record in person table
+        connection.delete("person") # deletes all records in person table
+
+        :param table_name: table name or table name with record_id to delete
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        _data = {"method": "delete", "params": [table_name]}
+        logger.info("Operation: DELETE. Table: %s", crop_data(table_name))
+        return self._use_rpc(_data)
+
+    @connected
     def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
               return_diff: bool = False) -> SurrealResult:
         """
@@ -397,18 +558,59 @@ class Connection(ABC):
         will not be created if table exists but no such record_id - new record will be created, if no record id-all
         records will be transformed
 
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#patch
+
         About allowed data format and DIFF refer to: https://jsonpatch.com
 
-        Notice: do not specify id twice, for example, in table name and in record_id, it will cause error
-        """
+        Examples:
+        connection.patch("person", [{"op": "replace", "path": "/active", "value": False}]) # replaces active
+        field for all records in person table to False
+        connection.patch("person:my_id", [{"op": "replace", "path": "/active", "value": False}]) # replaces
+        active field for one record with specified id to False
 
-    @abstractmethod
+        Notice: do not specify id twice, for example, in table name and in data, it will cause error on SurrealDB side
+
+        :param table_name: table name or table name with record_id to patch
+        :param data: list with json-patch data
+        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :param return_diff: True if you want to get only DIFF info, False for a standard results
+        :return: result of request
+        """
+        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        params = [table_name, data]
+        if return_diff:
+            params.append(return_diff)
+        _data = {"method": "patch", "params": params}
+        logger.info("Operation: PATCH. Table: %s, data: %s, use DIFF: %s", crop_data(table_name), crop_data(str(data)),
+                    return_diff)
+        return self._use_rpc(_data)
+
+    @connected
     def query(self, query: str, variables: Optional[Dict] = None) -> SurrealResult:
         """
         This method used for execute a custom SurrealQL query
 
+        Refer to: https://docs.surrealdb.com/docs/integration/websocket#query
+
         For SurrealQL refer to: https://docs.surrealdb.com/docs/surrealql/overview
+
+        Example:
+        connection.query("SELECT * FROM article;") # gets all records from article table
+        connection.query("SELECT * FROM type::table($tb);", {"tb": "article"}) # gets all records from
+        article table using variable tb to specify table
+
+        :param query: any SurrealQL query to execute
+        :param variables: a set of variables used by the query
+        :return: result of request
         """
+        params = [query]
+        if variables is not None:
+            params.append(variables)
+        data = {"method": "query", "params": params}
+        logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
+        result = self._use_rpc(data)
+        result.query = params[0] if len(params) == 1 else params
+        return result
 
     @abstractmethod
     def import_data(self, path) -> SurrealResult:
