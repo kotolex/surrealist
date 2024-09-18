@@ -1,7 +1,8 @@
 from unittest import TestCase, main
 
-from surrealist import Surreal
 from tests.integration_tests.utils import URL
+from surrealist import Surreal
+
 
 names = [
     ("array::add", '["one", "two"], "three"', ['one', 'two', 'three']),

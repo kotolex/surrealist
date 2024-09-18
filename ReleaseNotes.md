@@ -1,5 +1,5 @@
 ## Release Notes ##
-**Version 1.0.0 (compatible with SurrealDB version 2.0.0):**
+**Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
 - both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
 - websocket client under the hood uses explicit "sec-websocket-protocol"="json" header

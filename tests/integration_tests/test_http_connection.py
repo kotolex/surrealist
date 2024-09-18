@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from surrealist import Surreal, get_uuid
 from tests.integration_tests.utils import URL, WS_URL, get_random_series
+from surrealist import Surreal, get_uuid
 
 
 class TestSurreal(TestCase):

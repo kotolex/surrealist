@@ -2,8 +2,9 @@ import time
 from typing import List
 from unittest import TestCase, main
 
-from surrealist import DatabaseConnectionsPool
 from tests.integration_tests.utils import URL, get_random_series
+from surrealist import DatabaseConnectionsPool
+
 
 text = f"DatabasePool(namespace=test, name=test, connected=True,connections_count=2, min_connections=2, " \
        f"max_connections=10)"

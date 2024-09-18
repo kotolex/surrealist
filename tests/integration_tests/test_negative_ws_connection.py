@@ -1,8 +1,8 @@
 from unittest import TestCase, main
 
+from tests.integration_tests.utils import URL
 from surrealist import (Surreal, SurrealConnectionError, WebSocketConnectionError, CompatibilityError,
                         DatabaseConnectionsPool)
-from tests.integration_tests.utils import URL
 
 
 class TestNegativeWebSocketConnection(TestCase):
