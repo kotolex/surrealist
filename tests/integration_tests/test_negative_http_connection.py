@@ -32,7 +32,7 @@ class TestHttpConnectionNegative(TestCase):
                                                 {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
             self.assertEqual(res.status, "ERR", res)
 
-    def test_update_many_failed(self):
+    def test_update_many_works(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
         with db.connect() as connection:
             connection.use("test", "test")
@@ -42,11 +42,8 @@ class TestHttpConnectionNegative(TestCase):
             res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
                                                 {"author": "inserted", "title": uid2, "text": uid2},
                                                 ], record_id=uid)
-            self.assertEqual(res.status, "ERR", res)
-            res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                                {"author": "inserted", "title": uid2, "text": uid2},
-                                                ])
-            self.assertEqual(res.status, "ERR", res)
+            self.assertFalse(res.is_error(), res)
+
 
     def test_query_failed(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)

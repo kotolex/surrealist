@@ -8,7 +8,7 @@ names = [
     ("array::all", "[ 1, 2, 3, NONE, 'SurrealDB', 5 ]", False),
     ("array::any", "[ 1, 2, 3, NONE, 'SurrealDB', 5 ]", True),
     ("array::at", "['s', 'u', 'r', 'r', 'e', 'a', 'l'], 2", "r"),
-    ("array::boolean_and", '["true", "false", 1, 1], ["true", "true", 0, "true"]', [True, False, False, True]),
+    ("array::boolean_and", '["true", "false", 1, 1], ["true", "true", 0, "true"]', [True, True, False, True]),
     ("array::boolean_and", '[true, true], [false]', [False, False]),
     ("array::boolean_or", '[false, true, false, true], [false, false, true, true]', [False, True, True, True]),
     ("array::boolean_xor", '[false, true, false, true], [false, false, true, true]', [False, True, True, False]),
@@ -375,7 +375,7 @@ class TestInnerFunctions(TestCase):
     def test_version(self):
         surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'))
         version = surreal.version()
-        self.assertTrue("2.0.0" in version, version)
+        self.assertTrue("2.0.1" in version, version)
 
 
 if __name__ == '__main__':

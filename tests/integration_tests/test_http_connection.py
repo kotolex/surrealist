@@ -375,17 +375,6 @@ class TestHttpConnection(TestCase):
             self.assertFalse(res.is_error())
             self.assertFalse(tb_name in res.result)
 
-    def test_insert_when_id_exists_returns_existing(self):
-        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            uid = get_random_series(11)
-            res = connection.insert("article", {'id': uid, 'field': 'old'})
-            self.assertFalse(res.is_error())
-            res = connection.insert("article", {'id': uid, 'field': 'new'})
-            self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
-
     def test_update_not_creates_if_not_exists(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
         with surreal.connect() as connection:

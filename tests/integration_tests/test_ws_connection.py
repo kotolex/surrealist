@@ -391,16 +391,6 @@ class TestWebSocketConnection(TestCase):
             res = connection.kill(token)
             self.assertFalse(res.is_error(), res)
 
-    def test_insert_when_id_exists_returns_existing(self):
-        surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'))
-        with surreal.connect() as connection:
-            uid = get_random_series(11)
-            res = connection.insert("article", {'id': uid, 'field': 'old'})
-            self.assertFalse(res.is_error())
-            res = connection.insert("article", {'id': uid, 'field': 'new'})
-            self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [{'id': f"article:{uid}", 'field': 'old'}])
-
     def test_update_not_creates_if_not_exists(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
