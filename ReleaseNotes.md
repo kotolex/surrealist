@@ -1,4 +1,11 @@
 ## Release Notes ##
+**Version 1.0.1 (compatible with SurrealDB version 2.0.2+):**
+- add run and run_function for Database (https://surrealdb.com/docs/surrealdb/integration/rpc#run)
+- add insert_relation method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#insert_relation)
+- add version method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#version)
+- add info method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#info)
+- minor fixes for docs and examples
+
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
 - both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests

@@ -468,6 +468,38 @@ class TestHttpConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(res.result), 5)
 
+    def test_run(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.run("time::now")
+            self.assertFalse(res.is_error(), res)
+
+    def test_insert_relation(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            data = {"in": "user:alice", "out": "post:1234", "since": "2024-09-15T12:34:56Z"}
+            res = connection.insert_relation("likes", data)
+            self.assertFalse(res.is_error(), res)\
+
+
+    def test_insert_relation_none(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            data = {"id": "follows:user:alice:user:bob", "in": "user:alice", "out": "user:bob",
+                    "since": "2024-09-15T12:34:56Z"}
+            res = connection.insert_relation(None, data)
+            self.assertFalse(res.is_error(), res)
+
+    def test_version(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.version()
+            self.assertFalse(res.is_error(), res)
+
 
 if __name__ == '__main__':
     main()

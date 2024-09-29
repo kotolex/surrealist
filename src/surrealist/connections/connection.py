@@ -180,6 +180,19 @@ class Connection(ABC):
         return self.query(query)
 
     @connected
+    def info(self) -> SurrealResult:
+        """
+        This method returns the record of an authenticated record user.
+        The result property of the response is likely different depending on your schema and the authenticated user
+
+        :return: result of the query
+        """
+        logger.info("Query-Operation: INFO")
+        data = {"method": "info"}
+        result = self._use_rpc(data)
+        return result
+
+    @connected
     def db_tables(self) -> SurrealResult:
         """
         Returns all tables names in the current database. You should have permissions for this action.
@@ -354,6 +367,71 @@ class Connection(ABC):
         """
 
     @connected
+    def graphql(self, query: str, pretty: Optional[str] = False) -> SurrealResult:
+        """
+        This method allows you to execute GraphQL queries against the database.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#graphql
+
+        Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+
+        Examples:
+        connection.graphql("{ users { id name } }")
+
+        :param query: A GraphQL query string
+        :param pretty: optional boolean parameter, indicating whether the output should be pretty-printed.
+        :return: result of request
+        """
+        data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(query), pretty)
+        result = self._use_rpc(data)
+        return result
+
+    @connected
+    def run(self, func_name: str, version: Optional[str] = None, args: Optional[List] = None) -> SurrealResult:
+        """
+        This method allows you to execute built-in functions, custom functions, or machine learning models with
+        optional arguments
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#run
+
+        Examples:
+        connection.run("time::now")
+
+        :param func_name: The name of the function or model to execute. Prefix with fn:: for custom functions or
+        ml:: for machine learning models.
+        :param version: optional parameter, the version of the function or model to execute. When using a machine
+        learning model (prefixed with ml::), the version parameter is required.
+        :param args: The arguments to pass to the function or model.
+        :return: result of request
+        """
+        data = {"method": "run", "params": [func_name]}
+        if version is not None:
+            data["params"].append(version)
+        if args is not None:
+            data["params"].append(args)
+        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", crop_data(func_name), version, args)
+        result = self._use_rpc(data)
+        return result
+
+    @connected
+    def version(self) -> SurrealResult:
+        """
+        This method returns version information about the database/server
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#version
+
+        Examples:
+        connection.version() # get version information
+
+        :return: result of request
+        """
+        data = {"method": "version"}
+        logger.info("Operation: VERSION")
+        result = self._use_rpc(data)
+        return result
+
+    @connected
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method selects either all records in a table or a single record
@@ -500,6 +578,31 @@ class Connection(ABC):
         _data = {"method": "insert", "params": [table_name, data]}
         logger.info("Operation: INSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
         return self._use_rpc(_data)
+
+    @connected
+    def insert_relation(self, table_name: Optional[str], data: [Dict]) -> SurrealResult:
+        """
+        This method inserts a new relation record into the database. You can specify the relation table to insert into
+        and provide the data for the new relation.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#insert_relation
+
+        Examples:
+        connection.insert_relation("likes",{
+            "in": "user:alice",
+            "out": "post:123",
+            "since": "2024-09-15T12:34:56Z"
+        })
+
+        :param table_name: The name of the relation table to insert into. If None, the table is determined from the id
+        field in the data.
+        :param data: dict containing the data for the new relation record, including in, out, and any additional fields
+        :return: result of request
+        """
+        data = {"method": "insert_relation", "params": [table_name, data]}
+        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", crop_data(str(table_name)), crop_data(str(data)))
+        result = self._use_rpc(data)
+        return result
 
     @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:

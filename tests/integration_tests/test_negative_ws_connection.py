@@ -100,6 +100,14 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertTrue(res.is_error())
             self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
 
+    def test_run_3_args(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.run("ml::image_classifier", "v2.1", ["image_data_base64"])
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The model 'ml::image_classifier<v2.1>' does not exist", res.result)
+
 
 if __name__ == '__main__':
     main()

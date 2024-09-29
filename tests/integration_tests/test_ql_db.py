@@ -76,6 +76,12 @@ class TestDatabase(TestCase):
             self.assertEqual("test", db._database)
             self.assertEqual(connection, db._connection)
 
+    def test_run_function(self):
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            res = db.run_function("count")
+            self.assertFalse(res.is_error())
+            self.assertEqual(1, res.result)
+
 
 
 if __name__ == '__main__':

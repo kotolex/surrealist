@@ -97,7 +97,7 @@ For example for wss://127.0.0.1:9000/some/rps predicted http url will be https:/
 
 **use_http** - optional, False by default, flag of using websockets or http transport, False mean using websocket, specify True if you want to use http transport
 
-**timeout** - optional, 5 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
+**timeout** - optional, 15 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
 
 
 **Example 2**
@@ -139,7 +139,7 @@ ws_connection = surreal.connect()  # open connection
 result = ws_connection.select("person")  # select from db
 print(result)  # print result
 ws_connection.close()  # explicitly close connection
-# after closing, we cannot use connection anymore, if you need one - create one more connection with a surreal object
+# after closing, we cannot use connection anymore if you need one - create one more connection with a surreal object
 ```
 
 ## Methods and Query Language ##
@@ -199,7 +199,7 @@ from surrealist import Database
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: # connects to Database
     iterator = db.table("user").select().iter(limit=20) # get an iterator, nothing executes on this line
     for result in iterator: # here, where actions actually start
-        print(result.count()) # just print count of results, but you cand do anything here
+        print(result.count()) # just print count of results, but you can do anything here
 ```
 
 ## Results and RecordID ##
@@ -255,7 +255,7 @@ ws_connection.select("person:john"), but no other logic performed. Do not expect
 
 ## Logging and Debug mode ##
 As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use standard logging.
-All library logs will contain "surrealist" prefix in logs. You, as a developer, should choose proper handlers, formats, filters etc.
+All library logs will contain "surrealist" prefix. You, as a developer, should choose proper handlers, formats, filters etc.
 Surrealist does not use root logger, does not use any handlers and uses only DEBUG, INFO and ERROR level for its events.
 
 For example
@@ -522,7 +522,7 @@ By default, the minimum number is equal to CPU cores count for the system.
 So any incoming request from your application will use the first non-busy connection it gets from the pool.
 
 Pay attention — new connections can be created, but old connections never be closed until the pool will be closed, so the number of connections can grow, 
-but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection will be closed, LQ stop working.
+but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection is closed, LQ stops working.
 
 **Example 13**
 
