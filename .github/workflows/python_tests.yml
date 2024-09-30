@@ -28,6 +28,8 @@ jobs:
         surrealdb_password: root
         surrealdb_auth: true
         surrealdb_additional_args: --allow-net
+    - name: Wait for SurrealDB to be ready
+      run: sleep 3
     - name: Set up Python 3.8
       uses: actions/setup-python@v3
       with:
@@ -63,6 +65,8 @@ jobs:
           surrealdb_password: root
           surrealdb_auth: true
           surrealdb_additional_args: --allow-net
+      - name: Wait for SurrealDB to be ready
+        run: sleep 3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
