@@ -500,6 +500,13 @@ class TestHttpConnection(TestCase):
             res = connection.version()
             self.assertFalse(res.is_error(), res)
 
+    def test_relate(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.relate("person:john", "knows", "person:jane")
+            self.assertFalse(res.is_error(), res)
+
 
 if __name__ == '__main__':
     main()

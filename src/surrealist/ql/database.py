@@ -580,6 +580,5 @@ class Database:
         """
         return self._connection.run(function_name, version=version, args=args)
 
-
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

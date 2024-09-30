@@ -510,6 +510,13 @@ class TestWebSocketConnection(TestCase):
             res = connection.version()
             self.assertFalse(res.is_error(), res)
 
+    def test_relate(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.relate("person:tobie", "knows", "person:micha", {"since": "2024-09-15T12:34:56Z"})
+            self.assertFalse(res.is_error(), res)
+
 
 if __name__ == '__main__':
     main()

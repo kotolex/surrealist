@@ -402,13 +402,15 @@ class Connection(ABC):
         ml:: for machine learning models.
         :param version: optional parameter, the version of the function or model to execute. When using a machine
         learning model (prefixed with ml::), the version parameter is required.
-        :param args: The arguments to pass to the function or model.
+        :param args: The list of arguments to pass to the function or model.
         :return: result of request
         """
         data = {"method": "run", "params": [func_name]}
         if version is not None:
             data["params"].append(version)
         if args is not None:
+            if len(data["params"]) == 1:
+                data["params"].append(None)
             data["params"].append(args)
         logger.info("Operation: RUN. Function: %s, version: %s, args: %s", crop_data(func_name), version, args)
         result = self._use_rpc(data)
@@ -713,6 +715,31 @@ class Connection(ABC):
         logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
         result = self._use_rpc(data)
         result.query = params[0] if len(params) == 1 else params
+        return result
+
+    @connected
+    def relate(self, relate_to: str, relation_table: str, relate_from: str,
+               data: Optional[Dict] = None) -> SurrealResult:
+        """
+        This method relates two records with a specified relation
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#relate
+
+        Examples:
+        connection.relate("person:john", "knows", "person:jane")
+
+        :param relate_to: The record to relate to
+        :param relation_table: name of the relation table
+        :param relate_from: The record to relate from
+        :param data: dict containing the data for the new record
+        :return: result of request
+        """
+        full_data = {"method": "relate", "params": [relate_to, relation_table, relate_from]}
+        if data is not None:
+            full_data["params"].append(data)
+        logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
+                    relation_table, relate_from, crop_data(str(data)))
+        result = self._use_rpc(full_data)
         return result
 
     @abstractmethod

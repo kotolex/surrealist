@@ -1,9 +1,10 @@
 ## Release Notes ##
-**Version 1.0.1 (compatible with SurrealDB version 2.0.2+):**
-- add run and run_function for Database (https://surrealdb.com/docs/surrealdb/integration/rpc#run)
+**Version 1.0.1 (compatible with SurrealDB version 2.0.2):**
+- add run method for connections and run_function for Database (https://surrealdb.com/docs/surrealdb/integration/rpc#run)
 - add insert_relation method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#insert_relation)
 - add version method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#version)
 - add info method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#info)
+- add relate method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#relate)
 - minor fixes for docs and examples
 
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
