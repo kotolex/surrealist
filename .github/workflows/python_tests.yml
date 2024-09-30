@@ -29,7 +29,7 @@ jobs:
         surrealdb_auth: true
         surrealdb_additional_args: --allow-net
     - name: Wait for SurrealDB to be ready
-      run: sleep 3
+      run: while ! curl --output /dev/null --silent --head --fail http://localhost:8000; do sleep 1 && echo -n .; done;
     - name: Set up Python 3.8
       uses: actions/setup-python@v3
       with:
@@ -66,7 +66,7 @@ jobs:
           surrealdb_auth: true
           surrealdb_additional_args: --allow-net
       - name: Wait for SurrealDB to be ready
-        run: sleep 3
+        run: while ! curl --output /dev/null --silent --head --fail http://localhost:8000; do sleep 1 && echo -n .; done;
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
