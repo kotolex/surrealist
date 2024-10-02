@@ -32,10 +32,10 @@ Please make sure you install and start SurrealDB, you can read more [here](https
 **Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
 Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
 
-|     SurrealDB version     |     2.0.0      | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
-|:-------------------------:|:--------------:| :---: |----------|----------|----------|----------|
-|    Surrealist version     |     1.0.0      | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      |    3.8-3.12    |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+|     SurrealDB version     |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
+|:-------------------------:|:--------:| :---: |----------|----------|----------|----------|
+|    Surrealist version     |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
+|      Python versions      | 3.8-3.12 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
 A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 

@@ -4,7 +4,7 @@ from functools import wraps
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
-from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
+from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError, WrongParameterError
 from surrealist.result import SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass
 
@@ -367,23 +367,35 @@ class Connection(ABC):
         """
 
     @connected
-    def graphql(self, query: str, pretty: Optional[str] = False) -> SurrealResult:
+    def graphql(self, query: Dict, pretty: Optional[bool] = False) -> SurrealResult:
         """
         This method allows you to execute GraphQL queries against the database.
+        The query parameter is a dictionary with the following fields:
+        - query (required): The GraphQL query string.
+        - variables or vars (optional): An object containing variables for the query.
+        - operationName or operation (optional): The name of the operation to execute.
 
         Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#graphql
 
         Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
 
-        Examples:
-        connection.graphql("{ users { id name } }")
+        Important Note: GraphQL validates all schemas for all tables in the database, so if there are some errors,
+        you get an error back, even if the problem is not with your data
 
-        :param query: A GraphQL query string
+        Examples:
+        connection.graphql({"query": "{ author { id name } }"}, pretty=True)
+
+        :param query: dictionary with all parameters
         :param pretty: optional boolean parameter, indicating whether the output should be pretty-printed.
         :return: result of request
+        :raise WrongParameterError: if query is not valid dictionary
         """
+        allowed_fields = ("query", "variables", "vars", "operationName", "operation")
+        if "query" not in query or any(field not in allowed_fields for field in query.keys()):
+            raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
+                                      "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
         data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
-        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(query), pretty)
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(str(query)), pretty)
         result = self._use_rpc(data)
         return result
 

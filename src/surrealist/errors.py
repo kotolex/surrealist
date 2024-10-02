@@ -9,6 +9,12 @@ class PySurrealError(Exception):
     """
 
 
+class WrongParameterError(PySurrealError):
+    """
+    Raises when the wrong parameter is passed for some operation
+    """
+
+
 class SurrealConnectionError(PySurrealError):
     """
     Raises on any problem with connection to SurrealDB, check url and other parameters
