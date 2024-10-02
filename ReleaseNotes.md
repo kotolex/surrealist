@@ -5,6 +5,7 @@
 - add version method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#version)
 - add info method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#info)
 - add relate method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#relate)
+- add graphql method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#graphql)
 - minor fixes for docs and examples
 
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
