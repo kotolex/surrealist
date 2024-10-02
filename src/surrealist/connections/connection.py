@@ -4,7 +4,7 @@ from functools import wraps
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
-from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError
+from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError, WrongParameterError
 from surrealist.result import SurrealResult
 from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass
 
@@ -178,6 +178,19 @@ class Connection(ABC):
                 '"ns" : session::ns(), "http_origin" : session::origin(), "access" : session::ac()};'
         logger.info("Query-Operation: SESSION_INFO")
         return self.query(query)
+
+    @connected
+    def info(self) -> SurrealResult:
+        """
+        This method returns the record of an authenticated record user.
+        The result property of the response is likely different depending on your schema and the authenticated user
+
+        :return: result of the query
+        """
+        logger.info("Query-Operation: INFO")
+        data = {"method": "info"}
+        result = self._use_rpc(data)
+        return result
 
     @connected
     def db_tables(self) -> SurrealResult:
@@ -354,6 +367,85 @@ class Connection(ABC):
         """
 
     @connected
+    def graphql(self, query: Dict, pretty: Optional[bool] = False) -> SurrealResult:
+        """
+        This method allows you to execute GraphQL queries against the database.
+        The query parameter is a dictionary with the following fields:
+        - query (required): The GraphQL query string.
+        - variables or vars (optional): An object containing variables for the query.
+        - operationName or operation (optional): The name of the operation to execute.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#graphql
+
+        Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+
+        Important Note: GraphQL validates all schemas for all tables in the database, so if there are some errors,
+        you get an error back, even if the problem is not with your data
+
+        Examples:
+        connection.graphql({"query": "{ author { id name } }"}, pretty=True)
+
+        :param query: dictionary with all parameters
+        :param pretty: optional boolean parameter, indicating whether the output should be pretty-printed.
+        :return: result of request
+        :raise WrongParameterError: if query is not valid dictionary
+        """
+        allowed_fields = ("query", "variables", "vars", "operationName", "operation")
+        if "query" not in query or any(field not in allowed_fields for field in query.keys()):
+            raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
+                                      "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
+        data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(str(query)), pretty)
+        result = self._use_rpc(data)
+        return result
+
+    @connected
+    def run(self, func_name: str, version: Optional[str] = None, args: Optional[List] = None) -> SurrealResult:
+        """
+        This method allows you to execute built-in functions, custom functions, or machine learning models with
+        optional arguments
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#run
+
+        Examples:
+        connection.run("time::now")
+
+        :param func_name: The name of the function or model to execute. Prefix with fn:: for custom functions or
+        ml:: for machine learning models.
+        :param version: optional parameter, the version of the function or model to execute. When using a machine
+        learning model (prefixed with ml::), the version parameter is required.
+        :param args: The list of arguments to pass to the function or model.
+        :return: result of request
+        """
+        data = {"method": "run", "params": [func_name]}
+        if version is not None:
+            data["params"].append(version)
+        if args is not None:
+            if len(data["params"]) == 1:
+                data["params"].append(None)
+            data["params"].append(args)
+        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", crop_data(func_name), version, args)
+        result = self._use_rpc(data)
+        return result
+
+    @connected
+    def version(self) -> SurrealResult:
+        """
+        This method returns version information about the database/server
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#version
+
+        Examples:
+        connection.version() # get version information
+
+        :return: result of request
+        """
+        data = {"method": "version"}
+        logger.info("Operation: VERSION")
+        result = self._use_rpc(data)
+        return result
+
+    @connected
     def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method selects either all records in a table or a single record
@@ -502,6 +594,31 @@ class Connection(ABC):
         return self._use_rpc(_data)
 
     @connected
+    def insert_relation(self, table_name: Optional[str], data: [Dict]) -> SurrealResult:
+        """
+        This method inserts a new relation record into the database. You can specify the relation table to insert into
+        and provide the data for the new relation.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#insert_relation
+
+        Examples:
+        connection.insert_relation("likes",{
+            "in": "user:alice",
+            "out": "post:123",
+            "since": "2024-09-15T12:34:56Z"
+        })
+
+        :param table_name: The name of the relation table to insert into. If None, the table is determined from the id
+        field in the data.
+        :param data: dict containing the data for the new relation record, including in, out, and any additional fields
+        :return: result of request
+        """
+        data = {"method": "insert_relation", "params": [table_name, data]}
+        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", crop_data(str(table_name)), crop_data(str(data)))
+        result = self._use_rpc(data)
+        return result
+
+    @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
@@ -610,6 +727,31 @@ class Connection(ABC):
         logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
         result = self._use_rpc(data)
         result.query = params[0] if len(params) == 1 else params
+        return result
+
+    @connected
+    def relate(self, relate_to: str, relation_table: str, relate_from: str,
+               data: Optional[Dict] = None) -> SurrealResult:
+        """
+        This method relates two records with a specified relation
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#relate
+
+        Examples:
+        connection.relate("person:john", "knows", "person:jane")
+
+        :param relate_to: The record to relate to
+        :param relation_table: name of the relation table
+        :param relate_from: The record to relate from
+        :param data: dict containing the data for the new record
+        :return: result of request
+        """
+        full_data = {"method": "relate", "params": [relate_to, relation_table, relate_from]}
+        if data is not None:
+            full_data["params"].append(data)
+        logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
+                    relation_table, relate_from, crop_data(str(data)))
+        result = self._use_rpc(full_data)
         return result
 
     @abstractmethod

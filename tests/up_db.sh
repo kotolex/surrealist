@@ -1,2 +1,2 @@
 #!/bin/bash
-surreal start memory --user root --pass root
+SURREAL_EXPERIMENTAL_GRAPHQL=true surreal start memory --user root --pass root

@@ -1,9 +1,9 @@
 import time
 from unittest import TestCase, main
 
+
 from tests.integration_tests.utils import URL, get_random_series
 from surrealist import Surreal, get_uuid, Database
-
 
 class TestWebSocketConnection(TestCase):
     def test_connect(self):
@@ -478,6 +478,44 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.create("ws_article", prev)
             self.assertFalse(res.is_error())
+
+    def test_run(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.run("time::now")
+            self.assertFalse(res.is_error(), res)
+
+    def test_insert_relation(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            data = {"in": "user:alice", "out": "post:3456", "since": "2024-09-15T12:34:56Z"}
+            res = connection.insert_relation("likes", data)
+            self.assertFalse(res.is_error(), res)
+
+    def test_insert_relation_none(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            data = {"id": "follows:user:alice:user:bob", "in": "user:alice", "out": "user:bob",
+                    "since": "2024-09-15T12:34:56Z"}
+            res = connection.insert_relation(None, data)
+            self.assertFalse(res.is_error(), res)
+
+    def test_version(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.version()
+            self.assertFalse(res.is_error(), res)
+
+    def test_relate(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.relate("person:tobie", "knows", "person:micha", {"since": "2024-09-15T12:34:56Z"})
+            self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

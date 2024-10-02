@@ -560,5 +560,25 @@ class Database:
         """
         return Alter(self._connection, table_name)
 
+    def run_function(self, function_name: str, version: Optional[str] = None,
+                     args: Optional[List] = None) -> SurrealResult:
+        """
+        This method allows you to execute built-in functions, custom functions, or machine learning models with
+        optional arguments
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#run
+
+        Examples:
+        connection.run("time::now") # returns current time
+
+        :param function_name: The name of the function or model to execute. Prefix with fn:: for custom functions or
+        ml:: for machine learning models.
+        :param version: optional parameter, the version of the function or model to execute. When using a machine
+        learning model (prefixed with ml::), the version parameter is required.
+        :param args: The arguments to pass to the function or model.
+        :return: result of request
+        """
+        return self._connection.run(function_name, version=version, args=args)
+
     def __repr__(self):
         return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"

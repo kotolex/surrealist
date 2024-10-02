@@ -16,6 +16,9 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.person)  # Table(name=person)
     print(db.table("person"))  # Table(name=person)
 
+    # database can run built-in functions
+    print(db.run_function("math::abs", None, [-100]).result)  # returns 100 (math::abs(-100))
+
     # database can use RETURN statement
     # Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
     print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);

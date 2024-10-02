@@ -246,6 +246,14 @@ class TestHttpConnectionNegative(TestCase):
             self.assertTrue(res.is_error())
             self.assertEqual("IAM error: Not enough permissions to perform this action", res.result)
 
+    def test_run_3_args(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.run("ml::image_classifier", "v2.1", ["image_data_base64"])
+            self.assertTrue(res.is_error(), res)
+            self.assertEqual("The model 'ml::image_classifier<v2.1>' does not exist", res.result)
+
     # TODO uncomment after bugfix
     # def test_ml_import_failed_wrong_file(self):
     #     db = Surreal(URL, credentials=('root', 'root'), use_http=True)

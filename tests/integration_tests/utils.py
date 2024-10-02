@@ -23,6 +23,7 @@ db = Surreal(URL, credentials=('root', 'root'), use_http=True)
 with db.connect() as connection:
     connection.use("test", "test")
     connection.import_data(file_path)
+    connection.query("DEFINE CONFIG GRAPHQL AUTO")  # enable graphql
 
 
 def get_random_series(length: int) -> str:

@@ -453,7 +453,6 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.info()["accesses"]), count+1)
 
-
     def test_define_access_record_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
         with surreal.connect() as connection:

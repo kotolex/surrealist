@@ -1,6 +1,6 @@
 # README #
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.0.1)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.0.2)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -11,7 +11,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (2.0.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (2.0.2), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -32,16 +32,15 @@ Please make sure you install and start SurrealDB, you can read more [here](https
 **Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
 Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
 
-|     SurrealDB version     |     2.0.0      | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
-|:-------------------------:|:--------------:| :---: |----------|----------|----------|----------|
-|    Surrealist version     |     1.0.0      | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      |    3.8-3.12    |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+|     SurrealDB version     |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
+|:-------------------------:|:--------:| :---: |----------|----------|----------|----------|
+|    Surrealist version     |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
+|      Python versions      | 3.8-3.12 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
-
+A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
 You can find a lot of examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
-A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
 ## Transports ##
 First of all, you should know that SurrealDB can work with websocket or http "transports", we chose to support both transports here, 
@@ -97,7 +96,7 @@ For example for wss://127.0.0.1:9000/some/rps predicted http url will be https:/
 
 **use_http** - optional, False by default, flag of using websockets or http transport, False mean using websocket, specify True if you want to use http transport
 
-**timeout** - optional, 5 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
+**timeout** - optional, 15 seconds by default, it is time in seconds to wait for responses and messages, time for trying to connect to SurrealDB
 
 
 **Example 2**
@@ -139,7 +138,7 @@ ws_connection = surreal.connect()  # open connection
 result = ws_connection.select("person")  # select from db
 print(result)  # print result
 ws_connection.close()  # explicitly close connection
-# after closing, we cannot use connection anymore, if you need one - create one more connection with a surreal object
+# after closing, we cannot use connection anymore if you need one - create one more connection with a surreal object
 ```
 
 ## Methods and Query Language ##
@@ -199,7 +198,7 @@ from surrealist import Database
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: # connects to Database
     iterator = db.table("user").select().iter(limit=20) # get an iterator, nothing executes on this line
     for result in iterator: # here, where actions actually start
-        print(result.count()) # just print count of results, but you cand do anything here
+        print(result.count()) # just print count of results, but you can do anything here
 ```
 
 ## Results and RecordID ##
@@ -255,7 +254,7 @@ ws_connection.select("person:john"), but no other logic performed. Do not expect
 
 ## Logging and Debug mode ##
 As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use standard logging.
-All library logs will contain "surrealist" prefix in logs. You, as a developer, should choose proper handlers, formats, filters etc.
+All library logs will contain "surrealist" prefix. You, as a developer, should choose proper handlers, formats, filters etc.
 Surrealist does not use root logger, does not use any handlers and uses only DEBUG, INFO and ERROR level for its events.
 
 For example
@@ -522,7 +521,7 @@ By default, the minimum number is equal to CPU cores count for the system.
 So any incoming request from your application will use the first non-busy connection it gets from the pool.
 
 Pay attention — new connections can be created, but old connections never be closed until the pool will be closed, so the number of connections can grow, 
-but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection will be closed, LQ stop working.
+but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection is closed, LQ stops working.
 
 **Example 13**
 
