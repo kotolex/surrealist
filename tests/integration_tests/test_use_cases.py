@@ -122,8 +122,7 @@ class TestUseCases(TestCase):
         self.assertNotEqual(first, second)
 
     def test_change_feed(self):
-        params = (True, False)
-        for use_http in params:
+        for use_http in (True, False):
             with self.subTest(f"Change feed use_http={use_http}"):
                 surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=use_http)
                 with surreal.connect() as connection:
@@ -788,6 +787,18 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").permissions_full().run()
             self.assertFalse(res.is_error(), res)
+
+    def test_datetimes_field(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            db.define_field("created_at", "datetime_table").type("datetime").default("time::now()").permissions_full().run()
+            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
+            result = connection.create("datetime_table", {'name': "zzz", 'age': 44, 'created_at': tm})
+            self.assertFalse(result.is_error(), result)
+            result = db.datetime_table.create().content({'name': "xxx", 'age': 22, 'created_at': tm}).run()
+            self.assertFalse(result.is_error(), result)
 
 
 if __name__ == '__main__':

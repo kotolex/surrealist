@@ -6,7 +6,7 @@ from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
 from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError, WrongParameterError
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass, clean_dates
 
 logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
@@ -248,11 +248,11 @@ class Connection(ABC):
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#change-feeds
 
         :param table_name: name of the table, no record_id expected here
-        :param since: str representation of ISO date-time, for example "2024-02-06T10:48:08.700483Z"
+        :param since: str representation of ISO date-time, for example d"2024-02-06T10:48:08.700483Z"
         :param limit: amount of changes to get
         :return: result of the query
         """
-        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE d"{since}" LIMIT {limit};'
+        query = f'SHOW CHANGES FOR TABLE {table_name} SINCE {since} LIMIT {limit};'
         return self.query(query)
 
     @abstractmethod
@@ -720,6 +720,7 @@ class Connection(ABC):
         :param variables: a set of variables used by the query
         :return: result of request
         """
+        query = clean_dates(query)
         params = [query]
         if variables is not None:
             params.append(variables)
