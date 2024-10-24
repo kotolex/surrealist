@@ -55,17 +55,30 @@ def crop_data(data: Union[str, bytes], is_str: bool = True) -> Union[str, bytes]
 
 def to_surreal_datetime_str(dt: datetime.datetime) -> str:
     """
-    Convert datetime to string in Surreal format, for example: 2024-04-18T11:34:41.665249Z
+    Convert datetime to string in Surreal format, for example: d'2024-04-18T11:34:41.665249Z'
     :param dt: datetime object
     :return: string representation of the datetime
     """
-    return dt.strftime(DATE_FORMAT_NS)
+    return f"d'{dt.strftime(DATE_FORMAT_NS)}'"
 
 
 def to_datetime(dt_str: str) -> datetime.datetime:
     """
     Convert string in Surreal format to datetime object
-    :param dt_str: string datetime representation in Surreal format (e.g. 2024-04-18T11:34:41.665249Z)
+    :param dt_str: string datetime representation in Surreal format (e.g. d'2024-04-18T11:34:41.665249Z')
     :return: datetime object
     """
+    if "d'" in dt_str:
+        dt_str = dt_str.rstrip("'").replace("d'", "")
+    elif 'd"' in dt_str:
+        dt_str = dt_str.rstrip('"').replace('d"', '')
     return datetime.datetime.strptime(dt_str, DATE_FORMAT_NS)
+
+
+def clean_dates(data: str) -> str:
+    """
+    Get surreal dates with d' prefix out of quotes
+    :param data: some Surreal query
+    :return: data with valid Surreal dates
+    """
+    return re.sub(r'["\'](d(["\']).+?)["\']+', r'\1\2', data)

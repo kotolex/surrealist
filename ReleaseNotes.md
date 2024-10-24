@@ -1,4 +1,10 @@
 ## Release Notes ##
+**Version 1.0.3 (compatible with SurrealDB version 2.0.4):**
+- fix datetime bug for fields (prefix d')
+- add tests, examples and docs for datetimes
+- add test runs for Python 3.13
+
+
 **Version 1.0.2 (compatible with SurrealDB version 2.0.2):**
 - minor fixes
 

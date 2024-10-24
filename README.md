@@ -4,7 +4,7 @@ Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrea
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
-Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.12)
+Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.13)
 
 #### Key features: ####
 
@@ -35,7 +35,7 @@ Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
 |     SurrealDB version     |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
 |:-------------------------:|:--------:| :---: |----------|----------|----------|----------|
 |    Surrealist version     |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      | 3.8-3.12 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+|      Python versions      | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
 A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
@@ -251,6 +251,28 @@ otherwise, you can't find your record
 ws_connection.select("person", record_id="john") under the hood became
 ws_connection.select("person:john"), but no other logic performed. Do not expect we specified "`" for you.
 
+## Surreal Datetime ##
+SurrealDB never converts values we send to it, so we need to explicitly use datetimes. 
+For example, if you have a datetime field in your table:
+
+`DEFINE FIELD create_time ON person TYPE datetime DEFAULT time::now() PERMISSIONS FULL;`
+
+you need to use datetime with prefix to add a new record with that field
+
+```python
+from datetime import datetime, timezone
+from surrealist import Surreal, to_surreal_datetime_str
+
+surreal = Surreal("http://127.0.0.1:8000", credentials=("root", "root"))
+with surreal.connect() as ws_connection:
+    ws_connection.use("test", "test")
+    tm = to_surreal_datetime_str(datetime.now(timezone.utc))  # get current time in surreal format d'2024-10-22T16:18:59.367084Z'
+    result = ws_connection.create("person", {'name': "zzz", 'age': 44, 'active': True, 'create_time': tm})
+```
+
+but if you just use datetime string without d-prefix, you will get an error back
+
+```Found '2024-10-22T13:54:40.445833Z' for field `create_time`, with record `person:p8vji2zhvr8z7frhsaex`, but expected a datetime```
 
 ## Logging and Debug mode ##
 As it was said, if you need to debug something, stuck in some problem or just want to know all about data between you and SurrealDB, you can use standard logging.
@@ -456,7 +478,7 @@ Let's set up everything:
 DEFINE TABLE reading CHANGEFEED 1d;
 ```
 
-**Note:** date and time of your requests should be strict AFTER date and time of creating `reading`
+**Note:** date and time of your requests should be strict AFTER date and time of creating `reading` and it should have d'-prefix
 
 **Example 11**
 
@@ -467,12 +489,12 @@ from surrealist import Surreal
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
     # Again, 2024-02-06T10:48:08.700483Z - is a moment AFTER the table was created
-    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
+    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE d"2024-02-06T10:48:08.700483Z" LIMIT 10;')
     print(res.result) # it will be [] cause no events happen
     # now we add one record
     connection.query('CREATE reading set story = "long long time ago";')    
     # check again
-    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE "2024-02-06T10:48:08.700483Z" LIMIT 10;')
+    res = connection.query('SHOW CHANGES FOR TABLE reading SINCE d"2024-02-06T10:48:08.700483Z" LIMIT 10;')
     print(res.result) 
 ```
 in the console, you will see
