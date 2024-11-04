@@ -1,7 +1,7 @@
 from typing import Optional, Tuple, Union, List
 
 from surrealist.connections import Connection
-from surrealist.utils import OK
+from surrealist.utils import OK, StrOrRecord, get_table_or_record_id
 from .select_statements import SelectUseIndex, SelectUseTempfiles
 from .statement import Statement, IterableStatement
 
@@ -69,13 +69,13 @@ class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):
         if self._value:
             self._what = f"VALUE {self._value}"
 
-    def by_id(self, record_id: str) -> "Select":
+    def by_id(self, record_id: StrOrRecord) -> "Select":
         """
-        Select table_name:record_id
+        Will select by given id SELECT @fields from table:record_id
 
         :param record_id: id of the record to select
         """
-        self._from = f"{self._table_name}:{record_id}"
+        self._from = get_table_or_record_id(self._table_name, record_id)
         return self
 
     def only(self) -> "Select":

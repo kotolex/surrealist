@@ -1,10 +1,18 @@
 from enum import Enum, auto
 
 
+class Transport(Enum):
+    """
+    Represents different types of transport for connection
+    """
+    HTTP = "http"
+    WEBSOCKET = "websocket"
+
+
 class Algorithm(Enum):
     """
     Represents different types of cryptographic algorithms to use for token verification
-    https://github.com/surrealdb/surrealdb/blob/main/core/src/iam/verify.rs#L17-L72
+    Refer to: https://github.com/surrealdb/surrealdb/blob/main/core/src/iam/verify.rs#L17-L72
     """
     HS256 = auto()
     HS384 = auto()

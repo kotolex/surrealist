@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL
-from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError
+from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError
 from surrealist import Surreal, get_uuid
 
 
@@ -20,8 +20,8 @@ class TestHttpConnectionNegative(TestCase):
             connection.use("test", "test")
             uid = get_uuid()
             uid2 = get_uuid()
-            res = connection.create(f"article:`{uid}`", {"author": uid, "title": uid, "text": uid}, record_id=uid2)
-            self.assertEqual(res.status, "ERR", res)
+            with self.assertRaises(SurrealRecordIdError):
+                connection.create(f"article:`{uid}`", {"author": uid, "title": uid, "text": uid}, record_id=uid2)
 
     def test_create_many_failed(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -32,19 +32,6 @@ class TestHttpConnectionNegative(TestCase):
             res = connection.create("article", [{"id": uid, "author": uid, "title": uid, "text": uid},
                                                 {"id": uid2, "author": uid2, "title": uid2, "text": uid2}])
             self.assertEqual(res.status, "ERR", res)
-
-    def test_update_many_works(self):
-        db = Surreal(URL, credentials=('root', 'root'), use_http=True)
-        with db.connect() as connection:
-            connection.use("test", "test")
-            uid = get_uuid()
-            uid2 = get_uuid()
-            connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-            res = connection.update("article", [{"author": "inserted", "title": uid, "text": uid},
-                                                {"author": "inserted", "title": uid2, "text": uid2},
-                                                ], record_id=uid)
-            self.assertFalse(res.is_error(), res)
-
 
     def test_query_failed(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)

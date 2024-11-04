@@ -24,6 +24,4 @@ class Upsert(Update):
     """
 
     def _clean_str(self):
-        what = "" if not self._only else " ONLY"
-        table = self._table_name if not self._record_id else f"{self._table_name}:{self._record_id}"
-        return f"UPSERT{what} {table}"
+        return f"UPSERT{super()._clean_str().lstrip('UPDATE')}"

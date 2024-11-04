@@ -14,7 +14,7 @@ class TestDatabasePool(TestCase):
     def test_check_pool(self):
         for use in (True, False):
             with self.subTest(f"check pool(use_http={use}"):
-                with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True,
+                with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=use,
                                              min_connections=2, max_connections=10) as db:
                     self.assertEqual(text, str(db))
                     self.assertTrue("tables" in db.info())
@@ -24,8 +24,9 @@ class TestDatabasePool(TestCase):
                     self.assertEqual(2, db.min_connections)
                     self.assertEqual(10, db.max_connections)
                     self.assertEqual(2, db.connections_count)
-                    self.assertEqual("Table(name=person)", str(db.person))
-                    self.assertEqual("Table(name=person)", str(db.table("person")))
+                    res = 'http' if use else 'websocket'
+                    self.assertEqual(f"Table(name=person, connection with {res} transport)", str(db.person))
+                    self.assertEqual(f"Table(name=person, connection with {res} transport)", str(db.table("person")))
                     self.assertTrue(db.some_table.count() >= 0)
                     self.assertEqual(db.raw_query("Return 1;").result, 1)
                     self.assertEqual(db.returns("1").run().result, 1)

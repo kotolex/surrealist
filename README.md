@@ -201,7 +201,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "
         print(result.count()) # just print count of results, but you can do anything here
 ```
 
-## Results and RecordID ##
+## Results##
 If the method of connection is not raised, it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
 
 Please see [examples](https://github.com/kotolex/surrealist/blob/master/examples/result.py)
@@ -224,35 +224,39 @@ Besides, a result object has helper methods **is_empty**, **id**, **ids**, **get
 
 You need to read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
 
-For support and compatibility reasons, there are two ways to specify recordID in method.
-Let's consider CREATE method, for example:
+## Using RecordID ##
+Since version 2.0, SurrealDB never converts strings to record_id, so we have to manage it ourselves.
+
+RecordId object exists for that purpose, 
+you can see examples [here](https://github.com/kotolex/surrealist/blob/master/examples/record_id.py)
+
+Although for backward compatibility, you still can use record_id in string format, 
+it is strongly recommended to use RecordId instead!
+
+**Note**: RecordId object supports only string or uid/ulid type ids, if you need ranges, object or aray type record_id, 
+you should create valid query and use connection.query() method
+
+Here we create new person, get record id, wraps in RecordId and use for select:
 ```python
-# all the same
-ws_connection.create("person:john", {"name":"John Doe"})
-ws_connection.create("person", {"name":"John Doe"}, record_id="john")
+from surrealist import RecordId
+result = ws_connection.create("person", {"name": "John Doe"})
+record_id = result.id  # person:34vepp6apg0np2sdstle
+print(ws_connection.select("person", record_id=RecordId(record_id)).result)  # [{'id': 'person:34vepp6apg0np2sdstle', 'name': 'John Doe'}]
 ```
-These function calls are the same, so, as you can see, recordID can be specified:
- - in table name after colon, for example, "person:john"
- - in record_id argument
 
-**Attention!** Using recordID 2 times in one method will cause error on SurrealDB side, for example
-`ws_connection.select("person:john", record_id="john")` is invalid call, id should be specified only once.
-
-**Important note:** uuid-type recordID, like 8424486b-85b3-4448-ac8d-5d51083391c7 should be specified with "`" backticks, for example
+Simple record_id can have only A-Z, a-z letters and digits 0-9, for any other UTF-8 letters RecordId will generate valid representation with special braces:
 ```python
-ws_connection.select("person:`8424486b-85b3-4448-ac8d-5d51083391c7`")
-ws_connection.select("person", record_id="`8424486b-85b3-4448-ac8d-5d51083391c7`")
+from surrealist import get_uuid, RecordId
+uuid = get_uuid()  # 6e796db2-8322-4056-b63f-0f1812f6e075
+record_id = RecordId(uuid, table="person")
+print(record_id.to_valid_string())  # person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩
+create_result = ws_connection.create("person", {"name": "tobie", "age": 30}, record_id)
+print(create_result.result) # {'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}
+print(ws_connection.select("person", record_id=record_id).result) # [{'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}]
 ```
-otherwise, you can't find your record
-
-**Important note for UTF-8:** record_id can have only A-Z, a-z letters, if you want to use any other UTF-8 letters you have to use backticks "`"!
-
-**Note:** record_id parameter of methods is only concatenated with table_name and colon, so
-ws_connection.select("person", record_id="john") under the hood became
-ws_connection.select("person:john"), but no other logic performed. Do not expect we specified "`" for you.
 
 ## Surreal Datetime ##
-SurrealDB never converts values we send to it, so we need to explicitly use datetimes. 
+Since version 2.0 SurrealDB never converts values, we send to it, so we need to explicitly use datetime. 
 For example, if you have a datetime field in your table:
 
 `DEFINE FIELD create_time ON person TYPE datetime DEFAULT time::now() PERMISSIONS FULL;`

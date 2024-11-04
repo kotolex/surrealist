@@ -13,7 +13,7 @@ text = """BEGIN TRANSACTION;
 
 CREATE author CONTENT {"name": "john", "id": "john"};
 CREATE book CONTENT {"title": "Title", "author": "author:john"};
-UPDATE counter:author_count SET count +=1;
+UPDATE counter:authorcount SET count +=1;
 
 COMMIT TRANSACTION;"""
 
@@ -22,7 +22,7 @@ class TestDatabase(TestCase):
     def test_tr(self):
         create_author = Create(None, "author").content({"name": "john", "id": "john"})
         create_book = Create(None, "book").content({"title": "Title", "author": "author:john"})
-        counter_inc = Update(None, "counter", "author_count").set("count +=1")
+        counter_inc = Update(None, "counter", "authorcount").set("count +=1")
 
         transaction = Transaction(None, [create_author, create_book, counter_inc])
         self.assertEqual(text, transaction.to_str())

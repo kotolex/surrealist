@@ -5,6 +5,7 @@ from typing import Optional, Tuple, Dict, Union, Callable, Any
 
 from surrealist.clients.ws_client import WebSocketClient
 from surrealist.connections.connection import Connection, connected
+from surrealist.enums import Transport
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, WebSocketConnectionClosedError,
                                CompatibilityError)
 from surrealist.result import SurrealResult
@@ -93,6 +94,9 @@ class WebSocketConnection(Connection):
                     logger.error("Error on connecting to %s. Info %s", self._base_url, signin_result)
                     raise WebSocketConnectionError(f"Error on connecting to '{self._base_url}'.\nInfo: {signin_result}")
                 self._token = signin_result.result
+
+    def transport(self) -> Transport:
+        return Transport.WEBSOCKET
 
     @connected
     def use(self, namespace: str, database: Optional[str] = None) -> SurrealResult:

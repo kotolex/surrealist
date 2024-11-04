@@ -1,14 +1,9 @@
-import json
 from typing import List, Dict
 
 from surrealist.connections import Connection
 from surrealist.ql.statements.insert_statements import InsertUseDuplicate
 from surrealist.ql.statements.statement import Statement
-from surrealist.utils import OK
-
-"""
-
-"""
+from surrealist.utils import OK, safe_dumps
 
 
 class Insert(Statement, InsertUseDuplicate):
@@ -64,9 +59,9 @@ class Insert(Statement, InsertUseDuplicate):
     def _clean_str(self):
         args = self._args
         if len(args) == 1:
-            what = f"({args[0]._clean_str()})" if isinstance(args[0], Statement) else json.dumps(args[0])
+            what = f"({args[0]._clean_str()})" if isinstance(args[0], Statement) else safe_dumps(args[0])
         else:
             names = f"({', '.join(args[0])})"
-            data = ", ".join(str(e) for e in args[1:])
+            data = ", ".join(safe_dumps(e) for e in args[1:])
             what = f"{names} VALUES {data}"
         return f"INSERT INTO {self._table_name} {what}"

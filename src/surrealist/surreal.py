@@ -105,6 +105,8 @@ class Surreal:
         credentials parameters, so can raise exception if connect will fail. If this method succeeded, you are
         ready to go with SurrealDB
 
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/connect.py
+
         :return: connection object to work with SurrealDB
         :raise SurrealConnectionError: if cant connect with specified parameters
         """

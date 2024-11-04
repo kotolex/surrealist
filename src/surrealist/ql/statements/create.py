@@ -3,7 +3,7 @@ from typing import List, Optional
 from surrealist.connections import Connection
 from surrealist.ql.statements.create_statements import CreateUseSetContent
 from surrealist.ql.statements.statement import Statement
-from surrealist.utils import OK
+from surrealist.utils import OK, StrOrRecord, get_table_or_record_id
 
 
 class Create(Statement, CreateUseSetContent):
@@ -23,7 +23,7 @@ class Create(Statement, CreateUseSetContent):
     [ PARALLEL ];
     """
 
-    def __init__(self, connection: Connection, table_name: str, record_id: Optional[str] = None):
+    def __init__(self, connection: Connection, table_name: str, record_id: Optional[StrOrRecord] = None):
         """
         Init for Create
         :param connection: connection relied on
@@ -34,6 +34,7 @@ class Create(Statement, CreateUseSetContent):
         self._table_name = table_name
         self._only = False
         self._record_id = record_id
+        self._name = get_table_or_record_id(self._table_name, record_id)
 
     def only(self) -> "Create":
         """
@@ -47,5 +48,4 @@ class Create(Statement, CreateUseSetContent):
 
     def _clean_str(self):
         only = "" if not self._only else " ONLY"
-        name = self._table_name if not self._record_id else f"{self._table_name}:{self._record_id}"
-        return f"CREATE{only} {name}"
+        return f"CREATE{only} {self._name}"

@@ -9,6 +9,8 @@ class SurrealResult:
     """
     Represents a result of the request both via http or websocket.
     Contains a few helpers to work with results of different kinds: id, ids, get, is_error, is_empty
+
+    Examples: https://github.com/kotolex/surrealist/blob/master/examples/result.py
     """
 
     def __init__(self, **kwargs):

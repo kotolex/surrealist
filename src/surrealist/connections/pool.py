@@ -6,6 +6,7 @@ from threading import Thread
 from typing import Optional, Tuple, Dict, Callable, Any
 
 from surrealist.connections.connection import Connection
+from surrealist.enums import Transport
 from surrealist.errors import OperationOnClosedConnectionError
 from surrealist.result import SurrealResult
 from surrealist.surreal import Surreal
@@ -20,6 +21,7 @@ def connected_and_pooled(func):
     Wrapper to check if pool is connected ad delegate work to underlying connections
     :param func: function to wrap
     """
+
     @wraps(func)
     def wrapped(*args, **kwargs):
         # args[0] is a self-argument in methods
@@ -35,12 +37,13 @@ def connected_and_pooled(func):
 class Pool:
     """
     Represents a pool of connections, which is creating a bunch of database connections on start and delegating all
-    tasks to the first non-busy connection. So, if there are no nore connections in the pool, it tries to create a new
+    tasks to the first non-busy connection. So, if there are no more connections in the pool, it tries to create a new
     one if the maximum is not exceeded. If the maximum of connections is reached and no more connections to work with -
     client will be blocked until the first connection finishes the task and appears at the pool.
     """
+
     def __init__(self, first_connection: Connection, url: str, namespace: Optional[str] = None,
-                 database: Optional[str] = None, access: Optional[str] =None, credentials: Tuple[str, str] = None,
+                 database: Optional[str] = None, access: Optional[str] = None, credentials: Tuple[str, str] = None,
                  use_http: bool = False, timeout: int = DEFAULT_TIMEOUT, min_connections: int = CORES_COUNT,
                  max_connections: int = 50):
         self._options = {
@@ -56,6 +59,9 @@ class Pool:
         self._counter = 1
         self._connected = True
         self._start()
+
+    def transport(self) -> Transport:
+        return Transport.HTTP if self._options["use_http"] else Transport.WEBSOCKET
 
     @property
     def connections_count(self) -> int:

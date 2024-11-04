@@ -1,9 +1,9 @@
-import json
 from typing import Dict, List, Optional
 
 from surrealist.ql.statements.common_statements import CanUseWhere
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.ql.statements.utils import combine
+from surrealist.utils import safe_dumps
 
 
 class Set(FinishedStatement, CanUseWhere):
@@ -41,7 +41,7 @@ class Patch(FinishedStatement, CanUseWhere):
         self._value = operations
 
     def _clean_str(self):
-        return f"{self._statement._clean_str()} PATCH {json.dumps(self._value)}"
+        return f"{self._statement._clean_str()} PATCH {safe_dumps(self._value)}"
 
 
 class Merge(FinishedStatement, CanUseWhere):
@@ -57,7 +57,7 @@ class Merge(FinishedStatement, CanUseWhere):
         self._value = value
 
     def _clean_str(self):
-        return f"{self._statement._clean_str()} MERGE {json.dumps(self._value)}"
+        return f"{self._statement._clean_str()} MERGE {safe_dumps(self._value)}"
 
 
 class Content(FinishedStatement, CanUseWhere):
@@ -73,7 +73,7 @@ class Content(FinishedStatement, CanUseWhere):
         self._value = value
 
     def _clean_str(self):
-        return f"{self._statement._clean_str()} CONTENT {json.dumps(self._value)}"
+        return f"{self._statement._clean_str()} CONTENT {safe_dumps(self._value)}"
 
 
 class UpdateUseMethods(CanUseWhere):

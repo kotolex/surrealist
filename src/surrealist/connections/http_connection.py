@@ -4,6 +4,7 @@ from typing import Tuple, Dict, Optional, Union, Any, BinaryIO
 
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
+from surrealist.enums import Transport
 from surrealist.errors import (CompatibilityError, HttpConnectionError, HttpClientError, SurrealConnectionError)
 from surrealist.result import SurrealResult, to_result
 from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, crop_data, HTTP_OK, NS, DB, AC)
@@ -60,6 +61,9 @@ class HttpConnection(Connection):
             raise SurrealConnectionError(f"Cant connect to {url}\n"
                                          f"Is your SurrealDB started and work on that url? "
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
+
+    def transport(self) -> Transport:
+        return Transport.HTTP
 
     @connected
     def import_data(self, path: Union[str, Path]) -> SurrealResult:
