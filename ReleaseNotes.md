@@ -4,6 +4,7 @@
 - create RecordId object to work with string or uid/ulid record_id
 - now all methods can use RecordId, but strings can be used too for compatibility
 - now connection, database and table objects store transport type (http or ws)
+- redundant DATA_LENGTH_FOR_LOGS was removed
 - refactoring
 - add tests, examples and docs for record ids
 

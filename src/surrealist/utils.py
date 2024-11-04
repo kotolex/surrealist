@@ -16,16 +16,10 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 DATE_FORMAT_NS = "%Y-%m-%dT%H:%M:%S.%fZ"
 HTTP_OK = 200  # status code for success
 DEFAULT_TIMEOUT = 15  # timeout in seconds for basic operations
-DATA_LENGTH_FOR_LOGS = 300  # size of data in logs, data will be cropped if bigger than that
 LOG_FORMAT = '%(asctime)s : %(threadName)s : %(name)s : %(levelname)s : %(message)s'  # use it for logs
 NS = "NS"
 DB = "DB"
 AC = "AC"
-
-
-def _set_length(length: int):
-    global DATA_LENGTH_FOR_LOGS
-    DATA_LENGTH_FOR_LOGS = length
 
 
 def get_uuid() -> str:
@@ -44,19 +38,6 @@ def mask_pass(text: str) -> str:
     :return: text without visible passwords
     """
     return re.sub(r"(?ms)(?<=['\"]pass['\"]: ['\"]).*?(?=['\"])", '******', text)
-
-
-def crop_data(data: Union[str, bytes], is_str: bool = True) -> Union[str, bytes]:
-    """
-    Crop the data to maximum size, no actions if data is smaller, work with str and bytes in logs
-
-    :param data: str or bytes of data to put it in the logs
-    :param is_str: a flag to use correct operation
-    :return: data of the same type, but cropped if it is bigger than DATA_LENGTH_FOR_LOGS
-    """
-    if len(data) > DATA_LENGTH_FOR_LOGS:
-        return f"{data[:DATA_LENGTH_FOR_LOGS]}..." if is_str else data[:DATA_LENGTH_FOR_LOGS] + b'...'
-    return data
 
 
 def to_surreal_datetime_str(dt: datetime.datetime) -> str:

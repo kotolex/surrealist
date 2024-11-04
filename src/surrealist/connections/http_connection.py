@@ -7,7 +7,7 @@ from surrealist.connections.connection import Connection, connected
 from surrealist.enums import Transport
 from surrealist.errors import (CompatibilityError, HttpConnectionError, HttpClientError, SurrealConnectionError)
 from surrealist.result import SurrealResult, to_result
-from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, crop_data, HTTP_OK, NS, DB, AC)
+from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, HTTP_OK, NS, DB, AC)
 
 logger = getLogger("surrealist.connections.http")
 
@@ -79,7 +79,7 @@ class HttpConnection(Connection):
         :return: result of request
         """
         with open(path, 'rb') as file:
-            logger.info("Operation: IMPORT. Path: %s", crop_data(str(path)))
+            logger.info("Operation: IMPORT. Path: %s", path)
             _, text = self._simple_request("POST", "import", file, type_of_content="FILE")
         return to_result(text)
 
@@ -111,7 +111,7 @@ class HttpConnection(Connection):
         :return: result of request
         """
         with open(path, 'rb') as file:
-            logger.info("Operation: ML IMPORT. Path: %s", crop_data(str(path)))
+            logger.info("Operation: ML IMPORT. Path: %s", path)
             _, text = self._simple_request("POST", "ml/import", file.read().decode(ENCODING), type_of_content="STR")
         return to_result(text)
 
@@ -150,7 +150,7 @@ class HttpConnection(Connection):
         :param database: name of the database to use (optional)
         :return: None
         """
-        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database or "None"))
+        logger.info("Operation: USE. Namespace: %s, database %s", namespace, database or "None")
         self._db_params = {NS: namespace}
         if database:
             self._db_params[DB] = database
@@ -209,7 +209,7 @@ class HttpConnection(Connection):
     def _simple_get(self, endpoint: str) -> Tuple[int, str]:
         with self._http_client.get(endpoint) as resp:
             status, text = resp.status, resp.read().decode(ENCODING)
-            _body = "is empty" if not text else crop_data(text)
+            _body = "is empty" if not text else text
             logger.info("Response from /%s, status_code: %s, body: %s", endpoint, status, _body)
             return status, text
 
@@ -222,7 +222,7 @@ class HttpConnection(Connection):
             status, text = resp.status, resp.read().decode(ENCODING)
             if type_of_content == "FILE":
                 data.close()
-            _body = "is empty" if not text else crop_data(text)
+            _body = "is empty" if not text else text
             logger.info("Response from /%s, status_code: %s, body %s", endpoint, status, _body)
         return status, text
 

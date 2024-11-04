@@ -9,7 +9,7 @@ from surrealist.enums import Transport
 from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, WebSocketConnectionClosedError,
                                CompatibilityError)
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC
+from surrealist.utils import DEFAULT_TIMEOUT, NS, DB, AC
 
 logger = getLogger("surrealist.connections.websocket")
 
@@ -122,7 +122,7 @@ class WebSocketConnection(Connection):
             raise CompatibilityError(msg)
         params = [namespace, database]
         data = {"method": "use", "params": params}
-        logger.info("Operation: USE. Namespace: %s, database %s", crop_data(namespace), crop_data(database or "None"))
+        logger.info("Operation: USE. Namespace: %s, database %s", namespace, database or "None")
         result = self._run(data)
         if not result.is_error():
             # if USE was OK we need to store new data (ns and db)
@@ -155,7 +155,7 @@ class WebSocketConnection(Connection):
         if return_diff:
             params.append(True)
         data = {"method": "live", "params": params}
-        logger.info("Operation: LIVE. Data: %s", crop_data(str(params)))
+        logger.info("Operation: LIVE. Data: %s", params)
         return self._run(data, callback)
 
     @connected
@@ -180,7 +180,7 @@ class WebSocketConnection(Connection):
         :return: result of request with the live_id in 'result' field
         """
         data = {"method": "query", "params": [custom_query], "additional": "live"}
-        logger.info("Operation: CUSTOM LIVE. Query: %s", crop_data(custom_query))
+        logger.info("Operation: CUSTOM LIVE. Query: %s", custom_query)
         result = self._run(data, callback)
         result.query = custom_query
         return result
@@ -198,7 +198,7 @@ class WebSocketConnection(Connection):
         :return: result of request
         """
         data = {"method": "kill", "params": [live_query_id]}
-        logger.info("Operation: KILL. Live_id: %s", crop_data(live_query_id))
+        logger.info("Operation: KILL. Live_id: %s", live_query_id)
         return self._run(data)
 
     def export(self):
@@ -267,5 +267,5 @@ class WebSocketConnection(Connection):
 
     def _run(self, data, callback: Callable = None) -> SurrealResult:
         result = self._client.send(data, callback)
-        logger.info("Got result: %s", crop_data(str(result)))
+        logger.info("Got result: %s", result)
         return result

@@ -1,7 +1,7 @@
 import datetime
 from unittest import TestCase, main
 
-from surrealist.utils import (to_datetime, to_surreal_datetime_str, crop_data, mask_pass, clean_dates,
+from surrealist.utils import (to_datetime, to_surreal_datetime_str, mask_pass, clean_dates,
                               dict_to_json_str,
                               RecordId, list_to_json_str, tuple_to_json_str)
 
@@ -14,12 +14,6 @@ class TestUtils(TestCase):
 
     def test_to_surreal_datetime_str(self):
         self.assertEqual(to_surreal_datetime_str(datetime.datetime(2018, 1, 1, 0, 0)), "d'2018-01-01T00:00:00.000000Z'")
-
-    def test_crop_same(self):
-        self.assertEqual(crop_data("one"), "one")
-
-    def test_crop_data(self):
-        self.assertEqual(crop_data("*" * 400), "*" * 300 + "...")
 
     def test_mask_pass(self):
         self.assertEqual(mask_pass(

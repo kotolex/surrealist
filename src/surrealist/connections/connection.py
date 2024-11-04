@@ -7,7 +7,7 @@ from surrealist.enums import Transport
 from surrealist.errors import OperationOnClosedConnectionError, WrongParameterError
 from surrealist.record_id import RecordId
 from surrealist.result import SurrealResult
-from surrealist.utils import (DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass, clean_dates, StrOrRecord,
+from surrealist.utils import (DEFAULT_TIMEOUT, NS, DB, AC, mask_pass, clean_dates, StrOrRecord,
                               get_table_or_record_id)
 
 logger = getLogger("surrealist.connection")
@@ -89,7 +89,7 @@ class Connection(ABC):
         :param table_name: name of the table
         :return: result containing count, like SurrealResult(id='', error=None, result=[{'count': 1}], time='123.333µs')
         """
-        logger.info("Query-Operation: COUNT. Table: %s", crop_data(table_name))
+        logger.info("Query-Operation: COUNT. Table: %s", table_name)
         result = self.query(f"SELECT count() FROM {table_name} GROUP ALL;")
         if not result.is_error():
             result.result = self._get_count(result.result)
@@ -284,7 +284,7 @@ class Connection(ABC):
         if access is not None:
             params[AC] = access
         data = {"method": "signin", "params": [params]}
-        logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(params))))
+        logger.info("Operation: SIGNIN. Data: %s", mask_pass(str(params)))
         return self._use_rpc(data)
 
     @abstractmethod
@@ -318,7 +318,7 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "let", "params": [name, value]}
-        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
+        logger.info("Operation: LET. Name: %s, Value: %s", name, value)
         return self._use_rpc(data)
 
     @connected
@@ -333,7 +333,7 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "unset", "params": [name]}
-        logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
+        logger.info("Operation: UNSET. Variable name: %s", name)
         return self._use_rpc(data)
 
     @abstractmethod
@@ -398,7 +398,7 @@ class Connection(ABC):
             raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
                                       "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
         data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
-        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(str(query)), pretty)
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
         result = self._use_rpc(data)
         return result
 
@@ -427,7 +427,7 @@ class Connection(ABC):
             if len(data["params"]) == 1:
                 data["params"].append(None)
             data["params"].append(args)
-        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", crop_data(func_name), version, args)
+        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", func_name, version, args)
         result = self._use_rpc(data)
         return result
 
@@ -471,7 +471,7 @@ class Connection(ABC):
         """
         table_name = get_table_or_record_id(table_name, record_id)
         data = {"method": "select", "params": [table_name]}
-        logger.info("Operation: SELECT. Table: %s", crop_data(table_name))
+        logger.info("Operation: SELECT. Table: %s", table_name)
         result = self._use_rpc(data)
         if not isinstance(result.result, List) and not result.is_error():
             result.result = [result.result] if result.result else []
@@ -506,7 +506,7 @@ class Connection(ABC):
                 record_id = RecordId(record_id, table=table_name)
             data["id"] = record_id.to_valid_string()
         _data = {"method": "create", "params": [table_name, data]}
-        logger.info("Operation: CREATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: CREATE. Table: %s, data: %s", table_name, data)
         result = self._use_rpc(_data)
         if isinstance(result.result, List) and len(result.result) == 1:
             result.result = result.result[0]
@@ -541,7 +541,7 @@ class Connection(ABC):
         """
         table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "update", "params": [table_name, data]}
-        logger.info("Operation: UPDATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: UPDATE. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -571,7 +571,7 @@ class Connection(ABC):
         """
         table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "upsert", "params": [table_name, data]}
-        logger.info("Operation: UPSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: UPSERT. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -596,7 +596,7 @@ class Connection(ABC):
         :return: result of request
         """
         _data = {"method": "insert", "params": [table_name, data]}
-        logger.info("Operation: INSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: INSERT. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -620,7 +620,7 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "insert_relation", "params": [table_name, data]}
-        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", crop_data(str(table_name)), crop_data(str(data)))
+        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", table_name, data)
         result = self._use_rpc(data)
         return result
 
@@ -645,7 +645,7 @@ class Connection(ABC):
         """
         table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "merge", "params": [table_name, data]}
-        logger.info("Operation: MERGE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: MERGE. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -670,7 +670,7 @@ class Connection(ABC):
         """
         table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "delete", "params": [table_name]}
-        logger.info("Operation: DELETE. Table: %s", crop_data(table_name))
+        logger.info("Operation: DELETE. Table: %s", table_name)
         return self._use_rpc(_data)
 
     @connected
@@ -704,8 +704,7 @@ class Connection(ABC):
         if return_diff:
             params.append(return_diff)
         _data = {"method": "patch", "params": params}
-        logger.info("Operation: PATCH. Table: %s, data: %s, use DIFF: %s", crop_data(table_name), crop_data(str(data)),
-                    return_diff)
+        logger.info("Operation: PATCH. Table: %s, data: %s, use DIFF: %s", table_name, data, return_diff)
         return self._use_rpc(_data)
 
     @connected
@@ -731,7 +730,7 @@ class Connection(ABC):
         if variables is not None:
             params.append(variables)
         data = {"method": "query", "params": params}
-        logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
+        logger.info("Operation: QUERY. Query: %s, variables: %s", query, variables)
         result = self._use_rpc(data)
         result.query = params[0] if len(params) == 1 else params
         return result
@@ -757,7 +756,7 @@ class Connection(ABC):
         if data is not None:
             full_data["params"].append(data)
         logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
-                    relation_table, relate_from, crop_data(str(data)))
+                    relation_table, relate_from, data)
         result = self._use_rpc(full_data)
         return result
 

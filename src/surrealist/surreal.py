@@ -7,7 +7,7 @@ from surrealist.connections.connection import Connection
 from surrealist.connections.http_connection import HttpConnection
 from surrealist.connections.ws_connection import WebSocketConnection
 from surrealist.errors import HttpClientError, SurrealConnectionError, ConnectionParametersError
-from surrealist.utils import DEFAULT_TIMEOUT, _set_length, DATA_LENGTH_FOR_LOGS, ENCODING, OK, HTTP_OK, NS, DB, AC
+from surrealist.utils import DEFAULT_TIMEOUT, ENCODING, OK, HTTP_OK, NS, DB, AC
 
 logger = getLogger("surrealist")
 
@@ -41,7 +41,6 @@ class Surreal:
         It is strongly recommended to use websocket transport as it is more powerful.
         :param timeout: connection timeout in seconds
         """
-        self._log_data_length = DATA_LENGTH_FOR_LOGS
         self._client = HttpConnection if use_http else WebSocketConnection
         self.db_params = {}
         if namespace:
@@ -85,19 +84,6 @@ class Surreal:
             _url = urllib.parse.urlparse(url.lower())
             self._possible_url = f"{_url.scheme.replace('ws', 'http')}://{_url.netloc}/"
             logger.info("Predicted url is: %s", self._possible_url)
-
-    def set_log_length_for_data(self, length: int):
-        """
-        Setting maximum string length for object(json) in logs, it is not always desirable to see all data that comes
-        in and out in logs, because some objects(jsons) can be very large, but for debug purposes you can increase it
-        to see the full picture. However, it is not recommended to set length too small for speed reasons, or set it
-        too large, except when you are in the debug mode. Default is 300 chars, which is enough for standard
-        SurrealDB messages.
-
-        :param length: new maximum length for one string in logs
-        """
-        _set_length(length)
-        self._log_data_length = length
 
     def connect(self) -> Connection:
         """
