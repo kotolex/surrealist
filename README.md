@@ -201,7 +201,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "
         print(result.count()) # just print count of results, but you can do anything here
 ```
 
-## Results##
+## Results ##
 If the method of connection is not raised, it is always returns SurrealResult object on any response of SurrealDB. It was chosen for simplicity.
 
 Please see [examples](https://github.com/kotolex/surrealist/blob/master/examples/result.py)
