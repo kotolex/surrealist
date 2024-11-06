@@ -243,16 +243,10 @@ class DefineAccessRecord(Statement):
             exists = " OVERWRITE"
         sin = ""
         if self._signin:
-            if isinstance(self._signin, str):
-                sin = f" SIGNIN {self._signin}"
-            else:
-                sin = f" SIGNIN {self._signin._clean_str()}"
+            sin = f" SIGNIN {self._signin}" if isinstance(self._signin, str) else f" SIGNIN {self._signin._clean_str()}"
         sup = ""
         if self._signup:
-            if isinstance(self._signup, str):
-                sup = f" SIGNUP {self._signup}"
-            else:
-                sup = f" SIGNUP {self._signup._clean_str()}"
+            sup = f" SIGNUP {self._signup}" if isinstance(self._signup, str) else f" SIGNUP {self._signup._clean_str()}"
         access = ""
         if self._algo:
             access = f" ALGORITHM {self._algo[0].name} KEY '{self._algo[1]}'"

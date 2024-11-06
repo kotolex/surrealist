@@ -1,4 +1,4 @@
-from surrealist import Database
+from surrealist import Database, RecordId
 
 # Please read https://docs.surrealdb.com/docs/surrealql/statements/insert
 # here we represent analogs for string queries
@@ -6,18 +6,20 @@ from surrealist import Database
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
+    tobie = RecordId("tobie", table="person")  # Pay attention how you should use RecordId
+    jaime = RecordId("jaime", table="person")  # Pay attention how you should use RecordId
     data = {
         'name': 'SurrealDB',
         'founded': "2021-09-10",
-        'founders': ['person:tobie', 'person:jaime'],
+        'founders': [tobie, jaime],
         'tags': ['big data', 'database']
     }
     # INSERT INTO person {"name": "SurrealDB", "founded": "2021-09-10", "founders": ["person:tobie", "person:jaime"],
     # "tags": ["big data", "database"]};
     print(db.person.insert(data))
 
-    bulk = [{'id': "person:jaime", 'name': "Jaime", 'surname': "Morgan Hitchcock"},
-            {'id': "person:tobie", 'name': "Tobie", 'surname': "Morgan Hitchcock"}]
+    bulk = [{'id': jaime, 'name': "Jaime", 'surname': "Morgan Hitchcock"},
+            {'id': tobie, 'name': "Tobie", 'surname': "Morgan Hitchcock"}]
     # INSERT INTO person [{"id": "person:jaime", "name": "Jaime", "surname": "Morgan Hitchcock"},
     # {"id": "person:tobie", "name": "Tobie", "surname": "Morgan Hitchcock"}];
     print(db.person.insert(bulk))

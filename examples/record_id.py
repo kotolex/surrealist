@@ -1,6 +1,6 @@
 from surrealist import RecordId, get_uuid
 
-# Please read https://github.com/kotolex/surrealist#Using_recordid
+# Please read https://github.com/kotolex/surrealist?tab=readme-ov-file#using-recordid
 # Refer to https://surrealdb.com/docs/surrealql/datamodel/ids
 
 # You can create a RecordId from id in full form
@@ -9,14 +9,14 @@ print(record_id.naive_id)  # person:tobie
 print(record_id.id_part)  # tobie
 print(record_id.table_part)  # person
 print(record_id.to_prefixed_string())  # r'person:tobie'
-print(f"{record_id!r}")  # RecordId('person:tobie')
+print(record_id)  # RecordId('person:tobie')
 # Same RecordId as above we can create with id and table
 record_id = RecordId('tobie', table='person')
 print(record_id.naive_id)  # person:tobie
 print(record_id.id_part)  # tobie
 print(record_id.table_part)  # person
 print(record_id.to_prefixed_string())  # r'person:tobie'
-print(f"{record_id!r}")  # RecordId('person:tobie')
+print(record_id)  # RecordId('person:tobie')
 
 # Note! An exception will be raised if you try to create a RecordId in the wrong way
 # All examples below will raise an exception:

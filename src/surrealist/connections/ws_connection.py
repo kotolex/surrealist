@@ -96,6 +96,9 @@ class WebSocketConnection(Connection):
                 self._token = signin_result.result
 
     def transport(self) -> Transport:
+        """
+        Returns the transport type for websocket connection
+        """
         return Transport.WEBSOCKET
 
     @connected

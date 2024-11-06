@@ -1,7 +1,11 @@
 ## Release Notes ##
+**Version 1.0.5 (compatible with SurrealDB version 2.0.4):**
+- minor examples fix
+- minor pylint and readme fixes
+
 **Version 1.0.4 (compatible with SurrealDB version 2.0.4):**
 - fix record ids bug (cause SDB since 2.0 not convert string to record_id) 
-- Readme [block for RecordId](https://github.com/kotolex/surrealist#Using_recordid)
+- Readme [block for RecordId](https://github.com/kotolex/surrealist?tab=readme-ov-file#using-recordid)
 - examples [for RecordId](https://github.com/kotolex/surrealist/blob/master/examples/record_id.py)
 - create RecordId object to work with string or uid/ulid record_id
 - now all methods can use RecordId, but strings can be used too for compatibility

@@ -8,11 +8,11 @@ from surrealist import Database, RecordId
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     print(db.table("person").select())  # SELECT * FROM person;
     print(db.table("person").select("*"))  # SELECT * FROM person;
-    print(db.table("person").select().by_id("john"))  # SELECT * FROM person:john;
-    print(db.table("person").select().by_id(RecordId("person:john")))  # SELECT * FROM person:john;
+    john = RecordId("john", table="person")  # Pay attention how you should use RecordId
+    print(db.table("person").select().by_id(john))  # SELECT * FROM person:john;
     print(db.table("person").select("name", "age"))  # SELECT name, age FROM person;
-    print(db.table("person").select("name", "age").by_id("john").only())  # SELECT name, age FROM ONLY person:john;
-    print(db.table("person").select(value="age").by_id("john"))  # SELECT VALUE age FROM person:john;
+    print(db.table("person").select("name", "age").by_id(john).only())  # SELECT name, age FROM ONLY person:john;
+    print(db.table("person").select(value="age").by_id(john))  # SELECT VALUE age FROM person:john;
 
     # SELECT *, (SELECT * FROM events WHERE type = 'activity' LIMIT 5) AS history FROM person;
     print(db.table("person").select("*", alias=[("history", "(SELECT * FROM events WHERE type = 'activity' LIMIT 5)")]))

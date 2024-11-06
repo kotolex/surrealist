@@ -1,6 +1,6 @@
 from surrealist import Database
 
-with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db')) as db:
     # on database object we can DEFINE USER
 
     # DEFINE USER new_user ON DATABASE PASSWORD '123456' ROLES OWNER;

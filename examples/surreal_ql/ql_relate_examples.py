@@ -5,7 +5,7 @@ from surrealist import Database
 
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
-with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("root", "root")) as db:
+with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     # Pay attention, we should use RELATE on database level, not on specific table
 
     # RELATE person:l19zjikkw1p1h9o6ixrg->wrote->article:8nkk6uj4yprt49z7y3zm;
