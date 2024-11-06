@@ -13,8 +13,6 @@ class Concurrently(FinishedStatement):
     Refer to:
     https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#using-concurrently-clause
     """
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} CONCURRENTLY"

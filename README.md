@@ -1,4 +1,15 @@
 # README #
+<p align="left">
+    <a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/pypi/status/surrealist?style=flat-square"></a>
+    &nbsp;
+	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/pypi/v/surrealist?style=flat-square"></a>
+    &nbsp;
+    <a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/pypi/dm/surrealist?style=flat-square"></a>    
+	&nbsp;
+	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/pypi/pyversions/surrealist?style=flat-square"></a>
+    &nbsp;
+	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/github/last-commit/kotolex/surrealist/master?style=flat-square"></a>
+</p>
 
 Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.0.4)
 

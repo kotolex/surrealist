@@ -298,7 +298,7 @@ class Connection(ABC):
     @abstractmethod
     def transport(self) -> Transport:
         """
-        This method returns the current transport
+        This method returns the transport type for the current connection
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
         """

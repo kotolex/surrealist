@@ -61,6 +61,10 @@ class Pool:
         self._start()
 
     def transport(self) -> Transport:
+        """
+        Returns the transport type of the underlying connections
+        :return: Transport enum member
+        """
         return Transport.HTTP if self._options["use_http"] else Transport.WEBSOCKET
 
     @property

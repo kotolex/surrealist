@@ -9,15 +9,15 @@ from surrealist import Database
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db')) as db:
     # ALTER TABLE user SCHEMAFULL;
-    print(db.alter_table("user").schema_full())
+    print(db.alter_table("user").schemafull())
     # ALTER TABLE IF NOT EXISTS user SCHEMALESS;
-    print(db.alter_table("user").if_not_exists().schema_less())
+    print(db.alter_table("user").if_not_exists().schemaless())
     # ALTER TABLE user PERMISSIONS FOR create FULL;
     print(db.alter_table("user").permissions_for(create="FULL"))
     # ALTER TABLE user PERMISSIONS NONE COMMENT "text_of_comment";
     print(db.alter_table("user").permissions_none().comment("text_of_comment"))
     # ALTER TABLE IF NOT EXISTS user SCHEMAFULL;
-    print(db.alter_table("user").if_not_exists().schema_full())
+    print(db.alter_table("user").if_not_exists().schemafull())
 
 
 

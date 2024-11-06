@@ -63,6 +63,9 @@ class HttpConnection(Connection):
                                          f"Refer to https://docs.surrealdb.com/docs/introduction/start")
 
     def transport(self) -> Transport:
+        """
+        Returns the transport type for http connection
+        """
         return Transport.HTTP
 
     @connected

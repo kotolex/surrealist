@@ -11,7 +11,7 @@ class RecordId:
     This class is a wrapper for record_id of SurrealDB
 
     About record_ids: https://surrealdb.com/docs/surrealql/datamodel/ids
-    Refer to: https://github.com/kotolex/surrealist#Using_recordid
+    Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#using-recordid
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/record_id.py
     """
 
@@ -40,15 +40,24 @@ class RecordId:
 
     @property
     def id_part(self) -> str:
+        """
+        Returns id part of record_id, for "table:id" it returns "id"
+        """
         return self._id_part
 
     @property
-    def naive_id(self) -> str:
-        return self._naive_id
+    def table_part(self) -> str:
+        """
+        Returns table part of record_id, for "table:id" it returns "table"
+        """
+        return self._table_part
 
     @property
-    def table_part(self) -> str:
-        return self._table_part
+    def naive_id(self) -> str:
+        """
+        Returns naive record_id, without any special braces, e.g. 'table:id'
+        """
+        return self._naive_id
 
     def to_valid_string(self) -> str:
         """

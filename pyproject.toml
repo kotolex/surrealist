@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "surrealist"
-version = "1.0.4"
+version = "1.0.5"
 description = "Python client for SurrealDB, latest SurrealDB version compatible, all features supported"
 readme = "README.md"
 authors = [{ name = "kotolex", email = "farofwell@gmail.com" }]
@@ -12,13 +12,21 @@ license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Education",
     "Topic :: Software Development",
     "Topic :: Database",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Development Status :: 5 - Production/Stable",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
-keywords = ["surreal", "python", "Surreal", "SurrealDB", "surrealist", "database", "surrealdb"]
+keywords = ["surreal", "python", "Surreal", "SurrealDB", "surrealist", "database", "surrealdb", "surrealdb.py"]
 dependencies = [
     "websocket-client",
 ]
