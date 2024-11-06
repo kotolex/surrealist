@@ -1,6 +1,6 @@
 from surrealist import SurrealResult
 
-# here we will create Results. but in your work you will get it grom SurrealDB
+# here we will create Results, but in your work you will get it from SurrealDB
 # please see https://github.com/kotolex/surrealist?tab=readme-ov-file#results-and-recordid
 result = SurrealResult(error="Some error")
 print(result.is_error())  # True

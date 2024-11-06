@@ -15,6 +15,12 @@ class WrongParameterError(PySurrealError):
     """
 
 
+class SurrealRecordIdError(PySurrealError):
+    """
+    Raises when the wrong id or table is passed for RecordId
+    """
+
+
 class SurrealConnectionError(PySurrealError):
     """
     Raises on any problem with connection to SurrealDB, check url and other parameters

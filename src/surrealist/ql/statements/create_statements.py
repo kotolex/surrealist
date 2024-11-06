@@ -1,15 +1,16 @@
-import json
 from typing import Dict, Optional
 
 from surrealist.ql.statements.common_statements import CanUseReturn
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.ql.statements.utils import combine
+from surrealist.utils import safe_dumps
 
 
 class Set(FinishedStatement, CanUseReturn):
     """
     Represents a SET clause for CREATE statements.
     """
+
     def __init__(self, statement: Statement, result: Optional[str] = None, **kwargs):
         super().__init__(statement)
         self._kw = kwargs
@@ -26,12 +27,13 @@ class Content(FinishedStatement, CanUseReturn):
     """
     Represents a CONTENT clause for CREATE statements.
     """
+
     def __init__(self, statement: Statement, content: Dict):
         super().__init__(statement)
         self._content = content
 
     def _clean_str(self):
-        args = json.dumps(self._content)
+        args = safe_dumps(self._content)
         return f"{self._statement._clean_str()} CONTENT {args}"
 
 

@@ -451,7 +451,7 @@ class DefineField(Define, CanUsePermissions):
 
     Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
 
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_field.py
 
     DEFINE FIELD [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table
     [ [ FLEXIBLE ] TYPE @type ]

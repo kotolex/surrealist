@@ -23,31 +23,6 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
     print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);
 
-    # on database object we can DEFINE FIELD
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/field
-    print(db.define_field("new_field", "some_table"))  # DEFINE FIELD new_field ON TABLE some_table;
-    # DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;
-    print(db.define_field("new_field", "some_table").if_not_exists())
-    # DEFINE FIELD OVERWRITE new_field ON TABLE some_table;
-    print(db.define_field("new_field", "some_table").overwrite())
-    print(db.define_field("field", "user").type("string"))  # DEFINE FIELD field ON TABLE user TYPE string;
-    # DEFINE FIELD field ON TABLE user FLEXIBLE TYPE bool;
-    print(db.define_field("field", "user").type("bool", is_flexible=True))
-    # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false;
-    print(db.define_field("locked", "user").type("bool").default("false"))
-    # DEFINE FIELD locked ON TABLE user TYPE bool DEFAULT false COMMENT "Some comment";
-    print(db.define_field("locked", "user").type("bool").default("false").comment("Some comment"))
-    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now();
-    print(db.define_field("updated", "resource").default("time::now()"))
-    # DEFINE FIELD updated ON TABLE resource DEFAULT time::now() READONLY;
-    print(db.define_field("updated", "resource").default("time::now()").read_only())
-    # DEFINE FIELD email ON TABLE resource TYPE string ASSERT string::is::email($value);
-    print(db.define_field("email", "resource").type("string").asserts("string::is::email($value)"))
-    # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL;
-    print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full())
-    # DEFINE FIELD comment ON TABLE resource FLEXIBLE TYPE string PERMISSIONS FULL COMMENT "text";
-    print(db.define_field("comment", "resource").type("string", is_flexible=True).permissions_full().comment("text"))
-
     # on database object we can use DEFINE EVENT with sub-query
     # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/event
     # DEFINE EVENT email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event SET user = $value.id,

@@ -5,7 +5,7 @@ from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
 from surrealist import (OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str,
-                        Algorithm)
+                        Algorithm, get_uuid, RecordId)
 
 
 class TestUseCases(TestCase):
@@ -667,18 +667,6 @@ class TestUseCases(TestCase):
             res2 = db.table("b").select("link.*").where("num = 1").run().result
             self.assertEqual(res1, res2)
 
-    # def test_bug_index_cant_use_datetime(self):  # https://github.com/surrealdb/surrealdb/issues/2939
-    #     with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-    #         db.define_index("idx_first", table_name="series").columns("f_aired")
-    #         r = db.table("series").select("id, f_aired").where('f_aired > "2024-10-01T00:00:00Z"').explain().run()
-    #         print(r)
-    #         self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
-    #
-    # def test_bug_index_unsupport_uuid(self):  # https://github.com/surrealdb/surrealdb/issues/2939
-    #     with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-    #         r = db.table("sessions").select().where(
-    #             'sessionUid = "00ad70db-f435-442e-9012-1cd853102084"').explain().run()
-    #         self.assertTrue("Unsupported" not in r.result[1]['detail']['reason'])
 
     def test_for_full_text_search(self):  # https://surrealdb.com/docs/surrealdb/reference-guide/full-text-search
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -798,6 +786,87 @@ class TestUseCases(TestCase):
             result = connection.create("datetime_table", {'name': "zzz", 'age': 44, 'created_at': tm})
             self.assertFalse(result.is_error(), result)
             result = db.datetime_table.create().content({'name': "xxx", 'age': 22, 'created_at': tm}).run()
+            self.assertFalse(result.is_error(), result)
+
+    def test_record_id_with_db(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uuid = get_uuid()
+            record_id = RecordId(uuid, table="vanse")
+            result = db.vanse.create(record_id).run()
+            self.assertFalse(result.is_error(), result)
+            create = result.result
+            result = db.vanse.select().by_id(record_id).run()
+            self.assertFalse(result.is_error(), result)
+            select = result.result
+            self.assertEqual(create, select)
+            result = db.vanse.update(record_id).only().merge({"active": True}).run()
+            self.assertFalse(result.is_error(), result)
+            result = db.vanse.upsert(record_id).merge({"status": "online"}).run()
+            self.assertFalse(result.is_error(), result)
+            upsert = result.result
+            result = db.vanse.delete(record_id).return_before().run()
+            self.assertFalse(result.is_error(), result)
+            delete = result.result
+            self.assertEqual(upsert, delete)
+
+    def test_record_id_with_db2(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uuid = get_uuid()  # 6e796db2-8322-4056-b63f-0f1812f6e075
+            record_id = RecordId(uuid, table="vanse")
+            record_id2 = RecordId(uuid, table="vanse2")
+            record_id3 = RecordId(uuid, table="dates")
+            res = db.table("some_test").insert(("url", "link"), ('salesforce.com', record_id), ('other.com', record_id2)).run()
+            self.assertFalse(res.is_error(), res)
+            data = [{'link': record_id, 'name': "Jaime", 'surname': "Morgan Hitchcock"},
+                    {'link': record_id2, 'name': "Tobie", 'surname': "Morgan Hitchcock"}]
+            res = db.table("some_test2").insert(data).run()
+            self.assertFalse(res.is_error(), res)
+            data = {
+                'name': 'SurrealDB',
+                'founded': record_id3,
+                'founders': ['person:tobie', 'person:jaime'],
+                'links': [record_id, record_id2]
+            }
+            res = db.table("some_test2").insert(data).run()
+            self.assertFalse(res.is_error(), res)
+
+    def test_record_id_with_create_content(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uuid = get_uuid()
+            record_id = RecordId(uuid, table="vanse")
+            result = db.table("other").create().content({"name": "Jaime", "link": record_id}).run()
+            self.assertFalse(result.is_error(), result)
+
+    def test_record_id_with_update(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            uuid = get_uuid()
+            record_id = RecordId(uuid, table="links")
+            res = db.table("other").create().content({"name": "Jaime"}).run()
+            r_id = res.id
+            result = db.other.update().set("rank = 4", link=record_id).where("name = 'Jaime'").run()
+            self.assertFalse(result.is_error(), result)
+            result = db.other.update().set(link2=record_id).where("name = 'Jaime'").run()
+            self.assertFalse(result.is_error(), result)
+            data = {'name': 'Tobie', 'company': 'SurrealDB', 'links': [record_id, RecordId(r_id, table="other")]}
+            result = db.other.update(r_id).content(data).run()
+            self.assertFalse(result.is_error(), result)
+            data = [{"op": "add", "path": "Engineering", "value": record_id}]
+            result = db.other.update(r_id).patch(data).run()
+            self.assertFalse(result.is_error(), result)
+            data = {'settings': {'link': record_id}}
+            result = db.other.update(r_id).merge(data).run()
             self.assertFalse(result.is_error(), result)
 
 

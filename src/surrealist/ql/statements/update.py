@@ -3,7 +3,7 @@ from typing import List, Optional
 from surrealist.connections import Connection
 from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update_statements import UpdateUseMethods
-from surrealist.utils import OK
+from surrealist.utils import OK, get_table_or_record_id
 
 
 class Update(Statement, UpdateUseMethods):
@@ -33,6 +33,7 @@ class Update(Statement, UpdateUseMethods):
         self._table_name = table_name
         self._only = False
         self._record_id = record_id
+        self._name = get_table_or_record_id(table_name, record_id)
 
     def validate(self) -> List[str]:
         return [OK]
@@ -46,5 +47,4 @@ class Update(Statement, UpdateUseMethods):
 
     def _clean_str(self):
         what = "" if not self._only else " ONLY"
-        table = self._table_name if not self._record_id else f"{self._table_name}:{self._record_id}"
-        return f"UPDATE{what} {table}"
+        return f"UPDATE{what} {self._name}"

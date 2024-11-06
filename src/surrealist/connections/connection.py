@@ -1,12 +1,14 @@
-import json
 from abc import ABC, abstractmethod
 from functools import wraps
 from logging import getLogger
 from typing import Tuple, Dict, Optional, Union, List, Callable, Any
 
-from surrealist.errors import OperationOnClosedConnectionError, TooManyNestedLevelsError, WrongParameterError
+from surrealist.enums import Transport
+from surrealist.errors import OperationOnClosedConnectionError, WrongParameterError
+from surrealist.record_id import RecordId
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, crop_data, NS, DB, AC, mask_pass, clean_dates
+from surrealist.utils import (DEFAULT_TIMEOUT, NS, DB, AC, mask_pass, clean_dates, StrOrRecord,
+                              get_table_or_record_id)
 
 logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"
@@ -72,13 +74,6 @@ class Connection(ABC):
         """
         return self._connected
 
-    def _in_out_json(self, data, is_loads: bool):
-        try:
-            return json.loads(data) if is_loads else json.dumps(data)
-        except RecursionError as e:
-            logger.error("Cant serialize/deserialize object, too many nested levels")
-            raise TooManyNestedLevelsError(f"Cant serialize object, too many nested levels\nRefer to: {LINK}") from e
-
     @connected
     def count(self, table_name: str) -> SurrealResult:
         """
@@ -94,7 +89,7 @@ class Connection(ABC):
         :param table_name: name of the table
         :return: result containing count, like SurrealResult(id='', error=None, result=[{'count': 1}], time='123.333µs')
         """
-        logger.info("Query-Operation: COUNT. Table: %s", crop_data(table_name))
+        logger.info("Query-Operation: COUNT. Table: %s", table_name)
         result = self.query(f"SELECT count() FROM {table_name} GROUP ALL;")
         if not result.is_error():
             result.result = self._get_count(result.result)
@@ -124,7 +119,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
-        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
+        :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full database information
         """
         return self._info("DB", structured)
@@ -138,7 +133,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
-        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
+        :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full namespace information
         """
         return self._info("NS", structured)
@@ -152,7 +147,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
 
-        :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
+        :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: information about root
         """
         return self._info("ROOT", structured)
@@ -289,7 +284,7 @@ class Connection(ABC):
         if access is not None:
             params[AC] = access
         data = {"method": "signin", "params": [params]}
-        logger.info("Operation: SIGNIN. Data: %s", crop_data(mask_pass(str(params))))
+        logger.info("Operation: SIGNIN. Data: %s", mask_pass(str(params)))
         return self._use_rpc(data)
 
     @abstractmethod
@@ -298,6 +293,14 @@ class Connection(ABC):
         This method specifies the namespace and optionally database for the current connection
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
+        """
+
+    @abstractmethod
+    def transport(self) -> Transport:
+        """
+        This method returns the current transport
+
+        Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#transports
         """
 
     @connected
@@ -315,7 +318,7 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "let", "params": [name, value]}
-        logger.info("Operation: LET. Name: %s, Value: %s", crop_data(name), crop_data(str(value)))
+        logger.info("Operation: LET. Name: %s, Value: %s", name, value)
         return self._use_rpc(data)
 
     @connected
@@ -330,7 +333,7 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "unset", "params": [name]}
-        logger.info("Operation: UNSET. Variable name: %s", crop_data(name))
+        logger.info("Operation: UNSET. Variable name: %s", name)
         return self._use_rpc(data)
 
     @abstractmethod
@@ -395,7 +398,7 @@ class Connection(ABC):
             raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
                                       "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
         data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
-        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", crop_data(str(query)), pretty)
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
         result = self._use_rpc(data)
         return result
 
@@ -424,7 +427,7 @@ class Connection(ABC):
             if len(data["params"]) == 1:
                 data["params"].append(None)
             data["params"].append(args)
-        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", crop_data(func_name), version, args)
+        logger.info("Operation: RUN. Function: %s, version: %s, args: %s", func_name, version, args)
         result = self._use_rpc(data)
         return result
 
@@ -446,7 +449,7 @@ class Connection(ABC):
         return result
 
     @connected
-    def select(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
+    def select(self, table_name: str, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method selects either all records in a table or a single record
 
@@ -458,6 +461,7 @@ class Connection(ABC):
         connection.select("article") # select all records in article table
         connection.select("article:first") # select one article with id 'first'
         connection.select("article", "first") # select one article with id 'first', analog of previous
+        connection.select("article", RecordId("first", "article")) # analog of previous
 
         Notice: do not specify id twice: in table name and in record_id, it will cause error on SurrealDB side
 
@@ -465,16 +469,16 @@ class Connection(ABC):
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         data = {"method": "select", "params": [table_name]}
-        logger.info("Operation: SELECT. Table: %s", crop_data(table_name))
+        logger.info("Operation: SELECT. Table: %s", table_name)
         result = self._use_rpc(data)
         if not isinstance(result.result, List) and not result.is_error():
             result.result = [result.result] if result.result else []
         return result
 
     @connected
-    def create(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+    def create(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method creates a record either with a random or specified record_id. If no id specified in record_id or
         in data arguments, then id will be generated by SurrealDB
@@ -494,20 +498,22 @@ class Connection(ABC):
 
         :param table_name: table name or table name with record_id to create
         :param data: dict with data to create
-        :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
+        :param record_id: optional parameter, it can be string or record_id object
         :return: result of request
         """
         if record_id is not None:
-            data["id"] = record_id
+            if isinstance(record_id, str):
+                record_id = RecordId(record_id, table=table_name)
+            data["id"] = record_id.to_valid_string()
         _data = {"method": "create", "params": [table_name, data]}
-        logger.info("Operation: CREATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: CREATE. Table: %s, data: %s", table_name, data)
         result = self._use_rpc(_data)
         if isinstance(result.result, List) and len(result.result) == 1:
             result.result = result.result[0]
         return result
 
     @connected
-    def update(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+    def update(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method can be used to update or modify records in the database. So all old fields will be deleted, and new
         will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.
@@ -533,13 +539,13 @@ class Connection(ABC):
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "update", "params": [table_name, data]}
-        logger.info("Operation: UPDATE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: UPDATE. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
-    def upsert(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+    def upsert(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method can be used to create or update records in the database. So all old fields will be deleted, and new
         will be added, if you wand just to add field to record, keeping old ones -use **merge** method instead.
@@ -563,9 +569,9 @@ class Connection(ABC):
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "upsert", "params": [table_name, data]}
-        logger.info("Operation: UPSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: UPSERT. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -590,7 +596,7 @@ class Connection(ABC):
         :return: result of request
         """
         _data = {"method": "insert", "params": [table_name, data]}
-        logger.info("Operation: INSERT. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: INSERT. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
@@ -614,12 +620,12 @@ class Connection(ABC):
         :return: result of request
         """
         data = {"method": "insert_relation", "params": [table_name, data]}
-        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", crop_data(str(table_name)), crop_data(str(data)))
+        logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", table_name, data)
         result = self._use_rpc(data)
         return result
 
     @connected
-    def merge(self, table_name: str, data: Dict, record_id: Optional[str] = None) -> SurrealResult:
+    def merge(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method merges specified data into either all records in a table or a single record. Old data in records
         will not be deleted, if you want to replace old data with new - use **update** method.If
@@ -637,13 +643,13 @@ class Connection(ABC):
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "merge", "params": [table_name, data]}
-        logger.info("Operation: MERGE. Table: %s, data: %s", crop_data(table_name), crop_data(str(data)))
+        logger.info("Operation: MERGE. Table: %s, data: %s", table_name, data)
         return self._use_rpc(_data)
 
     @connected
-    def delete(self, table_name: str, record_id: Optional[str] = None) -> SurrealResult:
+    def delete(self, table_name: str, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
         This method deletes all records in a table or a single record, be careful and don't forget to specify id if you
         do not want to delete all records. This method does not remove table itself, only records in it.As a result of
@@ -662,13 +668,13 @@ class Connection(ABC):
         :param record_id: optional parameter, if it exists it will transform table_name to "table_name:record_id"
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         _data = {"method": "delete", "params": [table_name]}
-        logger.info("Operation: DELETE. Table: %s", crop_data(table_name))
+        logger.info("Operation: DELETE. Table: %s", table_name)
         return self._use_rpc(_data)
 
     @connected
-    def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[str] = None,
+    def patch(self, table_name: str, data: Union[Dict, List], record_id: Optional[StrOrRecord] = None,
               return_diff: bool = False) -> SurrealResult:
         """
         This method changes specified data in one ar all records. If given table does not exist, new table and record
@@ -693,13 +699,12 @@ class Connection(ABC):
         :param return_diff: True if you want to get only DIFF info, False for a standard results
         :return: result of request
         """
-        table_name = table_name if record_id is None else f"{table_name}:{record_id}"
+        table_name = get_table_or_record_id(table_name, record_id)
         params = [table_name, data]
         if return_diff:
             params.append(return_diff)
         _data = {"method": "patch", "params": params}
-        logger.info("Operation: PATCH. Table: %s, data: %s, use DIFF: %s", crop_data(table_name), crop_data(str(data)),
-                    return_diff)
+        logger.info("Operation: PATCH. Table: %s, data: %s, use DIFF: %s", table_name, data, return_diff)
         return self._use_rpc(_data)
 
     @connected
@@ -725,7 +730,7 @@ class Connection(ABC):
         if variables is not None:
             params.append(variables)
         data = {"method": "query", "params": params}
-        logger.info("Operation: QUERY. Query: %s, variables: %s", crop_data(query), crop_data(str(variables)))
+        logger.info("Operation: QUERY. Query: %s, variables: %s", query, variables)
         result = self._use_rpc(data)
         result.query = params[0] if len(params) == 1 else params
         return result
@@ -751,7 +756,7 @@ class Connection(ABC):
         if data is not None:
             full_data["params"].append(data)
         logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
-                    relation_table, relate_from, crop_data(str(data)))
+                    relation_table, relate_from, data)
         result = self._use_rpc(full_data)
         return result
 

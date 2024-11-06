@@ -10,7 +10,7 @@ import websocket
 
 from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
 from surrealist.result import to_result, SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, crop_data, mask_pass
+from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, mask_pass
 
 logger = getLogger("surrealist.clients.websocket")
 
@@ -42,12 +42,12 @@ class WebSocketClient:
         :param _ws: connection object
         :param message: string message
         """
-        logger.debug("Get message %s", crop_data(message))
+        logger.debug("Get message %s", message)
         try:
             mess = json.loads(message)
         except JSONDecodeError as je:
             # Should never happen, all messages via json
-            logger.error("Got non-json response %s", crop_data(message), exc_info=True)
+            logger.error("Got non-json response %s", message, exc_info=True)
             raise ValueError(f"Got non-json response! {message}") from je
         except RecursionError as e:
             logger.error("Cant deserialize object, too many nested levels")
@@ -124,7 +124,7 @@ class WebSocketClient:
         except RecursionError as e:
             logger.error("Cant serialize object, too many nested levels")
             raise TooManyNestedLevelsError("Cant serialize object, too many nested levels") from e
-        logger.debug("Send data: %s", crop_data(mask_pass(data_string)))
+        logger.debug("Send data: %s", mask_pass(data_string))
         self._messages[id_] = Queue(maxsize=1)
         self._ws.send(data_string)
         res = self._get_by_id(id_)

@@ -5,7 +5,6 @@ from surrealist import Surreal
 
 # Please, read https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
-
 # you need callback, a function which will get dictionary and do something with it
 def call_back(response: dict) -> None:
     print(response)

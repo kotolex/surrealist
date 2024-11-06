@@ -7,7 +7,7 @@ from typing import Optional, Tuple, Dict, Union, BinaryIO
 from urllib.error import URLError, HTTPError
 
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
-from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, crop_data, mask_pass, NS, DB, AC
+from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, mask_pass, NS, DB, AC
 
 logger = getLogger("surrealist.clients.http")
 
@@ -138,6 +138,6 @@ def mask_opts(options: Dict) -> Dict:
         if key == "headers" and "Authorization" in value:
             value = {**value, "Authorization": "Bearer ******"}
         elif key == "data":
-            value = crop_data(mask_pass(str(value)))
+            value = mask_pass(str(value))
         masked_opts[key] = value
     return masked_opts

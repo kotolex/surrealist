@@ -14,6 +14,7 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.ql.statements.update import Update
 from surrealist.ql.statements.upsert import Upsert
 from surrealist.result import SurrealResult
+from surrealist.utils import StrOrRecord
 
 
 class Table:
@@ -75,7 +76,7 @@ class Table:
         """
         return Select(self._connection, self.name, *args, alias=alias, value=value)
 
-    def create(self, record_id: Optional[Union[str, int]] = None) -> Create:
+    def create(self, record_id: Optional[Union[StrOrRecord, int]] = None) -> Create:
         """
         Represent CREATE a statement and its abilities as refer here:
         https://docs.surrealdb.com/docs/surrealql/statements/create
@@ -104,7 +105,7 @@ class Table:
         """
         return Show(self._connection, self._name, since=since)
 
-    def delete(self, record_id: Optional[str] = None) -> Delete:
+    def delete(self, record_id: Optional[StrOrRecord] = None) -> Delete:
         """
         Represent DELETE statement
 
@@ -134,7 +135,7 @@ class Table:
     def drop(self) -> SurrealResult:
         """
         Fully removes table with all records in it if table exists.
-        This method never returns error, use IF EXISTS query
+        This method never returns error, cause use IF EXISTS query
 
         If you need to just delete all records and keep table - use **delete_all** method
 
@@ -145,7 +146,7 @@ class Table:
     def remove(self) -> SurrealResult:
         """
         Fully removes table with all records in it if table exists.
-        This method never returns error, use IF EXISTS query
+        This method never returns error, cause use IF EXISTS query
 
         If you need to just delete all records and keep table - use **delete_all** method
 
@@ -210,7 +211,7 @@ class Table:
         """
         return Insert(self._connection, self._name, *args)
 
-    def update(self, record_id: Optional[str] = None) -> Update:
+    def update(self, record_id: Optional[StrOrRecord] = None) -> Update:
         """
         Represent UPDATE object
 
@@ -226,7 +227,7 @@ class Table:
         """
         return Update(self._connection, self._name, record_id)
 
-    def upsert(self, record_id: Optional[str] = None) -> Upsert:
+    def upsert(self, record_id: Optional[StrOrRecord] = None) -> Upsert:
         """
         Represent UPSERT object
 
@@ -258,7 +259,7 @@ class Table:
         return RebuildIndex(self._connection, index_name=index_name, table_name=self._name, if_exists=if_exists)
 
     def __repr__(self):
-        return f"Table(name={self._name})"
+        return f"Table(name={self._name}, connection with {self._connection.transport().value} transport)"
 
     def __call__(self, *args, **kwargs):
         raise WrongCallError(f"Table object is not callable. \n"

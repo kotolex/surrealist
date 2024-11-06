@@ -520,7 +520,7 @@ class Database:
 
         Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
 
-        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_field.py
 
         :param field_name: name of the field
         :param table_name: name of the table
@@ -581,4 +581,5 @@ class Database:
         return self._connection.run(function_name, version=version, args=args)
 
     def __repr__(self):
-        return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()})"
+        return f"Database(namespace={self._namespace}, name={self._database}, connected={self.is_connected()}, " \
+               f"connection with {self._connection.transport().value} transport)"

@@ -9,23 +9,23 @@ from surrealist import Database, WrongCallError, Surreal, SurrealConnectionError
 class TestDatabase(TestCase):
     def test_via_http(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
-            self.assertEqual("Database(namespace=test, name=test, connected=True)", str(db))
+            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with http transport)", str(db))
             self.assertTrue("tables" in db.info())
             self.assertTrue(isinstance(db.tables(), List))
             self.assertEqual("test", db.name)
             self.assertEqual("test", db.namespace)
-            self.assertEqual("Table(name=person)", str(db.person))
-            self.assertEqual("Table(name=person)", str(db.table("person")))
+            self.assertEqual("Table(name=person, connection with http transport)", str(db.person))
+            self.assertEqual("Table(name=person, connection with http transport)", str(db.table("person")))
 
     def test_via_ws(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            self.assertEqual("Database(namespace=test, name=test, connected=True)", str(db))
+            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with websocket transport)", str(db))
             self.assertTrue("tables" in db.info())
             self.assertTrue(isinstance(db.tables(), List))
             self.assertEqual("test", db.name)
             self.assertEqual("test", db.namespace)
-            self.assertEqual("Table(name=person)", str(db.person))
-            self.assertEqual("Table(name=person)", str(db.table("person")))
+            self.assertEqual("Table(name=person, connection with websocket transport)", str(db.person))
+            self.assertEqual("Table(name=person, connection with websocket transport)", str(db.table("person")))
 
     def test_live_and_kill(self):
         a_list = []
@@ -81,7 +81,6 @@ class TestDatabase(TestCase):
             res = db.run_function("count")
             self.assertFalse(res.is_error())
             self.assertEqual(1, res.result)
-
 
 
 if __name__ == '__main__':

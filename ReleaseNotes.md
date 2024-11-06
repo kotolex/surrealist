@@ -1,9 +1,19 @@
 ## Release Notes ##
+**Version 1.0.4 (compatible with SurrealDB version 2.0.4):**
+- fix record ids bug (cause SDB since 2.0 not convert string to record_id) 
+- Readme [block for RecordId](https://github.com/kotolex/surrealist#Using_recordid)
+- examples [for RecordId](https://github.com/kotolex/surrealist/blob/master/examples/record_id.py)
+- create RecordId object to work with string or uid/ulid record_id
+- now all methods can use RecordId, but strings can be used too for compatibility
+- now connection, database and table objects store transport type (http or ws)
+- redundant DATA_LENGTH_FOR_LOGS was removed
+- refactoring
+- add tests, examples and docs for record ids
+
 **Version 1.0.3 (compatible with SurrealDB version 2.0.4):**
 - fix datetime bug for fields (prefix d')
 - add tests, examples and docs for datetimes
 - add test runs for Python 3.13
-
 
 **Version 1.0.2 (compatible with SurrealDB version 2.0.2):**
 - minor fixes
