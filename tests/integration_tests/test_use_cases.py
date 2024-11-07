@@ -148,11 +148,17 @@ class TestUseCases(TestCase):
 
     def test_z_change_feed(self):
         time.sleep(0.2)
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             tm = to_surreal_datetime_str(datetime.now())
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result))
+            self.assertTrue('changes' in str(res.result))
+            self.assertTrue('update' in str(res.result))
+            self.assertTrue('reading' in str(res.result))
+            res = db.table("reading").show_changes().since(1).run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(story in str(res.result))
             self.assertTrue('changes' in str(res.result))

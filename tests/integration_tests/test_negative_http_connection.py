@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL
-from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError
+from surrealist import (HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError)
 from surrealist import Surreal, get_uuid
 
 

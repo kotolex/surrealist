@@ -1,4 +1,9 @@
 ## Release Notes ##
+**Version 1.0.6 (compatible with SurrealDB version 2.0._):**
+- versionstamp is now can be used in SINCE statement for SHOW
+- by default, if no SINCE were specified Show statement generates SINCE 1
+- add examples and tests for Show
+
 **Version 1.0.5 (compatible with SurrealDB version 2.0.4):**
 - minor examples fix
 - minor pylint and readme fixes

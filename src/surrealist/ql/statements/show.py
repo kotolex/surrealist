@@ -1,8 +1,7 @@
-from datetime import datetime, timezone
 from typing import List, Optional
 
 from surrealist.connections import Connection
-from surrealist.utils import OK, to_surreal_datetime_str
+from surrealist.utils import OK, StrOrInt
 from .statement import Statement
 
 
@@ -14,11 +13,11 @@ class Show(Statement):
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_show_examples.py
 
-    SHOW CHANGES FOR TABLE @tableName SINCE "@timestamp" [LIMIT @number]
+    SHOW CHANGES FOR TABLE @tablename SINCE @timestamp | @versionstamp [ LIMIT @number ]
 
     """
 
-    def __init__(self, connection: Connection, table_name: str, since: Optional[str] = None):
+    def __init__(self, connection: Connection, table_name: str, since: Optional[StrOrInt] = None):
         super().__init__(connection)
         self._table_name = table_name
         self._since = since
@@ -42,20 +41,21 @@ class Show(Statement):
         self._limit = limit
         return self
 
-    def since(self, timestamp: str) -> "Show":
+    def since(self, datetime_or_versionstamp: [StrOrInt]) -> "Show":
         """
-        Init timestamp since is to show updates, it should be a surreal timestamp like d'2024-01-01T10:10:10.000001Z'
+        Init timestamp or versionstamp since is to show updates,
+        it should be a surreal timestamp like d'2024-01-01T10:10:10.000001Z' or an integer versionstamp
 
         Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/show#basic-usage
 
-        :param timestamp: surreal timestamp
+        :param datetime_or_versionstamp: surreal timestamp or versionstamp
         :return: Show object
         """
-        self._since = timestamp
+        self._since = datetime_or_versionstamp
         return self
 
     def _clean_str(self):
         if not self._since:
-            self._since = to_surreal_datetime_str(datetime.now(timezone.utc))  # default value
+            self._since = 1 # default value, shows all changes
         limit = f" LIMIT {self._limit}" if self._limit else ""
         return f'SHOW CHANGES FOR TABLE {self._table_name} SINCE {self._since}{limit}'
