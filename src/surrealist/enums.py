@@ -27,3 +27,10 @@ class Algorithm(Enum):
     RS256 = auto()
     RS384 = auto()
     RS512 = auto()
+
+class AutoOrNone(Enum):
+    """
+    Represents the auto or none option for DEFINE CONFIG
+    """
+    AUTO = auto()
+    NONE = auto()

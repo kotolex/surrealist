@@ -5,7 +5,7 @@ from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
 from surrealist import (OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str,
-                        Algorithm, get_uuid, RecordId)
+                        Algorithm, get_uuid, RecordId, AutoOrNone)
 
 
 class TestUseCases(TestCase):
@@ -874,6 +874,14 @@ class TestUseCases(TestCase):
             data = {'settings': {'link': record_id}}
             result = db.other.update(r_id).merge(data).run()
             self.assertFalse(result.is_error(), result)
+
+    def test_define_config(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            res = db.define_config().if_not_exists().tables_kind(AutoOrNone.AUTO).functions_kind(AutoOrNone.AUTO).run()
+            self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':
