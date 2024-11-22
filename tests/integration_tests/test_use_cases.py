@@ -543,6 +543,7 @@ class TestUseCases(TestCase):
             db.define_analyzer("ascii2").run()
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").concurrently().run()
             self.assertFalse(res.is_error(), res)
+            time.sleep(1)
             res = db.rebuild_index(f"index_{uid}", "user").run()
             self.assertFalse(res.is_error(), res)
             res = db.rebuild_index(f"index_{uid}", "user", if_exists=True).run()
