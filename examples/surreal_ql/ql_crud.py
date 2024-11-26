@@ -3,7 +3,6 @@ from surrealist import Database
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db:
     print(db.tables())  # [] cause database is empty
     table = db.table("person")  # even there is no such table yes it is OK to switch on it
-    print(table.count())  # and even get count of records which is 0 for non-existent table
     # now let's create one record via set statement
     result = table.create().set(name="Alex", age=30, active=True).run()  # pay attention how we use keyword parameters
     print(result.result)  # [{'active': True, 'age': 30, 'id': 'person:wfulrb7dqml3vv7koqnb', 'name': 'Alex'}]

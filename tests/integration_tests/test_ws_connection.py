@@ -262,31 +262,29 @@ class TestWebSocketConnection(TestCase):
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
             self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '/', 'value': a_dict}])
 
-# TODO open after fix https://github.com/surrealdb/surrealdb/issues/5160
-    # def test_live_two_queries(self):
-    #     a_list = []
-    #     function = lambda mess: a_list.append(mess)
-    #     surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
-    #     with surreal.connect() as connection:
-    #         connection.live("ws_article", callback=function)
-    #         connection.live("ws_article2", callback=function)
-    #         uid = get_random_series(27)
-    #         opts = {"id": uid, "author": uid, "title": uid, "text": uid}
-    #         connection.create("ws_article", opts)
-    #         connection.create("ws_article2", opts)
-    #         time.sleep(0.3)
-    #         self.assertEqual(a_list[0]['result']['action'], 'CREATE')
-    #         self.assertEqual(a_list[1]['result']['action'], 'CREATE')
-    #         self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
-    #         self.assertEqual(a_list[1]['result']['result'], {**opts, "id": f"ws_article2:{uid}"})
+    def test_live_two_queries(self):
+        a_list = []
+        function = lambda mess: a_list.append(mess)
+        surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
+        with surreal.connect() as connection:
+            connection.live("ws_article", callback=function)
+            connection.live("ws_article2", callback=function)
+            uid = get_random_series(27)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            connection.create("ws_article2", opts)
+            time.sleep(0.3)
+            self.assertEqual(a_list[0]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[1]['result']['action'], 'CREATE')
+            self.assertEqual(a_list[0]['result']['result'], {**opts, "id": f"ws_article:{uid}"})
+            self.assertEqual(a_list[1]['result']['result'], {**opts, "id": f"ws_article2:{uid}"})
 
     def test_count(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("not_exists")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
             self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
             count = connection.count("article").result
             uid = get_random_series(6)
@@ -294,13 +292,12 @@ class TestWebSocketConnection(TestCase):
             new_count = connection.count("article").result
             self.assertEqual(new_count, count + 1)
 
-    def test_count_is_zero_if_wrong(self):
+    def test_count_is_error_if_wrong(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("wrong")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
 
     def test_count_returns_fields(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
