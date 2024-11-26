@@ -27,7 +27,7 @@ class TestDatabasePool(TestCase):
                     res = 'http' if use else 'websocket'
                     self.assertEqual(f"Table(name=person, connection with {res} transport)", str(db.person))
                     self.assertEqual(f"Table(name=person, connection with {res} transport)", str(db.table("person")))
-                    self.assertTrue(db.some_table.count() >= 0)
+                    self.assertTrue(db.article.count() >= 0)
                     self.assertEqual(db.raw_query("Return 1;").result, 1)
                     self.assertEqual(db.returns("1").run().result, 1)
 

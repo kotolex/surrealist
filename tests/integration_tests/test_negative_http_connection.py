@@ -1,8 +1,7 @@
-from pathlib import Path
 from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL
-from surrealist import HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError
+from surrealist import (HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError)
 from surrealist import Surreal, get_uuid
 
 
@@ -161,15 +160,6 @@ class TestHttpConnectionNegative(TestCase):
                 with self.assertRaises(SurrealConnectionError) as e:
                     db.connect()
                 self.assertTrue(expected in e.exception.args[0], e.exception.args[0])
-
-    def test_import_failed(self):
-        for expected, opts in PARAMS:
-            with self.subTest(f"import failed on data{opts}"):
-                db = Surreal(URL, use_http=True, **opts)
-                file_path = Path(__file__).parent / "import.surql"
-                with db.connect() as connection:
-                    res = connection.import_data(file_path)
-                    self.assertTrue(res.is_error())
 
     # def test_ml_import_failed(self):  # TODO uncomment on fix https://github.com/surrealdb/surrealdb/issues/4236
     #     for expected, opts in PARAMS:

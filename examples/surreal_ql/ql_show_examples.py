@@ -8,7 +8,7 @@ from surrealist import Database, to_surreal_datetime_str
 # Notice: all queries below not executed, just generate representation.
 # To run it against SurrealDB, you need to use run method
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db')) as db:
-    print(db.table("person").show_changes())  # SHOW CHANGES FOR TABLE person SINCE "2023-09-07T01:23:52Z";
+    print(db.table("person").show_changes())  # SHOW CHANGES FOR TABLE person SINCE 1;
 
     tm = to_surreal_datetime_str(datetime.now(timezone.utc))  # get current time in surreal format
 
@@ -19,3 +19,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     # SHOW CHANGES FOR TABLE person SINCE "d'2023-09-07T01:23:52Z'" LIMIT 10;
     print(db.person.show_changes().since("d'2023-09-07T01:23:52Z'").limit(10))
     print(db.person.show_changes(since="d'2023-09-07T01:23:52Z'").limit(10))
+
+    # SHOW CHANGES FOR TABLE person SINCE 65536 LIMIT 100;
+    print(db.person.show_changes().since(65536).limit(100))
+    print(db.person.show_changes(since=65536).limit(100))

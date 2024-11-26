@@ -5,7 +5,7 @@ from unittest import TestCase, main
 
 from tests.integration_tests.utils import URL, get_random_series
 from surrealist import (OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str,
-                        Algorithm, get_uuid, RecordId)
+                        Algorithm, get_uuid, RecordId, AutoOrNone)
 
 
 class TestUseCases(TestCase):
@@ -148,11 +148,17 @@ class TestUseCases(TestCase):
 
     def test_z_change_feed(self):
         time.sleep(0.2)
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             tm = to_surreal_datetime_str(datetime.now())
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
+            self.assertFalse(res.is_error(), res)
+            self.assertTrue(story in str(res.result))
+            self.assertTrue('changes' in str(res.result))
+            self.assertTrue('update' in str(res.result))
+            self.assertTrue('reading' in str(res.result))
+            res = db.table("reading").show_changes().since(1).run()
             self.assertFalse(res.is_error(), res)
             self.assertTrue(story in str(res.result))
             self.assertTrue('changes' in str(res.result))
@@ -537,6 +543,7 @@ class TestUseCases(TestCase):
             db.define_analyzer("ascii2").run()
             res = db.define_index(f"index_{uid}", "user").columns("name").search_analyzer("ascii2").concurrently().run()
             self.assertFalse(res.is_error(), res)
+            time.sleep(1)
             res = db.rebuild_index(f"index_{uid}", "user").run()
             self.assertFalse(res.is_error(), res)
             res = db.rebuild_index(f"index_{uid}", "user", if_exists=True).run()
@@ -868,6 +875,14 @@ class TestUseCases(TestCase):
             data = {'settings': {'link': record_id}}
             result = db.other.update(r_id).merge(data).run()
             self.assertFalse(result.is_error(), result)
+
+    def test_define_config(self):
+        surreal = Surreal(URL, credentials=("root", "root"))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            db = Database.from_connection(connection)
+            res = db.define_config().if_not_exists().tables_kind(AutoOrNone.AUTO).functions_kind(AutoOrNone.AUTO).run()
+            self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

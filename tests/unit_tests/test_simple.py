@@ -1,7 +1,9 @@
 from unittest import TestCase
 
+from surrealist import AutoOrNone
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.simple_statements import Where
+from surrealist.ql.statements.define_config import DefineConfig
 
 
 class TestSimple(TestCase):
@@ -28,3 +30,25 @@ class TestSimple(TestCase):
         self.assertEqual("REBUILD INDEX index_name ON TABLE table_name;", rb.to_str())
         rb = RebuildIndex(None, "index_name", "table_name", if_exists=True)
         self.assertEqual("REBUILD INDEX IF EXISTS index_name ON TABLE table_name;", rb.to_str())
+
+    def test_define_config(self):
+        text =  "DEFINE CONFIG GRAPHQL AUTO;"
+        self.assertEqual(text, DefineConfig(None, AutoOrNone.AUTO).to_str())
+
+        text = "DEFINE CONFIG GRAPHQL TABLES AUTO;"
+        self.assertEqual(text, DefineConfig(None).tables_kind(AutoOrNone.AUTO).to_str())
+
+        text = "DEFINE CONFIG GRAPHQL TABLES INCLUDE user, post, comment;"
+        self.assertEqual(text, DefineConfig(None).tables_include("user, post, comment").to_str())
+
+        text = "DEFINE CONFIG GRAPHQL FUNCTIONS AUTO;"
+        self.assertEqual(text, DefineConfig(None).functions_kind(AutoOrNone.AUTO).to_str())
+
+        text = "DEFINE CONFIG GRAPHQL FUNCTIONS INCLUDE [getUser, listPosts, searchComments];"
+        self.assertEqual(text, DefineConfig(None).functions_include("[getUser, listPosts, searchComments]").to_str())
+
+        text = "DEFINE CONFIG IF NOT EXISTS GRAPHQL TABLES AUTO FUNCTIONS AUTO;"
+        self.assertEqual(text, DefineConfig(None).if_not_exists().tables_kind(AutoOrNone.AUTO).functions_kind(AutoOrNone.AUTO).to_str())
+
+        text = "DEFINE CONFIG OVERWRITE GRAPHQL TABLES AUTO FUNCTIONS AUTO;"
+        self.assertEqual(text, DefineConfig(None).overwrite().tables_kind(AutoOrNone.AUTO).functions_kind(AutoOrNone.AUTO).to_str())

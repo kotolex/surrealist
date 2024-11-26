@@ -3,7 +3,7 @@ import warnings
 from typing import Optional, Tuple, List, Dict, Union, Any, Callable
 
 from surrealist.connections.connection import Connection
-from surrealist.enums import Algorithm
+from surrealist.enums import AutoOrNone, Algorithm
 from surrealist.errors import SurrealConnectionError
 from surrealist.ql.statements import Select, Remove, Live
 from surrealist.ql.statements.alter import Alter
@@ -11,6 +11,7 @@ from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineSco
                                              DefineIndex, DefineToken, DefineTable, DefineField)
 from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
+from surrealist.ql.statements.define_config import DefineConfig
 from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
@@ -527,6 +528,19 @@ class Database:
         :return: DefineField object
         """
         return DefineField(self._connection, field_name, table_name)
+
+    def define_config(self, kind: Optional[AutoOrNone] = None) -> DefineConfig:
+        """
+        Represents DEFINE CONFIG GRAPHQL statement
+
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/config
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_config.py
+
+        :param kind: kind of the config
+        :return: DefineConfig object
+        """
+        return DefineConfig(self._connection, kind)
 
     def remove_field(self, field_name: str, table_name: str) -> Remove:
         """

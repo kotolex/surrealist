@@ -376,7 +376,7 @@ class TestInnerFunctions(TestCase):
     def test_version(self):
         surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'))
         version = surreal.version()
-        self.assertTrue("2.0." in version, version)
+        self.assertTrue("2." in version, version)
 
 
 if __name__ == '__main__':

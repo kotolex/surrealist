@@ -7,7 +7,8 @@ from typing import Union, Dict, Optional, List, Tuple, Any
 from .errors import SurrealRecordIdError
 from .record_id import RecordId
 
-StrOrRecord = Union[str, RecordId]
+StrOrRecord = Union[str, RecordId]  # Represents a string or a RecordId for queries
+StrOrInt = Union[str, int]  # Represents datetime or versionstamp for SHOW statement
 
 ENCODING = "UTF-8"
 OK = "OK"

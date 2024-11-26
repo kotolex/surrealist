@@ -1,4 +1,13 @@
 ## Release Notes ##
+**Version 1.0.6 (compatible with SurrealDB version 2.1.1):**
+- versionstamp is now can be used in SINCE statement for SHOW
+- by default, if no SINCE were specified Show statement generates SINCE 1
+- add DEFINE CONFIG statement, only Database object can use it
+- add examples and tests for Show
+- add examples and tests for DEFINE CONFIG
+- count for non-existent table now returns error (not 0)
+- fix tests
+
 **Version 1.0.5 (compatible with SurrealDB version 2.0.4):**
 - minor examples fix
 - minor pylint and readme fixes
