@@ -11,7 +11,7 @@
 	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/github/last-commit/kotolex/surrealist/master?style=flat-square"></a>
 </p>
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.1.1)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.1.2)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -22,7 +22,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (2.1.1), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (2.1.2), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -168,13 +168,14 @@ from surrealist import Database
 # connects to Database (it is not connection)
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: 
     table = db.table("person") # switch to table level, no problem if it is not exists
+    print(table.count()) # 0, table is empty or not exists
     # let's add record
     # real query CREATE person:john SET status = "ACTIVE" RETURN id;
     result = table.create("john").set(status="ACTIVE").returns("id").run() 
     # SurrealResult(id=9eb966a4-02fc-40ea-82ba-825d37254f43, status=OK, result=[{'id': 'person:john'}], 
     # query=CREATE person:john SET status = "ACTIVE" RETURN id;, code=None, time=110.3µs, additional_info={})
     print(result)
-    print(table.count()) # 1 record
+    print(table.count()) # now one record
 ```
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 

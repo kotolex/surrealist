@@ -284,7 +284,8 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("not_exists")
-            self.assertTrue(res.is_error())
+            self.assertFalse(res.is_error())
+            self.assertEqual(0, res.result)
             self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
             count = connection.count("article").result
             uid = get_random_series(6)
@@ -292,12 +293,13 @@ class TestWebSocketConnection(TestCase):
             new_count = connection.count("article").result
             self.assertEqual(new_count, count + 1)
 
-    def test_count_is_error_if_wrong(self):
+    def test_count_is_zero_if_wrong(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("wrong")
-            self.assertTrue(res.is_error())
+            self.assertFalse(res.is_error())
+            self.assertEqual(0, res.result)
 
     def test_count_returns_fields(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
