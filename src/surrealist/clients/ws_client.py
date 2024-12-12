@@ -3,13 +3,14 @@ import threading
 import time
 from json import JSONDecodeError
 from logging import getLogger
-from queue import Queue, Empty
-from typing import Dict, Callable, Optional
+from queue import Empty, Queue
+from typing import Callable, Dict, Optional
 
 import websocket
 
-from surrealist.errors import WebSocketConnectionClosedError, TooManyNestedLevelsError
-from surrealist.result import to_result, SurrealResult
+from surrealist.errors import (TooManyNestedLevelsError,
+                               WebSocketConnectionClosedError)
+from surrealist.result import SurrealResult, to_result
 from surrealist.utils import DEFAULT_TIMEOUT, get_uuid, mask_pass
 
 logger = getLogger("surrealist.clients.websocket")

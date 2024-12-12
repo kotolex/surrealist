@@ -1,12 +1,13 @@
 import json
 from abc import ABC
-from typing import List, Union, Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from surrealist.connections import Connection
 from surrealist.enums import Algorithm
-from surrealist.ql.statements.define_index_statements import CanUseIndexTypes, CanUseConcurrently
+from surrealist.ql.statements.define_index_statements import (
+    CanUseConcurrently, CanUseIndexTypes)
 from surrealist.ql.statements.permissions import CanUsePermissions
-from surrealist.ql.statements.statement import Statement, FinishedStatement
+from surrealist.ql.statements.statement import FinishedStatement, Statement
 from surrealist.utils import OK
 
 

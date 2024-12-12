@@ -1,13 +1,14 @@
 from logging import getLogger
 from pathlib import Path
-from typing import Tuple, Dict, Optional, Union, Any, BinaryIO
+from typing import Any, BinaryIO, Dict, Optional, Tuple, Union
 
 from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.enums import Transport
-from surrealist.errors import (CompatibilityError, HttpConnectionError, HttpClientError, SurrealConnectionError)
+from surrealist.errors import (CompatibilityError, HttpClientError,
+                               HttpConnectionError, SurrealConnectionError)
 from surrealist.result import SurrealResult, to_result
-from surrealist.utils import (ENCODING, DEFAULT_TIMEOUT, HTTP_OK, NS, DB, AC)
+from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, ENCODING, HTTP_OK, NS
 
 logger = getLogger("surrealist.connections.http")
 

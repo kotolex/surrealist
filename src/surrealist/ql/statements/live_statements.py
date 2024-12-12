@@ -1,5 +1,5 @@
-from surrealist.result import SurrealResult
 from surrealist.ql.statements.statement import FinishedStatement, Statement
+from surrealist.result import SurrealResult
 
 
 class Fetch(FinishedStatement):

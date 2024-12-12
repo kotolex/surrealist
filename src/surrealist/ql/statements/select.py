@@ -1,9 +1,10 @@
-from typing import Optional, Tuple, Union, List
+from typing import List, Optional, Tuple, Union
 
 from surrealist.connections import Connection
 from surrealist.utils import OK, StrOrRecord, get_table_or_record_id
+
 from .select_statements import SelectUseIndex, SelectUseTempfiles
-from .statement import Statement, IterableStatement
+from .statement import IterableStatement, Statement
 
 
 class Select(IterableStatement, SelectUseIndex, SelectUseTempfiles):

@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Dict, Tuple, Union, List
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.connections import Connection
 from surrealist.errors import WrongCallError

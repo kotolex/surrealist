@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 from functools import wraps
 from logging import getLogger
-from typing import Tuple, Dict, Optional, Union, List, Callable, Any
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.enums import Transport
-from surrealist.errors import OperationOnClosedConnectionError, WrongParameterError
+from surrealist.errors import (OperationOnClosedConnectionError,
+                               WrongParameterError)
 from surrealist.record_id import RecordId
 from surrealist.result import SurrealResult
-from surrealist.utils import (DEFAULT_TIMEOUT, NS, DB, AC, mask_pass, clean_dates, StrOrRecord,
-                              get_table_or_record_id)
+from surrealist.utils import (AC, DB, DEFAULT_TIMEOUT, NS, StrOrRecord,
+                              clean_dates, get_table_or_record_id, mask_pass)
 
 logger = getLogger("surrealist.connection")
 LINK = "https://github.com/kotolex/surrealist?tab=readme-ov-file#recursion-and-json-in-python"

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Iterator
+from typing import Iterator, List
 
 from surrealist.connections import Connection
 from surrealist.result import SurrealResult

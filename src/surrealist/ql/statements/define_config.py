@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from surrealist.connections.connection import Connection
 from surrealist.enums import AutoOrNone

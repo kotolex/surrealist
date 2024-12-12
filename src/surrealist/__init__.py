@@ -1,11 +1,11 @@
-from .connections import WebSocketConnection, HttpConnection, Connection
+from .connections import Connection, HttpConnection, WebSocketConnection
 from .enums import Algorithm, AutoOrNone
 from .errors import *
 from .ql import Database, DatabaseConnectionsPool, Table, Where
 from .record_id import RecordId
 from .result import SurrealResult
 from .surreal import Surreal
-from .utils import get_uuid, to_surreal_datetime_str, to_datetime, LOG_FORMAT
+from .utils import LOG_FORMAT, get_uuid, to_datetime, to_surreal_datetime_str
 
 __all__ = ("Surreal", "SurrealResult", "WebSocketConnection", "HttpConnection", "PySurrealError", "HttpConnectionError",
            "HttpClientError", "SurrealConnectionError", "WebSocketConnectionError", "WebSocketConnectionClosedError",

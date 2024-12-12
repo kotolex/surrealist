@@ -3,7 +3,6 @@ from typing import Optional
 from surrealist.ql.statements.common_statements import CanUseComment
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 
-
 # This module contains classes with duplicate code. This is made specifically for IDE hints
 
 class Concurrently(FinishedStatement):

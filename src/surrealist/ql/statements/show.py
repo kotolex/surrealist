@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from surrealist.connections import Connection
 from surrealist.utils import OK, StrOrInt
+
 from .statement import Statement
 
 

@@ -1,13 +1,14 @@
 import urllib.parse
 from logging import getLogger
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 from surrealist.clients import HttpClient
 from surrealist.connections.connection import Connection
 from surrealist.connections.http_connection import HttpConnection
 from surrealist.connections.ws_connection import WebSocketConnection
-from surrealist.errors import HttpClientError, SurrealConnectionError, ConnectionParametersError
-from surrealist.utils import DEFAULT_TIMEOUT, ENCODING, OK, HTTP_OK, NS, DB, AC
+from surrealist.errors import (ConnectionParametersError, HttpClientError,
+                               SurrealConnectionError)
+from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, ENCODING, HTTP_OK, NS, OK
 
 logger = getLogger("surrealist")
 

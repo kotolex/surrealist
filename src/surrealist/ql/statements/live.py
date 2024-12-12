@@ -1,4 +1,4 @@
-from typing import List, Callable, Optional
+from typing import Callable, List, Optional
 
 from surrealist.connections import Connection
 from surrealist.ql.statements.live_statements import LiveUseWhere

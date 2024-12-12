@@ -1,7 +1,7 @@
 from typing import List
 
-from .define import Define, Connection
 from ...utils import OK
+from .define import Connection, Define
 
 ALLOWED_LANGUAGES = ('Arabic', 'Danish', 'Dutch', 'English', 'French', 'German', 'Greek', 'Hungarian',
                      'Italian', 'Norwegian', 'Portuguese', 'Romanian', 'Russian', 'Spanish', 'Swedish',

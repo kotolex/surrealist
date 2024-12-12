@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from surrealist.connections import Connection
 from surrealist.ql.statements.insert_statements import InsertUseDuplicate

@@ -1,8 +1,8 @@
 import json
-from typing import Optional, Union, Dict, List, Any
+from typing import Any, Dict, List, Optional, Union
 
-from surrealist.errors import TooManyNestedLevelsError, ResultHasNoValuesError
-from surrealist.utils import OK, ERR, HTTP_OK
+from surrealist.errors import ResultHasNoValuesError, TooManyNestedLevelsError
+from surrealist.utils import ERR, HTTP_OK, OK
 
 
 class SurrealResult:

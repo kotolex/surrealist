@@ -3,7 +3,7 @@ from logging import getLogger
 from os import cpu_count
 from queue import Queue
 from threading import Thread
-from typing import Optional, Tuple, Dict, Callable, Any
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from surrealist.connections.connection import Connection
 from surrealist.enums import Transport

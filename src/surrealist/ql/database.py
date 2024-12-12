@@ -1,15 +1,18 @@
 import logging
 import warnings
-from typing import Optional, Tuple, List, Dict, Union, Any, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.connections.connection import Connection
-from surrealist.enums import AutoOrNone, Algorithm
+from surrealist.enums import Algorithm, AutoOrNone
 from surrealist.errors import SurrealConnectionError
-from surrealist.ql.statements import Select, Remove, Live
+from surrealist.ql.statements import Live, Remove, Select
 from surrealist.ql.statements.alter import Alter
-from surrealist.ql.statements.define import (DefineEvent, DefineParam, DefineScope,
-                                             DefineIndex, DefineToken, DefineTable, DefineField)
-from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
+from surrealist.ql.statements.define import (DefineEvent, DefineField,
+                                             DefineIndex, DefineParam,
+                                             DefineScope, DefineTable,
+                                             DefineToken)
+from surrealist.ql.statements.define_access import (DefineAccessJwt,
+                                                    DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_config import DefineConfig
 from surrealist.ql.statements.define_user import DefineUser
@@ -21,7 +24,7 @@ from surrealist.ql.statements.transaction import Transaction
 from surrealist.ql.table import Table
 from surrealist.result import SurrealResult
 from surrealist.surreal import Surreal
-from surrealist.utils import DEFAULT_TIMEOUT, NS, DB, AC
+from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, NS
 
 logger = logging.getLogger("surrealist.databaseQL")
 

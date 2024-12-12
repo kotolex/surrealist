@@ -1,15 +1,16 @@
 import urllib.parse
 from logging import getLogger
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Union, Callable, Any
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from surrealist.clients.ws_client import WebSocketClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.enums import Transport
-from surrealist.errors import (SurrealConnectionError, WebSocketConnectionError, WebSocketConnectionClosedError,
-                               CompatibilityError)
+from surrealist.errors import (CompatibilityError, SurrealConnectionError,
+                               WebSocketConnectionClosedError,
+                               WebSocketConnectionError)
 from surrealist.result import SurrealResult
-from surrealist.utils import DEFAULT_TIMEOUT, NS, DB, AC
+from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, NS
 
 logger = getLogger("surrealist.connections.websocket")
 

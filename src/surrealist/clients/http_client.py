@@ -3,11 +3,11 @@ import urllib.parse
 import urllib.request
 from http.client import HTTPResponse, RemoteDisconnected
 from logging import getLogger
-from typing import Optional, Tuple, Dict, Union, BinaryIO
-from urllib.error import URLError, HTTPError
+from typing import BinaryIO, Dict, Optional, Tuple, Union
+from urllib.error import HTTPError, URLError
 
 from surrealist.errors import HttpClientError, TooManyNestedLevelsError
-from surrealist.utils import ENCODING, DEFAULT_TIMEOUT, mask_pass, NS, DB, AC
+from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, ENCODING, NS, mask_pass
 
 logger = getLogger("surrealist.clients.http")
 

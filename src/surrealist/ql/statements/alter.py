@@ -2,7 +2,8 @@ from typing import List
 
 from surrealist.connections import Connection
 from surrealist.utils import OK
-from .permissions import CanUsePermissions, CanUseComment
+
+from .permissions import CanUseComment, CanUsePermissions
 from .statement import Statement
 
 

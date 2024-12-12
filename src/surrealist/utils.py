@@ -2,7 +2,7 @@ import datetime
 import json
 import re
 import uuid
-from typing import Union, Dict, Optional, List, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .errors import SurrealRecordIdError
 from .record_id import RecordId

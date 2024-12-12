@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
-from surrealist.ql.statements.simple_statements import Where
 from surrealist.ql.statements.common_statements import CanUseComment
+from surrealist.ql.statements.simple_statements import Where
 from surrealist.ql.statements.statement import FinishedStatement, Statement
 
 

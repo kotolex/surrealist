@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from surrealist.connections import Connection
 from surrealist.utils import OK, StrOrRecord, get_table_or_record_id
+
 from .common_statements import CanUseWhere
 from .statement import Statement
 
