@@ -69,6 +69,15 @@ iCTjhbIDEBHySSSc/pQ4ftHQmhToTlQeOdEy4LYiaEIgl1X+hzRH1hBYvWlNKe4EY1nMCKcjgt0=
     # You can remove any type of ACCESS with
     print(db.remove_access("token"))  # REMOVE ACCESS token ON DATABASE;
 
+    # Examples for DEFINE ACCESS ... BEARER
+    # DEFINE ACCESS api ON DATABASE TYPE BEARER FOR USER DURATION FOR GRANT 30d, FOR TOKEN 15m, FOR SESSION 12h;
+    print(db.define_access_bearer("api").type_user().duration_for_grant("30d").duration_for_token("15m").duration_for_session("12h"))
+    # DEFINE ACCESS api ON DATABASE TYPE BEARER FOR RECORD DURATION FOR GRANT 10d;
+    print(db.define_access_bearer("api").type_record().duration_for_grant("10d"))
+    # DEFINE ACCESS IF NOT EXISTS api ON DATABASE TYPE BEARER;
+    print(db.define_access_bearer("api").if_not_exists())
+
+
 
 
 

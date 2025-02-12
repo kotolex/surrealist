@@ -5,14 +5,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm, AutoOrNone
 from surrealist.errors import SurrealConnectionError
+from surrealist.ql.statements import (DefineAccessJwt, DefineAccessBearer, DefineAccessRecord)
 from surrealist.ql.statements import Live, Remove, Select
 from surrealist.ql.statements.alter import Alter
 from surrealist.ql.statements.define import (DefineEvent, DefineField,
                                              DefineIndex, DefineParam,
                                              DefineScope, DefineTable,
                                              DefineToken)
-from surrealist.ql.statements.define_access import (DefineAccessJwt,
-                                                    DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_config import DefineConfig
 from surrealist.ql.statements.define_user import DefineUser
@@ -447,6 +446,20 @@ class Database:
         :return: DefineAccessRecord object
         """
         return DefineAccessRecord(self._connection, name)
+
+    def define_access_bearer(self, name: str) -> DefineAccessBearer:
+        """
+        Represents DEFINE ACCESS ... BEARER statement.
+        Use this method instead of define_token or define_scope
+
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/bearer
+
+        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_access.py
+
+        :param name: name for the access
+        :return: DefineAccessRecord object
+        """
+        return DefineAccessBearer(self._connection, name)
 
     def remove_access(self, name: str) -> Remove:
         """

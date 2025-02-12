@@ -7,6 +7,136 @@ from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
 
+class DefineAccessBearer(Statement):
+    """
+    A bearer access method allows generating bearer grants with an associated key that can be used to access SurrealDB
+    as a specific system user or record user. Bearer grants allow other systems and software to authenticate
+    with SurrealDB using a secure and unique credential that can be audited and revoked at any time.
+
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/bearer
+
+    DEFINE ACCESS [ OVERWRITE | IF NOT EXISTS ] @name
+    ON [ NAMESPACE | DATABASE ]
+    TYPE BEARER FOR [ USER | RECORD ]
+    [ AUTHENTICATE @expression ]
+    [ DURATION
+    [ FOR GRANT @duration ]
+    [ FOR TOKEN @duration ]
+    [ FOR SESSION @duration ]
+    ]
+    """
+
+    def __init__(self, connection: Connection, name: str):
+        super().__init__(connection)
+        self._name = name
+        self._if_not_exists = None
+        self._duration: List[Optional[str]] = [None, None, None]
+        self._auth = None
+        self._user_type = None
+
+    def if_not_exists(self) -> "DefineAccessBearer":
+        """
+        Represents the IF NOT EXISTS statement.
+        :return: DefineAccessJwt object
+        """
+        self._if_not_exists = True
+        return self
+
+    def overwrite(self) -> "DefineAccessBearer":
+        """
+        Adds OVERWRITE statement to the query
+        :return: self
+        """
+        self._if_not_exists = False
+        return self
+
+    def type_record(self) -> "DefineAccessBearer":
+        """
+        Sets the type of access to record
+        :return: DefineAccessJwt object
+        """
+        self._user_type = False
+        return self
+
+    def type_user(self) -> "DefineAccessBearer":
+        """
+        Sets the type of access to user
+        :return: DefineAccessJwt object
+        """
+        self._user_type = True
+        return self
+
+    def authenticate(self, raw_expression: str) -> "DefineAccessBearer":
+        """
+        Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
+
+        Refer to:
+        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/access/jwt#with-authenticate-clause
+
+        """
+        self._auth = raw_expression
+        return self
+
+    def duration_for_grant(self, duration: str) -> "DefineAccessBearer":
+        """
+        Sets the duration for grant
+        :param duration: duration
+        :return: DefineAccessJwt object
+        """
+        self._duration[0] = duration
+        return self
+
+    def duration_for_token(self, duration: str) -> "DefineAccessBearer":
+        """
+        Sets the duration for grant
+        :param duration: duration
+        :return: DefineAccessJwt object
+        """
+        self._duration[1] = duration
+        return self
+
+    def duration_for_session(self, duration: str) -> "DefineAccessBearer":
+        """
+        Sets the duration for grant
+        :param duration: duration
+        :return: DefineAccessJwt object
+        """
+        self._duration[2] = duration
+        return self
+
+    def validate(self) -> List[str]:
+        if self._duration != [None, None, None]:
+            for duration in self._duration:
+                if duration:
+                    if not any(self._duration.endswith(letter) for letter in ('h', 'd', 'w', 'm', 'y')):
+                        return [f"Wrong duration {self._duration}, allowed postfix are ('h', 'd', 'w', 'm', 'y')"]
+                    if ' ' in self._duration:
+                        return ["Wrong duration format, should be like 5m"]
+        return [OK]
+
+    def _clean_str(self):
+        exists = ""
+        if self._if_not_exists:
+            exists = " IF NOT EXISTS"
+        elif self._if_not_exists is False:
+            exists = " OVERWRITE"
+        auth = "" if not self._auth else f" AUTHENTICATE {self._auth}"
+        durations = []
+        if self._duration[0]:
+            durations.append(f"FOR GRANT {self._duration[0]}")
+        if self._duration[1]:
+            durations.append(f"FOR TOKEN {self._duration[1]}")
+        if self._duration[2]:
+            durations.append(f"FOR SESSION {self._duration[2]}")
+        duration = f" DURATION {', '.join(durations)}" if durations else ""
+        kind = ""
+        if self._user_type:
+            kind = " FOR USER"
+        elif self._user_type is False:
+            kind = " FOR RECORD"
+        return f"DEFINE ACCESS{exists} {self._name} ON DATABASE TYPE BEARER{kind}{auth}{duration}"
+
+
 class DefineAccessJwt(Statement):
     """
     A JWT access method allows accessing SurrealDB with a token signed by a trusted issuer.

@@ -11,6 +11,8 @@ from .select import Select
 from .show import Show
 from .transaction import Transaction
 from .update import Update
+from .define_access import DefineAccessBearer, DefineAccessJwt, DefineAccessRecord
 
 __all__ = ("Create", "Delete", "Insert", "Live", "Remove", "Select", "Show", "Update", "Transaction", "DefineParam",
-           "DefineUser", "DefineEvent", "RebuildIndex", "DefineAnalyzer")
+           "DefineUser", "DefineEvent", "RebuildIndex", "DefineAnalyzer", "DefineAccessBearer", "DefineAccessJwt",
+           "DefineAccessRecord")
