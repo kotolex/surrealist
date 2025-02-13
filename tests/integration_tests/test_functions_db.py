@@ -1,8 +1,8 @@
 from unittest import TestCase, main
 
+
 from tests.integration_tests.utils import URL
 from surrealist import Surreal
-
 
 names = [
     ("array::add", '["one", "two"], "three"', ['one', 'two', 'three']),
@@ -122,6 +122,13 @@ names = [
     ("math::top", '[1, 40, 60, 10, 2, 901], 3', [40, 901, 60]),
     ("math::variance", '[ 1, 40, 60, 10, 2, 901 ]', 129148.0),
     ("math::trimean", '[ 1, 40, 60, 10, 2, 901 ]', 27.25),
+    ("object::entries", '{a: 1, b: true}', [["a", 1], ["b", True]]),
+    ("object::keys", '{a: 1, b: true}', ["a", "b"]),
+    ("object::values", '{a: 1, b: true}', [1, True]),
+    ("object::len", '{a: 1, b: true}', 2),
+    ("object::from_entries", '[[ "a", 1 ], [ "b", true ],]', {'a': 1, 'b': True}),
+    ("object::is_empty", '{}', True),
+    ("object::is_empty", '{"a":1}', False),
     ("record::id", 'person:tobie', "tobie"),
     ("record::tb", 'person:tobie', "person"),
     ("record::exists", 'person:tobie', False),

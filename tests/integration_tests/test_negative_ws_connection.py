@@ -33,7 +33,7 @@ class TestNegativeWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.live(f"ws_article:some_id", callback=function)
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, "Can not execute LIVE statement using value 'ws_article:some_id'")
+            self.assertEqual(res.result, "Can not execute LIVE statement using value: ws_article:some_id")
             self.assertEqual(res.code, -32000)
 
     def test_kill(self):
@@ -41,11 +41,11 @@ class TestNegativeWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.kill("wrong")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, "Can not execute KILL statement using id ''wrong''")
+            self.assertEqual(res.result, "Can not execute KILL statement using id: 'wrong'")
             self.assertEqual(res.code, -32000)
             res = connection.kill("0189d6e3-8eac-703a-9a48-d9faa78b44b9")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, "Can not execute KILL statement using id ''0189d6e3-8eac-703a-9a48-d9faa78b44b9''")
+            self.assertEqual(res.result, "Can not execute KILL statement using id: '0189d6e3-8eac-703a-9a48-d9faa78b44b9'")
             self.assertEqual(res.code, -32000)
 
     def test_export_failed(self):

@@ -1,4 +1,11 @@
 ## Release Notes ##
+
+**Version 1.1.0 (compatible with SurrealDB version 2.2.0):**
+- add DEFINE ACCESS BEARER statement
+- add REFERENCE clauses to DEFINE FIELD
+- add ALWAYS statement to DEFINE FIELD
+- fix some tests
+
 **Version 1.0.8 (compatible with SurrealDB version 2.1.3):**
 - minor fixes
 
