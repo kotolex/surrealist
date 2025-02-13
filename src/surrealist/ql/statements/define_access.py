@@ -2,7 +2,8 @@ from typing import List, Optional, Union
 
 from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm
-from surrealist.ql.statements import Create, Select
+from surrealist.ql.statements.create import Create
+from surrealist.ql.statements.select import Select
 from surrealist.ql.statements.statement import Statement
 from surrealist.utils import OK
 
@@ -108,9 +109,9 @@ class DefineAccessBearer(Statement):
         if self._duration != [None, None, None]:
             for duration in self._duration:
                 if duration:
-                    if not any(self._duration.endswith(letter) for letter in ('h', 'd', 'w', 'm', 'y')):
-                        return [f"Wrong duration {self._duration}, allowed postfix are ('h', 'd', 'w', 'm', 'y')"]
-                    if ' ' in self._duration:
+                    if not any(duration.endswith(letter) for letter in ('h', 'd', 'w', 'm', 'y')):
+                        return [f"Wrong duration {duration}, allowed postfix are ('h', 'd', 'w', 'm', 'y')"]
+                    if ' ' in duration:
                         return ["Wrong duration format, should be like 5m"]
         return [OK]
 
