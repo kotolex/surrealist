@@ -9,7 +9,7 @@ from surrealist.ql.statements.define_field import DefineField
 from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessBearer, DefineAccessRecord
 from surrealist.ql.statements.define import (DefineEvent, DefineIndex, DefineParam, DefineScope, DefineTable,
                                              DefineToken)
-from surrealist.ql.statements import Live, Remove, Select
+from surrealist.ql.statements import Live, Remove, Select, Access
 from surrealist.ql.statements.alter import Alter
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_config import DefineConfig
@@ -556,6 +556,19 @@ class Database:
         :return: DefineConfig object
         """
         return DefineConfig(self._connection, kind)
+
+    def access(self, name: str) -> Access:
+        """
+        Represents ACCESS statement, it should be able to use any statements from documentation
+
+        Refer to: https://surrealdb.com/docs/surrealql/statements/access
+
+        Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_access_examples.py
+
+        :param name: name for access
+        :return: Access object
+        """
+        return Access(self._connection, name)
 
     def remove_field(self, field_name: str, table_name: str) -> Remove:
         """

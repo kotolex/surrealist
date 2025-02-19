@@ -1,18 +1,27 @@
 ## Release Notes ##
 
+**Version 1.1.1 (compatible with SurrealDB version 2.2.1):**
+
+- add ACCESS statement
+- add some tests and examples
+
 **Version 1.1.0 (compatible with SurrealDB version 2.2.0):**
+
 - add DEFINE ACCESS BEARER statement
 - add REFERENCE clauses to DEFINE FIELD
 - add ALWAYS statement to DEFINE FIELD
 - fix some tests
 
 **Version 1.0.8 (compatible with SurrealDB version 2.1.3):**
+
 - minor fixes
 
 **Version 1.0.7 (compatible with SurrealDB version 2.1.2):**
+
 - fix tests and examples
 
 **Version 1.0.6 (compatible with SurrealDB version 2.1.1):**
+
 - versionstamp is now can be used in SINCE statement for SHOW
 - by default, if no SINCE were specified Show statement generates SINCE 1
 - add DEFINE CONFIG statement, only Database object can use it
@@ -22,11 +31,13 @@
 - fix tests
 
 **Version 1.0.5 (compatible with SurrealDB version 2.0.4):**
+
 - minor examples fix
 - minor pylint and readme fixes
 
 **Version 1.0.4 (compatible with SurrealDB version 2.0.4):**
-- fix record ids bug (cause SDB since 2.0 not convert string to record_id) 
+
+- fix record ids bug (cause SDB since 2.0 not convert string to record_id)
 - Readme [block for RecordId](https://github.com/kotolex/surrealist?tab=readme-ov-file#using-recordid)
 - examples [for RecordId](https://github.com/kotolex/surrealist/blob/master/examples/record_id.py)
 - create RecordId object to work with string or uid/ulid record_id
@@ -37,15 +48,19 @@
 - add tests, examples and docs for record ids
 
 **Version 1.0.3 (compatible with SurrealDB version 2.0.4):**
+
 - fix datetime bug for fields (prefix d')
 - add tests, examples and docs for datetimes
 - add test runs for Python 3.13
 
 **Version 1.0.2 (compatible with SurrealDB version 2.0.2):**
+
 - minor fixes
 
 **Version 1.0.1 (compatible with SurrealDB version 2.0.2):**
-- add run method for connections and run_function for Database (https://surrealdb.com/docs/surrealdb/integration/rpc#run)
+
+- add run method for connections and run_function for
+  Database (https://surrealdb.com/docs/surrealdb/integration/rpc#run)
 - add insert_relation method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#insert_relation)
 - add version method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#version)
 - add info method for connections (https://surrealdb.com/docs/surrealdb/integration/rpc#info)
@@ -54,11 +69,14 @@
 - minor fixes for docs and examples
 
 **Version 1.0.0 (compatible with SurrealDB version 2.0.0+):**
-- both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood on connecting
+
+- both http and ws connections lost signin, signup, authenticate, invalidate methods, sign in now happen under the hood
+  on connecting
 - USE method for http just adds headers "surreal-db" and "surreal-ns" for http-requests
 - websocket client under the hood uses explicit "sec-websocket-protocol"="json" header
 - http now uses rpc-protocol instead of different endpoints and methods
-- for root user now you should connect only with credentials and then call use method (see [examples](https://github.com/kotolex/surrealist/tree/master/examples/connect.py))
+- for root user now you should connect only with credentials and then call use method (
+  see [examples](https://github.com/kotolex/surrealist/tree/master/examples/connect.py))
 - you can now specify access method on connecting via a Surreal/Database object
 - now use Bearer instead of Basic for Authorization
 - database argument is now optional for USE method, but raises for websocket if a database is not specified
@@ -67,7 +85,8 @@
 - now DEFINE TOKEN use Algorithm enum
 - Database object can be created from active connection with `Database.from_connection(connection)`
 - Connection can be extracted from Database with `Database.get_connection()`
-- improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of them
+- improve DEFINE ANALYZER, now it uses predefined methods for tokenizers and filters, and has documentation for all of
+  them
 - SELECT statement can use TEMPFILES clause on all levels except EXPLAIN (which is the last one)
 - update DEFINE USER statement
 - add UPSERT statement
@@ -85,15 +104,18 @@
 - fix Readme, add compatibility table
 
 **Version 0.5.3 (compatible with SurrealDB version 1.5.2):**
+
 - minor fixes for docs and examples
 
 **Version 0.5.2 (compatible with SurrealDB version 1.5.1):**
+
 - now user should use standard logging for debug
 - remove log_level arguments for classes
 - add LOG_FORMAT for default uses
 - fix README
 
 **Version 0.5.1 (compatible with SurrealDB version 1.5.0):**
+
 - add more precise names for INDEX methods (M, TYPE)
 - limit allowed options for some methods (TYPE)
 - add documentation for index methods
@@ -102,19 +124,22 @@
 - fix README, examples and tests
 
 **Version 0.5.0 (compatible with SurrealDB version 1.5.0):**
+
 - although INCLUDE ORIGINAL statement exists, it has no effect (SurrealDB team decision for 1.5.0)
 - add REBUILD INDEX statement, usable for database and table objects
 - improve DEFINE INDEX statement, now it can use MTREE and HNSW indexes
-- fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which have optional string and 
-keyword-arguments for QL will combine string and kwargs
+- fix https://github.com/kotolex/surrealist/issues/44 , so now set() and other methods which have optional string and
+  keyword-arguments for QL will combine string and kwargs
 - add INFO ... STRUCTURE feature as optional, by default, it is not used as it is for internal use of SDB
 - add more examples and tests
 
 **Version 0.4.1 (compatible with SurrealDB version 1.4.2):**
+
 - add to_surreal_datetime_str and to_datetime functions, cause SurealDB has a specific datetime format
 - minor improvements for documentation, examples and tests
 
 **Version 0.4.0 (compatible with SurrealDB version 1.4.0):**
+
 - code attribute of a result is now containing http status code or error code for websocket
 - SHOW CHANGES uses current date-time if not specified, because SHOW does not work without SINCE
 - fix live queries url links
@@ -123,10 +148,12 @@ keyword-arguments for QL will combine string and kwargs
 - minor improvements for documentation, examples and tests
 
 **Version 0.3.1 (compatible with SurrealDB version 1.3.1):**
+
 - increment default timeout to 15 seconds
 - minor improvements for documentation
 
 **Version 0.3.0 (compatible with SurrealDB version 1.3.0):**
+
 - add IF NOT EXISTS for all DEFINE statements
 - add IF EXISTS for all REMOVE statements
 - improvements for documentation, examples and tests

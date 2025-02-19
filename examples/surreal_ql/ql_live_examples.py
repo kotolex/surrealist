@@ -20,3 +20,5 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "
     print(db.live_query(table_name="person", callback=print, use_diff=True))  # LIVE SELECT DIFF FROM person;
     # LIVE SELECT * FROM person WHERE x > 10 FETCH id;
     print(db.live_query("person", print).where("x > 10").fetch("id"))
+    # LIVE SELECT * FROM person FETCH id;
+    print(db.live_query("person", print).fetch("id"))

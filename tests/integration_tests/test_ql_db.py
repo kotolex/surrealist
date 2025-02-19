@@ -2,14 +2,15 @@ import time
 from typing import List
 from unittest import TestCase, main
 
+from surrealist import Database, WrongCallError, Surreal, SurrealConnectionError, RecordId
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import Database, WrongCallError, Surreal, SurrealConnectionError
 
 
 class TestDatabase(TestCase):
     def test_via_http(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
-            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with http transport)", str(db))
+            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with http transport)",
+                             str(db))
             self.assertTrue("tables" in db.info())
             self.assertTrue(isinstance(db.tables(), List))
             self.assertEqual("test", db.name)
@@ -19,7 +20,8 @@ class TestDatabase(TestCase):
 
     def test_via_ws(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with websocket transport)", str(db))
+            self.assertEqual("Database(namespace=test, name=test, connected=True, connection with websocket transport)",
+                             str(db))
             self.assertTrue("tables" in db.info())
             self.assertTrue(isinstance(db.tables(), List))
             self.assertEqual("test", db.name)
@@ -40,6 +42,19 @@ class TestDatabase(TestCase):
             self.assertFalse(a_list == [])
             result = db.kill_query(live_uid)
             self.assertFalse(result.is_error())
+
+    def test_live_with_fetch(self):
+        a_list = []
+        func = lambda mess: a_list.append(mess)
+        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
+            uid = get_random_series(14)
+            result = db.live_query(table_name="ws_artile", callback=func).fetch("authors").run()
+            self.assertFalse(result.is_error())
+            result = db.ws_artile.create().content(
+                {"title": uid, "authors": [RecordId("author:john")], "description": "test"}).run()
+            time.sleep(0.1)
+            self.assertFalse(a_list == [])
+            self.assertTrue(len(result.result[0]["authors"][0]) > 1)
 
     def test_fail_on_misspell(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:

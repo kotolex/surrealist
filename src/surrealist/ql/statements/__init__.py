@@ -13,7 +13,8 @@ from .select import Select
 from .show import Show
 from .transaction import Transaction
 from .update import Update
+from .access import Access
 
 __all__ = ("Create", "Delete", "Insert", "Live", "Remove", "Select", "Show", "Update", "Transaction", "DefineParam",
            "DefineUser", "DefineEvent", "RebuildIndex", "DefineAnalyzer", "DefineAccessBearer", "DefineAccessJwt",
-           "DefineAccessRecord", "DefineField", "DefineScope", "DefineTable", "DefineToken", "DefineIndex")
+           "DefineAccessRecord", "DefineField", "DefineScope", "DefineTable", "DefineToken", "DefineIndex", "Access")
