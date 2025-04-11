@@ -50,9 +50,6 @@ class ShowAll(FinishedStatement):
     Represents a SHOW ALL statement
     """
 
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
-
     def _clean_str(self):
         return f"{self._statement._clean_str()} SHOW ALL"
 
@@ -61,9 +58,6 @@ class RevokeAll(FinishedStatement):
     """
     Represents a REVOKE ALL statement
     """
-
-    def __init__(self, statement: Statement):
-        super().__init__(statement)
 
     def _clean_str(self):
         return f"{self._statement._clean_str()} REVOKE ALL"

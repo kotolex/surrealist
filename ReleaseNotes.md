@@ -1,5 +1,9 @@
 ## Release Notes ##
 
+**Version 1.1.2 (compatible with SurrealDB version 2.2.2):**
+
+- minor fixes
+
 **Version 1.1.1 (compatible with SurrealDB version 2.2.1):**
 
 - add ACCESS statement
