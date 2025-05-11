@@ -42,7 +42,7 @@ class Show(Statement):
         self._limit = limit
         return self
 
-    def since(self, datetime_or_versionstamp: [StrOrInt]) -> "Show":
+    def since(self, datetime_or_versionstamp: StrOrInt) -> "Show":
         """
         Init timestamp or versionstamp since is to show updates,
         it should be a surreal timestamp like d'2024-01-01T10:10:10.000001Z' or an integer versionstamp

@@ -1,9 +1,9 @@
 import datetime
 from unittest import TestCase, main
 
-from surrealist.utils import (to_datetime, to_surreal_datetime_str, mask_pass, clean_dates,
-                              dict_to_json_str,
-                              RecordId, list_to_json_str, tuple_to_json_str)
+from surrealist.utils import (RecordId, clean_dates, dict_to_json_str,
+                              list_to_json_str, mask_pass, to_datetime,
+                              to_surreal_datetime_str, tuple_to_json_str)
 
 
 class TestUtils(TestCase):

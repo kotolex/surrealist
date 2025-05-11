@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from surrealist import AutoOrNone
+from surrealist.ql.statements.define_config import DefineConfig
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.simple_statements import Where
-from surrealist.ql.statements.define_config import DefineConfig
 
 
 class TestSimple(TestCase):

@@ -3,6 +3,7 @@ import random
 import sys
 from pathlib import Path
 from string import ascii_lowercase
+
 # from logging import DEBUG, basicConfig
 
 TESTS = Path(__file__).parent.parent

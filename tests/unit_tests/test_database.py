@@ -1,13 +1,15 @@
 from unittest import TestCase, main
 
-from surrealist import Where, Algorithm
-from surrealist.ql.statements import Create, Update, Select
-from surrealist.ql.statements.define import DefineEvent, DefineParam, DefineScope, \
-    DefineIndex, DefineToken, DefineTable
+from surrealist import Algorithm, Where
+from surrealist.ql.statements import Create, Select, Update
+from surrealist.ql.statements.define import (DefineEvent, DefineIndex,
+                                             DefineParam, DefineScope,
+                                             DefineTable, DefineToken)
+from surrealist.ql.statements.define_access import (DefineAccessJwt,
+                                                    DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_field import DefineField
 from surrealist.ql.statements.define_user import DefineUser
-from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessRecord
 from surrealist.ql.statements.transaction import Transaction
 
 text = """BEGIN TRANSACTION;

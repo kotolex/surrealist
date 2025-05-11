@@ -1,9 +1,9 @@
 import time
 from unittest import TestCase, main
 
-
+from surrealist import Database, Surreal, get_uuid
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import Surreal, get_uuid, Database
+
 
 class TestWebSocketConnection(TestCase):
     def test_connect(self):
@@ -516,6 +516,21 @@ class TestWebSocketConnection(TestCase):
             connection.use("test", "test")
             res = connection.relate("person:tobie", "knows", "person:micha", {"since": "2024-09-15T12:34:56Z"})
             self.assertFalse(res.is_error(), res)
+
+    def test_ping(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.ping()
+            self.assertFalse(res.is_error(), res)
+
+    # def test_reset(self): # https://github.com/surrealdb/surrealdb/issues/5906
+    #     surreal = Surreal(URL, credentials=('root', 'root'))
+    #     with surreal.connect() as connection:
+    #         connection.use("test", "test")
+    #         res = connection.reset()
+    #         print(res)
+    #         self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

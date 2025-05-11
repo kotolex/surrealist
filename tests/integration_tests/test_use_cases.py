@@ -3,9 +3,10 @@ import time
 from datetime import datetime, timezone
 from unittest import TestCase, main
 
+from surrealist import (Algorithm, AutoOrNone, Connection, Database,
+                        OperationOnClosedConnectionError, RecordId, Surreal,
+                        get_uuid, to_surreal_datetime_str)
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import (OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str,
-                        Algorithm, get_uuid, RecordId, AutoOrNone)
 
 
 class TestUseCases(TestCase):

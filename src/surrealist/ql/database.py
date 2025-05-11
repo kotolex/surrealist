@@ -5,14 +5,17 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from surrealist.connections.connection import Connection
 from surrealist.enums import Algorithm, AutoOrNone
 from surrealist.errors import SurrealConnectionError
-from surrealist.ql.statements.define_field import DefineField
-from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessBearer, DefineAccessRecord
-from surrealist.ql.statements.define import (DefineEvent, DefineIndex, DefineParam, DefineScope, DefineTable,
-                                             DefineToken)
-from surrealist.ql.statements import Live, Remove, Select, Access
+from surrealist.ql.statements import Access, Live, Remove, Select
 from surrealist.ql.statements.alter import Alter
+from surrealist.ql.statements.define import (DefineEvent, DefineIndex,
+                                             DefineParam, DefineScope,
+                                             DefineTable, DefineToken)
+from surrealist.ql.statements.define_access import (DefineAccessBearer,
+                                                    DefineAccessJwt,
+                                                    DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_config import DefineConfig
+from surrealist.ql.statements.define_field import DefineField
 from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
@@ -496,7 +499,7 @@ class Database:
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
 
-        :param table_name: name od the table to live select
+        :param table_name: name of the table to live select
         :param callback: function to call on live query event, signature is `def callback(arg:Dict) -> None`
         :param select: raw query to insert between LIVE SELECT and FROM {table}, so the result will be
         LIVE SELECT {select} FROM {table_name}.

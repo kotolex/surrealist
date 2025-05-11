@@ -81,6 +81,7 @@ names = [
     ("duration::from::nanos", '3', "3ns"),
     ("duration::from::secs", '3', "3s"),
     ("duration::from::weeks", '3', "3w"),
+    ("file::bucket", 'f"my_bucket:/file_name"', "my_bucket"),
     ("math::abs", '-13.746189', 13.746189),
     ("math::acos", '0.5', 1.0471975511965979),
     ("math::acot", '1', 0.7853981633974483),
@@ -383,7 +384,7 @@ class TestInnerFunctions(TestCase):
     def test_version(self):
         surreal = Surreal("http://127.0.0.1:8000", 'test', 'test', credentials=('root', 'root'))
         version = surreal.version()
-        self.assertTrue("2." in version, version)
+        self.assertTrue("3." in version, version)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,6 @@ from time import sleep
 
 from surrealist import Surreal
 
-
 # Please, read https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
 # you need callback, a function which will get dictionary and do something with it

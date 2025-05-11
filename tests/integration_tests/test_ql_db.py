@@ -2,7 +2,8 @@ import time
 from typing import List
 from unittest import TestCase, main
 
-from surrealist import Database, WrongCallError, Surreal, SurrealConnectionError, RecordId
+from surrealist import (Database, RecordId, Surreal, SurrealConnectionError,
+                        WrongCallError)
 from tests.integration_tests.utils import URL, get_random_series
 
 

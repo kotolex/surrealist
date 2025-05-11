@@ -2,7 +2,9 @@ from typing import List
 
 from surrealist.connections import Connection
 from surrealist.utils import OK
-from .access_statements import CanUseGrant, CanUseShow, CanUseRevoke, CanUsePurge
+
+from .access_statements import (CanUseGrant, CanUsePurge, CanUseRevoke,
+                                CanUseShow)
 from .statement import Statement
 
 

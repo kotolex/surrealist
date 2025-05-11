@@ -11,7 +11,7 @@
 	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/github/last-commit/kotolex/surrealist/master?style=flat-square"></a>
 </p>
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.2.2)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 3.0.0)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
@@ -22,7 +22,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (2.2.2), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (3.0.0), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -43,10 +43,10 @@ Please make sure you install and start SurrealDB, you can read more [here](https
 **Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
 Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
 
-|     SurrealDB version     |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
-|:-------------------------:|:--------:| :---: |----------|----------|----------|----------|
-|    Surrealist version     |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+|     SurrealDB version     | 3.0.0+   |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
+|:-------------------------:|----------|:--------:| :---: |----------|----------|----------|----------|
+|    Surrealist version     | 2.0.0+   |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
+|      Python versions      | 3.8-3.13 | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
 A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 

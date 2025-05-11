@@ -21,7 +21,7 @@ class TestSurreal(TestCase):
     def test_version(self):
         surreal = Surreal(URL)
         result = surreal.version()
-        self.assertTrue("surrealdb-2." in result, result)
+        self.assertTrue("surrealdb-3." in result, result)
 
     def test_health_ws(self):
         surreal = Surreal(WS_URL)
@@ -38,7 +38,7 @@ class TestSurreal(TestCase):
     def test_version_ws(self):
         surreal = Surreal(WS_URL)
         result = surreal.version()
-        self.assertTrue("surrealdb-2." in result, result)
+        self.assertTrue("surrealdb-3." in result, result)
 
 
 class TestHttpConnection(TestCase):
@@ -513,6 +513,21 @@ class TestHttpConnection(TestCase):
             connection.use("test", "test")
             res = connection.graphql({"query": "{ author { id } }"}, pretty=False)
             self.assertFalse(res.is_error(), res)
+
+    def test_ping(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.ping()
+            self.assertFalse(res.is_error(), res)
+
+    # def test_reset(self): # https://github.com/surrealdb/surrealdb/issues/5906
+    #     surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+    #     with surreal.connect() as connection:
+    #         connection.use("test", "test")
+    #         res = connection.reset()
+    #         print(res)
+    #         self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':

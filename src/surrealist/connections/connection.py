@@ -185,8 +185,7 @@ class Connection(ABC):
         """
         logger.info("Query-Operation: INFO")
         data = {"method": "info"}
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def db_tables(self) -> SurrealResult:
@@ -337,6 +336,32 @@ class Connection(ABC):
         logger.info("Operation: UNSET. Variable name: %s", name)
         return self._use_rpc(data)
 
+    @connected
+    def ping(self) -> SurrealResult:
+        """
+        This method pings backend
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#ping
+
+        :return: result of request
+        """
+        data = {"method": "ping"}
+        logger.info("Operation: PING")
+        return self._use_rpc(data)
+
+    @connected
+    def reset(self) -> SurrealResult:
+        """
+        This method will reset all attributes for the current connection.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#reset
+
+        :return: result of request
+        """
+        data = {"method": "reset"}
+        logger.info("Operation: RESET")
+        return self._use_rpc(data)
+
     @abstractmethod
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
@@ -400,8 +425,7 @@ class Connection(ABC):
                                       "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
         data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
         logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def run(self, func_name: str, version: Optional[str] = None, args: Optional[List] = None) -> SurrealResult:
@@ -429,8 +453,7 @@ class Connection(ABC):
                 data["params"].append(None)
             data["params"].append(args)
         logger.info("Operation: RUN. Function: %s, version: %s, args: %s", func_name, version, args)
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def version(self) -> SurrealResult:
@@ -446,8 +469,7 @@ class Connection(ABC):
         """
         data = {"method": "version"}
         logger.info("Operation: VERSION")
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def select(self, table_name: str, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
@@ -622,8 +644,7 @@ class Connection(ABC):
         """
         data = {"method": "insert_relation", "params": [table_name, data]}
         logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", table_name, data)
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
@@ -758,8 +779,7 @@ class Connection(ABC):
             full_data["params"].append(data)
         logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
                     relation_table, relate_from, data)
-        result = self._use_rpc(full_data)
-        return result
+        return self._use_rpc(full_data)
 
     @abstractmethod
     def import_data(self, path) -> SurrealResult:

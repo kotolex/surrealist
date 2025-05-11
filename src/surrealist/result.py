@@ -24,6 +24,8 @@ class SurrealResult:
         time - execution time, only for http requests
         additional_info -all other fields
         """
+        if len(kwargs) == 2 and isinstance(kwargs.get('result', None), List) and len(kwargs["result"]) == 1:
+            kwargs.update(kwargs["result"][0])
         self.ws_id: Optional[Union[int, str]] = kwargs.pop("id", None)
         self.result: Optional[Union[str, int, Dict, List]] = kwargs.pop("result", None)
         self.code: Optional[int] = kwargs.pop("code", None)

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .statement import Statement, FinishedStatement
+from .statement import FinishedStatement, Statement
 
 
 class GrantFor(FinishedStatement):

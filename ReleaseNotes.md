@@ -1,5 +1,10 @@
 ## Release Notes ##
 
+**Version 2.0.0 (compatible with SurrealDB version 3.0.0):**
+
+- add ping and reset methods for rpc
+- add some tests and examples
+
 **Version 1.1.2 (compatible with SurrealDB version 2.2.2):**
 
 - minor fixes
