@@ -352,7 +352,7 @@ class Connection(ABC):
     @connected
     def reset(self) -> SurrealResult:
         """
-        This method will reset all attributes for the current connection.
+        This method will reset all attributes for the current connection. Works only for websockets.
 
         Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#reset
 

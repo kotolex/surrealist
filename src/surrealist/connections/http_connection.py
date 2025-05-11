@@ -160,6 +160,16 @@ class HttpConnection(Connection):
             self._db_params[DB] = database
         self._http_client.set_db_params(self._db_params)
 
+    def reset(self):
+        """
+        Http transport cannot use reset method, you should use websocket transport for that
+
+        :raise CompatibilityError: on any use
+        """
+        message = "Http transport cannot use reset, use websockets instead"
+        logger.error(message)
+        raise CompatibilityError(message)
+
     def live(self, table_name, callback, return_diff: bool = False):
         """
         Http transport cannot use live queries, you should use websocket transport for that

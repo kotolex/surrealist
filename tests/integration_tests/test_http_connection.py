@@ -521,14 +521,6 @@ class TestHttpConnection(TestCase):
             res = connection.ping()
             self.assertFalse(res.is_error(), res)
 
-    # def test_reset(self): # https://github.com/surrealdb/surrealdb/issues/5906
-    #     surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
-    #     with surreal.connect() as connection:
-    #         connection.use("test", "test")
-    #         res = connection.reset()
-    #         print(res)
-    #         self.assertFalse(res.is_error(), res)
-
 
 if __name__ == '__main__':
     main()

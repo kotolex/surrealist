@@ -524,13 +524,12 @@ class TestWebSocketConnection(TestCase):
             res = connection.ping()
             self.assertFalse(res.is_error(), res)
 
-    # def test_reset(self): # https://github.com/surrealdb/surrealdb/issues/5906
-    #     surreal = Surreal(URL, credentials=('root', 'root'))
-    #     with surreal.connect() as connection:
-    #         connection.use("test", "test")
-    #         res = connection.reset()
-    #         print(res)
-    #         self.assertFalse(res.is_error(), res)
+    def test_reset(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.reset()
+            self.assertFalse(res.is_error(), res)
 
 
 if __name__ == '__main__':
