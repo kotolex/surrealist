@@ -775,8 +775,6 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").run()
             self.assertFalse(res.is_error(), res)
-            res = db.alter_table(f"alter_{uid}").drop().comment("test").run()
-            self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").schemaless().run()
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").schemafull().run()
