@@ -2,7 +2,7 @@ from surrealist import Database
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db')) as db:
     # on database object we can DEFINE FIELD
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/field
+    # https://surrealdb.com/docs/surrealql/statements/define/field
     print(db.define_field("new_field", "some_table"))  # DEFINE FIELD new_field ON TABLE some_table;
     # DEFINE FIELD IF NOT EXISTS new_field ON TABLE some_table;
     print(db.define_field("new_field", "some_table").if_not_exists())

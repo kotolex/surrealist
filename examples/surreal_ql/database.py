@@ -24,7 +24,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.returns("math::abs(-100)"))  # RETURN math::abs(-100);
 
     # on database object we can use DEFINE EVENT with sub-query
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/event
+    # https://surrealdb.com/docs/surrealql/statements/define/event
     # DEFINE EVENT email ON TABLE user WHEN $before.email != $after.email THEN (CREATE event SET user = $value.id,
     # time = time::now(), value = $after.email);
     then = db.event.create().set("user = $value.id, time = time::now(), value = $after.email")
@@ -34,7 +34,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.remove_event("email", table_name="user"))  # REMOVE EVENT email ON TABLE user;
 
     # on database object we can DEFINE PARAM
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/param
+    # https://surrealdb.com/docs/surrealql/statements/define/param
     print(db.define_param("key", 1000))  # DEFINE PARAM $key VALUE 1000;
     print(db.define_param("key", 1000).if_not_exists())  # DEFINE PARAM IF NOT EXISTS $key VALUE 1000;
     print(db.define_param("key", 1000).overwrite())  # DEFINE PARAM OVERWRITE $key VALUE 1000;
@@ -42,7 +42,7 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.remove_param("key"))  # REMOVE PARAM $key;
 
     # on database object we can DEFINE ANALYZER
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/analyzer
+    # https://surrealdb.com/docs/surrealql/statements/define/analyzer
     # DEFINE ANALYZER example_ascii TOKENIZERS class FILTERS ascii;
     print(db.define_analyzer("example_ascii").tokenizer_class().filter_ascii())
     # DEFINE ANALYZER IF NOT EXISTS example_ascii TOKENIZERS class FILTERS ascii;
@@ -55,29 +55,3 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', '
     print(db.define_analyzer("example_ascii").filter_lowercase().filter_snowball("english"))
     # we can remove analyzer
     print(db.remove_analyzer("example_ascii"))  # REMOVE ANALYZER example_ascii;
-
-    # on database object we can DEFINE SCOPE
-    # DEFINE SCOPE is deprecated since SurrealDB 2.x, use DEFINE ACCESS instead
-    # but first, let's generate Create and Select queries for our scope users
-    create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
-    select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
-
-    # DEFINE SCOPE account SESSION 24h
-    # SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass))
-    # SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));
-    print(db.define_scope("account", "24h", signup=create, signin=select))
-    # we can remove scope
-    print(db.remove_scope("account"))  # REMOVE SCOPE account;
-
-    # on database object we can DEFINE TOKEN
-    # DEFINE TOKEN is deprecated since SurrealDB 2.x, use DEFINE ACCESS instead
-    from surrealist import Algorithm  # need to specify algorithm for token
-
-    # DEFINE TOKEN token_name ON DATABASE
-    # TYPE HS512
-    # VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz";
-    token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz"
-    print(db.define_token("token_name", Algorithm.HS512, value=token_value))
-
-    # we can remove token by name
-    print(db.remove_token("token_name"))  # REMOVE TOKEN token_name ON DATABASE;

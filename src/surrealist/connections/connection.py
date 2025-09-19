@@ -367,7 +367,7 @@ class Connection(ABC):
         """
         This method can be used to initiate live query - a real-time selection from a table. Works only for websockets.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -380,7 +380,7 @@ class Connection(ABC):
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query. Works only for websockets.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 

@@ -3,6 +3,9 @@
 **Version 2.0.0 (compatible with SurrealDB version 3.0.0):**
 
 - add ping and reset methods for rpc
+- remove SCOPE and TOKEN methods(DEFINE and REMOVE)
+- change SEARCH to FULLTEXT in analyzer
+- fix documentation urls
 - add some tests and examples
 
 **Version 1.1.2 (compatible with SurrealDB version 2.2.2):**

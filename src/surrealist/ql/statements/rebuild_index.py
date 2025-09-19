@@ -10,7 +10,7 @@ class RebuildIndex(Statement):
     """
     Represents REBUILD statement, it should be able to use any statements from documentation
 
-    Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
+    Refer to: https://surrealdb.com/docs/surrealql/statements/rebuild
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 

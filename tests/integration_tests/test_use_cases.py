@@ -391,28 +391,6 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The analyzer 'not_exists' does not exist", res.result)
 
-    def test_define_scope_and_remove(self):
-        surreal = Surreal(URL, credentials=("root", "root"))
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            db = Database.from_connection(connection)
-            uid = get_random_series(6)
-            count = len(db.info()["accesses"])
-            create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
-            select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The access method 'scope_{uid}' already exists in the database 'test'", res.result, res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_access(f"scope_{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count)
-
     def test_define_access_jwt_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
         with surreal.connect() as connection:
@@ -571,26 +549,6 @@ class TestUseCases(TestCase):
                 total += records
             self.assertEqual(total, count)
 
-    def test_define_token_and_remove(self):
-        surreal = Surreal(URL, credentials=("root", "root"))
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            db = Database.from_connection(connection)
-            uid = get_random_series(8)
-            count = len(db.info()["accesses"])
-            val = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The access method 'token_{uid}' already exists in the database 'test'", res.result, res)
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).if_not_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_access(f"token_{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count)
-
     def test_define_relate(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             res = db.relate("author:john->write->ws_article:main").run()
@@ -732,7 +690,7 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
-    def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
+    def test_continue(self):  # https://surrealdb.com/docs/surrealql/statements/continue
         text = """
             FOR $person IN (SELECT id, age FROM person) {
 	IF ($person.age < 18) {
@@ -753,7 +711,7 @@ class TestUseCases(TestCase):
             res = connection.select("person:John")
             self.assertTrue("can_vote" not in res.result[0], res)
 
-    def test_throw(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/throw
+    def test_throw(self):  # https://surrealdb.com/docs/surrealql/statements/throw
         text = 'THROW "some error message";'
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:

@@ -13,12 +13,6 @@ DEFINE USER viewer ON DATABASE PASSWORD 'viewer' ROLES VIEWER COMMENT 'test user
 DEFINE USER user_ns ON NAMESPACE PASSWORD 'user_ns' ROLES OWNER COMMENT 'test user';
 
 -- ------------------------------
--- SCOPES
--- ------------------------------
-
-DEFINE SCOPE user_scope SESSION 1d SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));
-
--- ------------------------------
 -- TABLE: account
 -- ------------------------------
 

@@ -41,7 +41,10 @@ Via pip:
 Please make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
 
 **Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
-Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
+Surreal DB version 1.5.3 or earlier. 
+For the same reasons, you will not be able to use the Surrealist version 2.0.0+ with the SurrealDB version 2.0.0+ and below.
+
+Please consider table to choose a version:
 
 |     SurrealDB version     | 3.0.0+   |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
 |:-------------------------:|----------|:--------:| :---: |----------|----------|----------|----------|
@@ -346,7 +349,7 @@ Live queries let you subscribe to events of desired table when changes happen—
 
 About live query: https://surrealdb.com/products/lq
 
-Using live select: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+Using live select: https://surrealdb.com/docs/surrealql/statements/live
 
 About DIFF (jsonpatch): https://jsonpatch.com
 
@@ -413,7 +416,7 @@ in console, you will get:
 
 If you do not need LQ anymore, call KILL method, with live_id
 
-You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query)
+You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealql/statements/live#filter-the-live-query)
 
 **Example 10**
 

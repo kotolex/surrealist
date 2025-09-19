@@ -37,7 +37,7 @@ class Where(FinishedStatement, LiveUseFetch):
     Represents WHERE part of the LIVE statement
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query
+    https://surrealdb.com/docs/surrealql/statements/live#filter-the-live-query
     """
     def __init__(self, statement: Statement, predicate: str):
         super().__init__(statement)
@@ -59,7 +59,7 @@ class LiveUseWhere(LiveUseFetch):
         Add WHERE clause to filter data
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query
+        https://surrealdb.com/docs/surrealql/statements/live#filter-the-live-query
 
         :param predicate: condition to filter data
         :return: Where object

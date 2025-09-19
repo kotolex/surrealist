@@ -1,6 +1,6 @@
 from surrealist import Database
 
-# Please read https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+# Please read https://surrealdb.com/docs/surrealql/statements/live
 # here we represent analogs for string queries
 
 # Notice: all queries below not executed, just generate representation.

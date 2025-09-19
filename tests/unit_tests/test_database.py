@@ -3,8 +3,7 @@ from unittest import TestCase, main
 from surrealist import Algorithm, Where
 from surrealist.ql.statements import Create, Select, Update
 from surrealist.ql.statements.define import (DefineEvent, DefineIndex,
-                                             DefineParam, DefineScope,
-                                             DefineTable, DefineToken)
+                                             DefineParam, DefineTable)
 from surrealist.ql.statements.define_access import (DefineAccessJwt,
                                                     DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
@@ -113,47 +112,29 @@ class TestDatabase(TestCase):
                          DefineAnalyzer(None, "example_ascii").overwrite().tokenizer_class().
                          filter_lowercase().to_str())
 
-    def test_define_scope(self):
-        create = Create(None, "user").set("email = $email, pass = crypto::argon2::generate($pass)")
-        select = Select(None, "user").where("email = $email AND crypto::argon2::compare(pass, $pass)")
-
-        text = """DEFINE SCOPE account SESSION 24h 
-SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) 
-SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));"""
-        self.assertEqual(text, DefineScope(None, "account", "24h", signup=create, signin=select).to_str())
-
-    def test_define_scope_exists(self):
-        create = Create(None, "user").set("email = $email, pass = crypto::argon2::generate($pass)")
-        select = Select(None, "user").where("email = $email AND crypto::argon2::compare(pass, $pass)")
-
-        text = """DEFINE SCOPE IF NOT EXISTS account SESSION 24h 
-SIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) 
-SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass));"""
-        self.assertEqual(text, DefineScope(None, "account", "24h", signup=create, signin=select).if_not_exists().
-                         to_str())
 
     def test_define_index(self):
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").to_str())
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 HIGHLIGHTS;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii BM25 HIGHLIGHTS;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").bm25().highlights().to_str())
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.7;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii BM25 1.2 0.7;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
                              "ascii").bm25(1.2, 0.7).to_str())
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 1.2 0.0;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii BM25 1.2 0.0;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
                              "ascii").bm25(1.2).to_str())
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii BM25 0.0 1.2;"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii BM25 0.0 1.2;"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer(
                              "ascii").bm25(None, 1.2).to_str())
 
     def test_define_index_comment(self):
-        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii COMMENT \"some\";"
+        text = "DEFINE INDEX userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii COMMENT \"some\";"
         self.assertEqual(text,
                          DefineIndex(None, "userNameIndex", "user").columns("name").search_analyzer("ascii").comment("some").to_str())
 
@@ -198,26 +179,15 @@ SIGNIN (SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").columns("name").hnsw(4).distance_cosine().concurrently().to_str())
 
     def test_define_index_exists(self):
-        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
+        text = "DEFINE INDEX IF NOT EXISTS userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").if_not_exists().columns("name").
                          search_analyzer("ascii").to_str())
 
     def test_define_index_over(self):
-        text = "DEFINE INDEX OVERWRITE userNameIndex ON TABLE user COLUMNS name SEARCH ANALYZER ascii;"
+        text = "DEFINE INDEX OVERWRITE userNameIndex ON TABLE user COLUMNS name FULLTEXT ANALYZER ascii;"
         self.assertEqual(text, DefineIndex(None, "userNameIndex", "user").overwrite().columns("name").
                          search_analyzer("ascii").to_str())
 
-    def test_define_token(self):
-        text = """DEFINE TOKEN token_name ON DATABASE 
-TYPE RS256 
-VALUE "value";"""
-        self.assertEqual(text, DefineToken(None, "token_name", Algorithm.RS256, "value").to_str())
-
-    def test_define_token_exists(self):
-        text = """DEFINE TOKEN IF NOT EXISTS token_name ON DATABASE 
-TYPE RS256 
-VALUE "value";"""
-        self.assertEqual(text, DefineToken(None, "token_name", Algorithm.RS256, "value").if_not_exists().to_str())
 
     def test_define_table(self):
         text = "DEFINE TABLE table_name;"

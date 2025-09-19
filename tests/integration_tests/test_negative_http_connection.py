@@ -1,9 +1,8 @@
 from unittest import TestCase, main
 
+from surrealist import (CompatibilityError, HttpConnectionError, Surreal,
+                        SurrealConnectionError, SurrealRecordIdError, get_uuid)
 from tests.integration_tests.utils import URL
-from surrealist import (HttpConnectionError, SurrealConnectionError, CompatibilityError, SurrealRecordIdError)
-from surrealist import Surreal, get_uuid
-
 
 PARAMS = (
     ('Specify a namespace to use', {'credentials': ('root', 'root'), }),

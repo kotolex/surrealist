@@ -47,7 +47,7 @@ class Show(Statement):
         Init timestamp or versionstamp since is to show updates,
         it should be a surreal timestamp like d'2024-01-01T10:10:10.000001Z' or an integer versionstamp
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/show#basic-usage
+        Refer to: https://surrealdb.com/docs/surrealql/statements/show#basic-usage
 
         :param datetime_or_versionstamp: surreal timestamp or versionstamp
         :return: Show object

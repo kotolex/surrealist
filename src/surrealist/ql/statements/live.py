@@ -11,7 +11,7 @@ class Live(Statement, LiveUseWhere):
     """
     Represents LIVE SELECT statement, it should be able to use any statements from documentation
 
-    Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+    Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
 
@@ -30,7 +30,7 @@ class Live(Statement, LiveUseWhere):
         """
         Constructor for LIVE statement
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         :param connection: connection to use
         :param table_name: name of the table to observe

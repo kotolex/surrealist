@@ -161,7 +161,7 @@ class Table:
         Example:
         db.person.live(func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
@@ -250,7 +250,7 @@ class Table:
         Example:
         db.table("user").rebuild_index("my_index").run()
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
+        Refer to: https://surrealdb.com/docs/surrealql/statements/rebuild
 
         :param index_name: name of the index
         :param if_exists: use IF EXISTS statement if True

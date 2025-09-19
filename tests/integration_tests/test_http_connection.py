@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, WS_URL, get_random_series
 from surrealist import Surreal, get_uuid
+from tests.integration_tests.utils import URL, WS_URL, get_random_series
 
 
 class TestSurreal(TestCase):
@@ -232,7 +232,7 @@ class TestHttpConnection(TestCase):
         res = connection.export()
         self.assertTrue("article" in res)
         self.assertTrue("user_db" in res)
-        self.assertTrue("user_scope" in res)
+        self.assertTrue("USERS" in res)
         self.assertTrue("OPTION IMPORT;" in res)
 
     def test_import(self):
@@ -242,7 +242,7 @@ class TestHttpConnection(TestCase):
         connection.use("test", "test")
         res = connection.import_data(file_path)
         self.assertTrue(len(res.result) > 10)
-        self.assertEqual(res.status, "OK")
+        self.assertEqual(res.status, "OK", res)
 
     def test_use(self):
         db = Surreal(URL, credentials=("root", "root"), use_http=True)
@@ -329,7 +329,6 @@ class TestHttpConnection(TestCase):
             res = connection.db_tables()
             self.assertFalse(res.is_error())
             self.assertTrue('article' in res.result)
-            self.assertTrue('person' in res.result)
             self.assertEqual("INFO FOR DB;", res.query)
 
     def test_session_info(self):
@@ -457,7 +456,7 @@ class TestHttpConnection(TestCase):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
         with surreal.connect() as connection:
             connection.use("test", "test")
-            self.assertTrue(connection.is_table_exists("person"))
+            self.assertTrue(connection.is_table_exists("author"))
             self.assertFalse(connection.is_table_exists("not_exists"))
 
     def test_info_table(self):

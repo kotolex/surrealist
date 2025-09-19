@@ -140,7 +140,7 @@ class WebSocketConnection(Connection):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#live
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -168,7 +168,7 @@ class WebSocketConnection(Connection):
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 

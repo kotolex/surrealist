@@ -3,7 +3,7 @@ from surrealist import Database
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
 
     # on database object we can DEFINE INDEX
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes
+    # https://surrealdb.com/docs/surrealql/statements/define/indexes
     # DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
     print(db.define_index("userEmailIndex", "user").columns("email").unique())
     # DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE COMMENT "unique index";

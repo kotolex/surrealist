@@ -10,7 +10,7 @@ class Concurrently(FinishedStatement):
     Represents CONCURRENTLY statement
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#using-concurrently-clause
+    https://surrealdb.com/docs/surrealql/statements/define/indexes#using-concurrently-clause
     """
 
     def _clean_str(self):
@@ -30,7 +30,7 @@ class Unique(FinishedStatement, CanUseComment, CanUseConcurrently):
     Represents UNIQUE statement
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#unique-index
+    https://surrealdb.com/docs/surrealql/statements/define/indexes#unique-index
     """
 
     def _clean_str(self):
@@ -39,10 +39,10 @@ class Unique(FinishedStatement, CanUseComment, CanUseConcurrently):
 
 class SearchAnalyzer(FinishedStatement, CanUseComment, CanUseConcurrently):
     """
-    Represents SEARCH ANALYZER statement
+    Represents FULLTEXT ANALYZER statement
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#full-text-search-index
+    https://surrealdb.com/docs/surrealql/statements/define/indexes#full-text-search-index
     """
 
     def __init__(self, statement: Statement, name: str):
@@ -86,7 +86,7 @@ class SearchAnalyzer(FinishedStatement, CanUseComment, CanUseConcurrently):
         if self._bm25:
             pair = self._bm25
             bm25 = " BM25" if pair == (None, None) else f" BM25 {pair[0]} {pair[1]}"
-        return f"{self._statement._clean_str()} SEARCH ANALYZER {self._name}{bm25}{hl}"
+        return f"{self._statement._clean_str()} FULLTEXT ANALYZER {self._name}{bm25}{hl}"
 
 
 class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
@@ -95,7 +95,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
     There is code duplication in this class. This is made specifically for IDE hints
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#vector-search-indexes
+    https://surrealdb.com/docs/surrealql/statements/define/indexes#vector-search-indexes
     """
 
     def __init__(self, statement: Statement, dimension_number: int):
@@ -111,7 +111,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistanceeuclidean
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistanceeuclidean
 
         :return: MTree object
         """
@@ -124,7 +124,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistancemanhattan
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistancemanhattan
 
         :return: MTree object
         """
@@ -137,7 +137,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectorsimilaritycosine
+        https://surrealdb.com/docs/surrealql/functions/vector#vectorsimilaritycosine
 
         :return: MTree object
         """
@@ -150,7 +150,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistanceminkowski
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistanceminkowski
 
         :return: MTree object
         """
@@ -175,7 +175,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 64-bit floating-point numbers (double precision floating-point numbers).
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: MTree object
         """
@@ -188,7 +188,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 32-bit floating-point numbers (single precision floating-point numbers).
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: MTree object
         """
@@ -201,7 +201,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 64-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: MTree object
         """
@@ -214,7 +214,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 32-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: MTree object
         """
@@ -227,7 +227,7 @@ class MTree(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 16-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: MTree object
         """
@@ -247,7 +247,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
     There is code duplication in this class. This is made specifically for IDE hints
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#hnsw-hierarchical-navigable-small-world-since-150
+    https://surrealdb.com/docs/surrealql/statements/define/indexes#hnsw-hierarchical-navigable-small-world-since-150
     """
 
     def __init__(self, statement: Statement, dimension_number: int):
@@ -264,7 +264,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 64-bit floating-point numbers (double precision floating-point numbers).
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: HNSW object
         """
@@ -277,7 +277,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 32-bit floating-point numbers (single precision floating-point numbers).
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: HNSW object
         """
@@ -290,7 +290,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 64-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: HNSW object
         """
@@ -303,7 +303,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 32-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: HNSW object
         """
@@ -316,7 +316,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         Represents 16-bit signed integers.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#types
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#types
 
         :return: HNSW object
         """
@@ -329,7 +329,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistanceeuclidean
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistanceeuclidean
 
         :return: HNSW object
         """
@@ -342,7 +342,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistancemanhattan
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistancemanhattan
 
         :return: HNSW object
         """
@@ -355,7 +355,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectorsimilaritycosine
+        https://surrealdb.com/docs/surrealql/functions/vector#vectorsimilaritycosine
 
         :return: HNSW object
         """
@@ -368,7 +368,7 @@ class HNSW(FinishedStatement, CanUseComment, CanUseConcurrently):
         When no function is specified, SurrealDB chooses Euclidean for the default distance function
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/functions/vector#vectordistanceminkowski
+        https://surrealdb.com/docs/surrealql/functions/vector#vectordistanceminkowski
 
         :return: HNSW object
         """
@@ -420,7 +420,7 @@ class CanUseIndexTypes:
         Creates unique index
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#unique-index
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#unique-index
 
         :return: Unique object
         """
@@ -431,7 +431,7 @@ class CanUseIndexTypes:
         Creates full-text search index
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#full-text-search-index
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#full-text-search-index
 
         :param name: analyzer name
         :return: SearchAnalyzer object
@@ -443,7 +443,7 @@ class CanUseIndexTypes:
         Creates vector-search index MTREE
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#vector-search-indexes
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#vector-search-indexes
 
         :param num_dimension: number of dimensions
         :return: MTree object
@@ -455,7 +455,7 @@ class CanUseIndexTypes:
         Creates vector-search index HNSW
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/indexes#hnsw-hierarchical-navigable-small-world-since-150
+        https://surrealdb.com/docs/surrealql/statements/define/indexes#hnsw-hierarchical-navigable-small-world-since-150
 
         :param num_dimension: number of dimensions
         :return: HNSW object

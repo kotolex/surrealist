@@ -12,7 +12,7 @@ class Set(FinishedStatement, CanUseWhere):
     SET @field = @value ...
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/update
+    https://surrealdb.com/docs/surrealql/statements/update
     """
     def __init__(self, statement: Statement, result: Optional[str] = None, **kwargs):
         super().__init__(statement)
@@ -34,7 +34,7 @@ class Patch(FinishedStatement, CanUseWhere):
     About patch: https://jsonpatch.com
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/update
+    https://surrealdb.com/docs/surrealql/statements/update
     """
     def __init__(self, statement: Statement, operations: List[Dict]):
         super().__init__(statement)
@@ -50,7 +50,7 @@ class Merge(FinishedStatement, CanUseWhere):
     MERGE @value
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/update
+    https://surrealdb.com/docs/surrealql/statements/update
     """
     def __init__(self, statement: Statement, value: Dict):
         super().__init__(statement)
@@ -66,7 +66,7 @@ class Content(FinishedStatement, CanUseWhere):
     CONTENT @value
 
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/update
+    https://surrealdb.com/docs/surrealql/statements/update
     """
     def __init__(self, statement: Statement, value: Dict):
         super().__init__(statement)

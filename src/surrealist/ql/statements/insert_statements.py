@@ -7,7 +7,7 @@ class OnDuplicate(FinishedStatement):
 
     [ ON DUPLICATE KEY UPDATE @field = @value ... ]
     Refer to:
-    https://surrealdb.com/docs/surrealdb/surrealql/statements/insert
+    https://surrealdb.com/docs/surrealql/statements/insert
     """
     def __init__(self, statement: Statement, action: str):
         super().__init__(statement)
