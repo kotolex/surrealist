@@ -156,7 +156,7 @@ ws_connection.close()  # explicitly close connection
 ```
 
 ## Methods and Query Language ##
-Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/surrealql/overview)
+Before you go with surrealist, please [check](https://surrealdb.com/docs/surrealql/overview)
 
 You can find basic examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
@@ -236,7 +236,7 @@ if result.is_error():
 
 Besides, a result object has helper methods **is_empty**, **id**, **ids**, **get**, **first**, **last** to work with response of SurrealDB.
 
-You need to read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
+You need to read this on SurrealDB recordID: https://surrealdb.com/docs/surrealql/datamodel/ids
 
 ## Using RecordID ##
 Since version 2.0, SurrealDB never converts strings to record_id, so we have to manage it ourselves.
@@ -487,7 +487,7 @@ Read here: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrea
 
 Read here: https://surrealdb.com/products/cf
 
-Under the hood: https://docs.surrealdb.com/docs/surrealql/statements/show
+Under the hood: https://surrealdb.com/docs/surrealql/statements/show
 
 Changes Feed works both for http and websockets!
 

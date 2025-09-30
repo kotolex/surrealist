@@ -155,7 +155,7 @@ class TestUseCases(TestCase):
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
             self.assertFalse(res.is_error(), res)
-            self.assertTrue(story in str(res.result))
+            self.assertTrue(story in str(res.result), res)
             self.assertTrue('changes' in str(res.result))
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
