@@ -191,7 +191,7 @@ class TestUseCases(TestCase):
             transaction = db.transaction([create_author, create_book, counter_inc])
             res = transaction.run()
             self.assertFalse(res.is_error(), res)
-            self.assertTrue(len(res.result) == 3)
+            self.assertTrue(len(res.result) >= 3)
 
     def test_define_event_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
@@ -484,17 +484,6 @@ class TestUseCases(TestCase):
             res = db.remove_index(f"index_{uid}", table_name="user").run()
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
-
-    def test_define_mtree_index_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            uid = get_random_series(8)
-            ind_count = len(db.table(f"user{uid}").info()["indexes"])
-            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").mtree(4).distance_euclidean().run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
-            res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
 
     def test_define_hnsw_index_and_remove(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:

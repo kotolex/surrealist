@@ -402,6 +402,7 @@ class TestHttpConnection(TestCase):
             connection.use("test", "test")
             uid = get_random_series(14)
             res = connection.delete(f"article:{uid}")
+            print(res)
             self.assertEqual(res.result, None)
             self.assertFalse(res.is_error())
             res = connection.delete(uid)

@@ -215,4 +215,4 @@ def _is_result_inside(a_dict) -> bool:
     Helper predicate for deep nested objects
     """
     return len(a_dict) in (1, 2) and "result" in a_dict and isinstance(a_dict["result"], List) \
-        and len(a_dict["result"]) == 1 and set(a_dict["result"][0].keys()) == {"time", "status", "result"}
+        and len(a_dict["result"]) == 1 and set(a_dict["result"][0].keys()) == {"time", "status", "result", "type"}

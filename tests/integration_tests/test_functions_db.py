@@ -219,7 +219,7 @@ names = [
     ("type::number", '"12345"', 12345),
     ("type::point", '[ 51.509865, -0.118092 ]', {'coordinates': [51.509865, -0.118092], 'type': 'Point'}),
     ("type::string", '12345', "12345"),
-    ("type::thing", '"one","two"', 'one:two'),
+    ("type::record", '"one","two"', 'one:two'),
     # https://github.com/surrealdb/surrealdb/issues/4639
     # ("type::range", '"product_price","10", "100", { begin: "excluded", end: "included" }', "{'tb': 'product_price', 'beg': {'Excluded': {'String': '10'}}, 'end': {'Included': {'String': '100'}}}"),
     ("type::is_array", "[ 'a', 'b', 'c' ]", True),
@@ -276,8 +276,8 @@ functions = [
     ("rand::enum", "'one', 'two', 3, 4.15385, 'five', true"),
     ("rand::float", ""),
     ("rand::float", "10, 15"),
-    ("rand::guid", ""),
-    ("rand::guid", "10"),
+    ("rand::id", ""),
+    ("rand::id", "10"),
     ("rand::int", ""),
     ("rand::int", "10, 15"),
     ("rand::string", "10"),
@@ -370,7 +370,7 @@ class TestInnerFunctions(TestCase):
                     self.assertFalse(res.is_error(), res)
 
     def test_constants(self):
-        with Surreal(URL, credentials=('root', 'root'), use_http=True).connect() as conn:
+        with Surreal(URL, credentials=('root', 'root'), use_http=False).connect() as conn:
             for const, expected in constants:
                 with self.subTest(f"constant {const}"):
                     query = f"RETURN {const};"

@@ -260,7 +260,7 @@ class TestWebSocketConnection(TestCase):
             time.sleep(0.1)
             a_dict = {**opts, "id": f"ws_article:{uid}"}
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
-            self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '/', 'value': a_dict}])
+            self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '', 'value': a_dict}])
 
     def test_live_two_queries(self):
         a_list = []

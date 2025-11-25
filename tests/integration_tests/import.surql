@@ -40,7 +40,7 @@ DEFINE TABLE author TYPE ANY SCHEMALESS PERMISSIONS NONE;
 -- TABLE: create
 -- ------------------------------
 
-DEFINE TABLE create TYPE ANY SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE create2 TYPE ANY SCHEMALESS PERMISSIONS NONE;
 
 -- ------------------------------
 -- TABLE: include_original

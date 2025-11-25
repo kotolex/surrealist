@@ -5,8 +5,11 @@
 - add ping and reset methods for rpc
 - remove SCOPE and TOKEN methods(DEFINE and REMOVE)
 - change SEARCH to FULLTEXT in analyzer
-- fix documentation urls
+- remove MTREE index
+- add info part to Result
+- fix documentation urls, and other README parts
 - add some tests and examples
+- add python 3.14 tests
 
 **Version 1.1.2 (compatible with SurrealDB version 2.2.2):**
 

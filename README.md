@@ -15,7 +15,7 @@ Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrea
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
-Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.13)
+Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.14)
 
 #### Key features: ####
 
@@ -49,7 +49,7 @@ Please consider table to choose a version:
 |     SurrealDB version     | 3.0.0+   |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
 |:-------------------------:|----------|:--------:| :---: |----------|----------|----------|----------|
 |    Surrealist version     | 2.0.0+   |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      | 3.8-3.13 | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+|      Python versions      | 3.8-3.14 | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
 A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
@@ -96,7 +96,7 @@ Calls of **is_ready()**, **health()** or **version()** on Surreal objects are fo
 ### Parameters ###
 
 **url** - url of SurrealDB server, if you are sure you will use websocket connection - you can use url like ws://127.0.0.1:8000/rpc, but http will work fine too, even for websockets.
-So, you can simply use http://127.0.0.1:8000, it will be transform to ws://127.0.0.1:8000/rpc under the hood.
+So, you can simply use http://127.0.0.1:8000, it will be transformed to ws://127.0.0.1:8000/rpc under the hood.
 If your url is differed - specify url in ws(s) format
 
 But if you will use ws(s) format, a Surreal object will try to predict http url too; it is important for status and version checks.

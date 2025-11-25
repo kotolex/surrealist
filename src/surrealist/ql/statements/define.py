@@ -58,7 +58,7 @@ class DefineEvent(Define):
     """
     Represents DEFINE EVENT statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/event
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -108,7 +108,7 @@ class DefineParam(Define):
     """
     Represents DEFINE PARAM statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/param
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -143,14 +143,13 @@ class DefineIndex(Define, CanUseIndexTypes, CanUseConcurrently):
     """
     Represents DEFINE INDEX statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/indexes
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
     DEFINE INDEX [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields
     [ UNIQUE
-        | SEARCH ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
-        | MTREE DIMENSION @dimension [ TYPE @type ] [ DIST @distance ] [ CAPACITY @capacity]
+        | FULLTEXT ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
         | HNSW DIMENSION @dimension [ TYPE @type ] [DIST @distance] [ EFC @efc ] [ M @m ]
     ]
     [ COMMENT @string ]
@@ -208,7 +207,7 @@ class DefineTable(Define, CanUsePermissions):
     """
     Represents DEFINE TABLE statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/table
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     
