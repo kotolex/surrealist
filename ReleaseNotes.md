@@ -6,7 +6,9 @@
 - remove SCOPE and TOKEN methods(DEFINE and REMOVE)
 - change SEARCH to FULLTEXT in analyzer
 - remove MTREE index
+- method to_uid_string_with_backticks in RecordId removed, cause braces ⟨⟩ are not valid anymore for recordId
 - add info part to Result
+- fix docs, examples and test because now select/count/LQ returns error when table is not exists
 - fix documentation urls, and other README parts
 - add some tests and examples
 - add python 3.14 tests

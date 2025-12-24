@@ -24,7 +24,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.use('test', 'test')
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(None, res.result)
+            self.assertEqual({'database': 'test', 'namespace': 'test'}, res.result)
 
     def test_let_unset(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -76,9 +76,9 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             self.assertFalse(res.result == [])
-            res = connection.select(f"article:⟨{uid}⟩")
+            res = connection.select(f"article:`{uid}`")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result, [{"id": f"article:⟨{uid}⟩", **data}])
+            self.assertEqual(res.result, [{"id": f"article:`{uid}`", **data}])
 
     def test_create_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -226,6 +226,7 @@ class TestWebSocketConnection(TestCase):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.live("ws_article", callback=function)
+            print(res)
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             uid = get_random_series(27)
@@ -267,10 +268,14 @@ class TestWebSocketConnection(TestCase):
         function = lambda mess: a_list.append(mess)
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
-            connection.live("ws_article", callback=function)
-            connection.live("ws_article2", callback=function)
             uid = get_random_series(27)
             opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            connection.create("ws_article2", opts)
+            uid = get_random_series(27)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.live("ws_article", callback=function)
+            connection.live("ws_article2", callback=function)
             connection.create("ws_article", opts)
             connection.create("ws_article2", opts)
             time.sleep(0.3)
@@ -284,8 +289,8 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("not_exists")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
+            self.assertEqual("The table 'not_exists' does not exist", res.result)
             self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
             count = connection.count("article").result
             uid = get_random_series(6)
@@ -293,13 +298,12 @@ class TestWebSocketConnection(TestCase):
             new_count = connection.count("article").result
             self.assertEqual(new_count, count + 1)
 
-    def test_count_is_zero_if_wrong(self):
+    def test_count_is_error_if_wrong(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("wrong")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
 
     def test_count_returns_fields(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
@@ -415,7 +419,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
-            self.assertFalse(res.is_error())
+            self.assertFalse(res.is_error(), res)
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
@@ -436,10 +440,10 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 5)
+            self.assertEqual(len(res.result), 7)
             res = connection.root_info(structured=True)
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 5)
+            self.assertEqual(len(res.result), 7)
 
     def test_info_ns(self):
         surreal = Surreal(URL, 'test', credentials=('user_ns', 'user_ns'))

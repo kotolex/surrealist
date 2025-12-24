@@ -136,7 +136,8 @@ class WebSocketConnection(Connection):
     @connected
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
-        This method can be used to initiate live query - a real-time selection from a table
+        This method can be used to initiate live query - a real-time selection from a table. Since SDB version 3 this
+        method will return error if table is not exists.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#live
 
@@ -166,7 +167,7 @@ class WebSocketConnection(Connection):
     def custom_live(self, custom_query: str, callback: Callable[[Dict], Any]) -> SurrealResult:
         """
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
-        other features of Live Query
+        other features of Live Query. Since SDB version 3 this method will return error if table is not exists.
 
         Refer to: https://surrealdb.com/docs/surrealql/statements/live
 

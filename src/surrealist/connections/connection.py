@@ -81,9 +81,9 @@ class Connection(ABC):
         Returns records count for given table. You should have permissions for this action.
         Actually converts to QL "SELECT count() FROM {table_name} GROUP ALL;" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/count
+        Refer to: https://surrealdb.com/docs/surrealql/functions/database/count
 
-        Note: returns zero if table does not exist, if you need to check table existence use **is_table_exists**
+        Note: returns error if table does not exist, if you need to check table existence use **is_table_exists**
 
         Note: if you specify table_name with recordID like "person:john" you will get count of fields in record
 
@@ -103,7 +103,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR TABLE table_name" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param table_name: name of the table
         :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
@@ -118,7 +118,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR DB" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full database information
@@ -132,7 +132,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR NS" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full namespace information
@@ -146,7 +146,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR ROOT" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: information about root
@@ -166,7 +166,7 @@ class Connection(ABC):
 
         Actually converts to QL query to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/session
+        Refer to: https://surrealdb.com/docs/surrealql/functions/database/session
 
         :return: full session information
         """
@@ -220,7 +220,7 @@ class Connection(ABC):
 
         If if_exists parameter is False and the table does not exist - error will be returned at a result.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+        Refer to: https://surrealdb.com/docs/surrealql/statements/remove
 
         Note: only name of the table allowed here, do not use record_id
 
@@ -292,7 +292,7 @@ class Connection(ABC):
         """
         This method specifies the namespace and optionally database for the current connection
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
+        Refer to: https://surrealdb.com/docs/surrealql/statements/use
         """
 
     @abstractmethod
@@ -311,7 +311,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
+        Refer to: https://surrealdb.com/docs/surrealql/statements/let
 
         :param name: name for the variable (without $ sign!)
         :param value: value for the variable
@@ -366,6 +366,7 @@ class Connection(ABC):
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
         This method can be used to initiate live query - a real-time selection from a table. Works only for websockets.
+        Since SDB version 3 this method will return error if table is not exists.
 
         Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
@@ -379,6 +380,7 @@ class Connection(ABC):
         """
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query. Works only for websockets.
+        Since SDB version 3 this method will return error if table is not exists.
 
         Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
@@ -392,7 +394,7 @@ class Connection(ABC):
         """
         This method is used to terminate a running live query by id
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
+        Refer to: https://surrealdb.com/docs/surrealql/statements/kill
         """
 
     @connected
@@ -474,11 +476,12 @@ class Connection(ABC):
     @connected
     def select(self, table_name: str, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
-        This method selects either all records in a table or a single record
+        This method selects either all records in a table or a single record. Since SDB version 3 this method will
+        return error if table is not exists.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#select
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
+        Refer to: https://surrealdb.com/docs/surrealql/statements/select
 
         Examples:
         connection.select("article") # select all records in article table
@@ -508,7 +511,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#create
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/create
+        Refer to: https://surrealdb.com/docs/surrealql/statements/create
 
         Examples:
         connection.create("person", {"name": "John Doe"}) # create one record in person table with random id
@@ -547,7 +550,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+        Refer to: https://surrealdb.com/docs/surrealql/statements/update
 
         Example:
         connection.update("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
@@ -579,7 +582,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#upsert
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
+        Refer to: https://surrealdb.com/docs/surrealql/statements/upsert
 
         Example:
         connection.upsert("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
@@ -606,7 +609,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
+        Refer to: https://surrealdb.com/docs/surrealql/statements/insert
 
         Examples:
         connection.insert("person", {"name": "John Doe"}) # inserts one record with random id
@@ -679,7 +682,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
+        Refer to: https://surrealdb.com/docs/surrealql/statements/delete
 
         Examples:
         connection.delete("person:my_id") # deletes one record in person table
@@ -736,7 +739,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#query
 
-        For SurrealQL refer to: https://docs.surrealdb.com/docs/surrealql/overview
+        For SurrealQL refer to: https://surrealdb.com/docs/surrealql/overview
 
         Example:
         connection.query("SELECT * FROM article;") # gets all records from article table

@@ -12,7 +12,7 @@ def call_back(response: dict) -> None:
 # you need websockets for a live query
 surreal = Surreal("http://127.0.0.1:8000", namespace="test", database="test", credentials=("user_db", "user_db"))
 with surreal.connect() as connection:
-    # here we subscribe on person table
+    # here we subscribe on person table, it should exist
     res = connection.live("person", callback=call_back)
     live_id = res.result  # live_id is a LQ id, we need it to kill a query
     connection.create("person", {"name": "John", "surname": "Doe"})  # here we create an event

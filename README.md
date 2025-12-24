@@ -171,14 +171,13 @@ from surrealist import Database
 # connects to Database (it is not connection)
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: 
     table = db.table("person") # switch to table level, no problem if it is not exists
-    print(table.count()) # 0, table is empty or not exists
     # let's add record
     # real query CREATE person:john SET status = "ACTIVE" RETURN id;
     result = table.create("john").set(status="ACTIVE").returns("id").run() 
     # SurrealResult(id=9eb966a4-02fc-40ea-82ba-825d37254f43, status=OK, result=[{'id': 'person:john'}], 
     # query=CREATE person:john SET status = "ACTIVE" RETURN id;, code=None, time=110.3µs, additional_info={})
     print(result)
-    print(table.count()) # now one record
+    print(table.count()) # 1
 ```
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 
@@ -359,7 +358,7 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 
 **Note 1:** if your connection was interrupted or closed, LQ will disappear, and you need to recreate it
 
-**Note 2:** LQ only produces events which happen after the creation of this LQ
+**Note 2:** LQ only produces events which happen after the creation of this LQ and table should exist
 
 **Note 3:** LQ is associated with connection, where it was created, if you have two or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active

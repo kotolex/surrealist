@@ -35,10 +35,10 @@ class TestDatabase(TestCase):
         func = lambda mess: a_list.append(mess)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
-            result = db.live_query(table_name="ws_artile", callback=func).run()
+            result = db.live_query(table_name="ws_article", callback=func).run()
             self.assertFalse(result.is_error())
             live_uid = result.result
-            db.ws_artile.create().content({"title": uid}).run()
+            db.ws_article.create().content({"title": uid}).run()
             time.sleep(0.1)
             self.assertFalse(a_list == [])
             result = db.kill_query(live_uid)
@@ -49,9 +49,9 @@ class TestDatabase(TestCase):
         func = lambda mess: a_list.append(mess)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
-            result = db.live_query(table_name="ws_artile", callback=func).fetch("authors").run()
+            result = db.live_query(table_name="ws_article", callback=func).fetch("authors").run()
             self.assertFalse(result.is_error())
-            result = db.ws_artile.create().content(
+            result = db.ws_article.create().content(
                 {"title": uid, "authors": [RecordId("author:john")], "description": "test"}).run()
             time.sleep(0.1)
             self.assertFalse(a_list == [])

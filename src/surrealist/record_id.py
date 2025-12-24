@@ -33,7 +33,7 @@ class RecordId:
         id_ = id_.replace("`", "").replace("⟨", "").replace("⟩", "")
         self._naive_id = id_ if ":" in id_ else f"{table}:{id_}"
         self._table_part, self._id_part = self._naive_id.split(":")
-        self._uid = f"{self._table_part}:⟨{self._id_part}⟩"
+        self._uid = f"{self._table_part}:`{self._id_part}`"
 
     def __repr__(self):
         return f"RecordId('{self._naive_id}')"
@@ -74,12 +74,6 @@ class RecordId:
 
     def to_uid_string(self) -> str:
         """
-        Return record id with special braces for id like article:⟨c332eb25-e408-4396-814f-83a85d556493⟩
-        """
-        return self._uid
-
-    def to_uid_string_with_backticks(self) -> str:
-        """
         Return record id with backticks for id like article:`c332eb25-e408-4396-814f-83a85d556493`
         """
-        return self._uid.replace("⟨", "`").replace("⟩", "`")
+        return self._uid

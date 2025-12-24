@@ -175,7 +175,7 @@ UPDATE signup:jtil9t25gittkevrggqv CONTENT { id: signup:jtil9t25gittkevrggqv, pa
 -- TABLE DATA: temperature
 -- ------------------------------
 
-UPDATE temperature:⟨018d46d7-9eff-72fc-9df0-96ac142b1459⟩ CONTENT { celsius: 37.5f, id: temperature:⟨018d46d7-9eff-72fc-9df0-96ac142b1459⟩, time: '2024-01-26T17:35:52.575768Z' };
+UPDATE temperature:`018d46d7-9eff-72fc-9df0-96ac142b1459` CONTENT { celsius: 37.5f, id: temperature:`018d46d7-9eff-72fc-9df0-96ac142b1459`, time: '2024-01-26T17:35:52.575768Z' };
 UPDATE temperature:01HN3DF7QZNJYP899DQH2YAXWZ CONTENT { celsius: 37.5f, id: temperature:01HN3DF7QZNJYP899DQH2YAXWZ, time: '2024-01-26T17:35:52.575578Z' };
 UPDATE temperature:xqy0bwas6xvi5s2ee6j2 CONTENT { celsius: 37.5f, id: temperature:xqy0bwas6xvi5s2ee6j2, time: '2024-01-26T17:35:52.572435Z' };
 

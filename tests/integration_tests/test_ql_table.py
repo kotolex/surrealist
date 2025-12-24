@@ -86,9 +86,9 @@ class TestTable(TestCase):
         func = lambda mess: a_list.append(mess)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
-            table = db.table("ws_artile")
+            table = db.table("ws_article")
             result = table.live(func).run()
-            self.assertFalse(result.is_error())
+            self.assertFalse(result.is_error(), result)
             live_uid = result.result
             table.create().content({"title": uid}).run()
             time.sleep(0.1)
@@ -102,8 +102,9 @@ class TestTable(TestCase):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(14)
             table = db.table("ws_person")
+            table.create().content({"title": f"some_{uid}", "age": 22}).run()
             result = table.live(func).alias("title", "TITLE").where("age > 22").run()
-            self.assertFalse(result.is_error())
+            self.assertFalse(result.is_error(), result)
             live_uid = result.result
             table.create().content({"title": uid, "age": 22}).run()
             table.create().content({"title": "new", "age": 40}).run()

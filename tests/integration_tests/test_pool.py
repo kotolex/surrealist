@@ -35,10 +35,10 @@ class TestDatabasePool(TestCase):
         func = lambda mess: a_list.append(mess)
         with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'),) as db:
             uid = get_random_series(12)
-            result = db.live_query(table_name="ws_artile", callback=func).run()
-            self.assertFalse(result.is_error())
+            result = db.live_query(table_name="ws_article", callback=func).run()
+            self.assertFalse(result.is_error(), result)
             live_uid = result.result
-            db.ws_artile.create().content({"title": uid}).run()
+            db.ws_article.create().content({"title": uid}).run()
             time.sleep(0.1)
             self.assertFalse(a_list == [])
             result = db.kill_query(live_uid)
