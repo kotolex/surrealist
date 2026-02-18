@@ -76,9 +76,9 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             self.assertFalse(res.result == [])
-            res = connection.select(f"article:`{uid}`")
+            res = connection.select(f"article:u'{uid}'")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result, [{"id": f"article:`{uid}`", **data}])
+            self.assertEqual(res.result, [{"id": f"article:u'{uid}'", **data}])
 
     def test_create_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -471,17 +471,18 @@ class TestWebSocketConnection(TestCase):
             self.assertTrue(connection.is_table_exists("person"))
             self.assertFalse(connection.is_table_exists("not_exists"))
 
-    def test_nesting_48(self):
+    def test_nesting_56(self):
         num = 0
         prev = {"name": "first", "age": num, "inner": []}
-        for _ in range(48):
+        for _ in range(56):
             num += 1
             prev = {"name": get_random_series(10), "level": num, "inner": [prev]}
 
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.create("ws_article", prev)
-            self.assertFalse(res.is_error())
+            self.assertFalse(res.is_error(), res)
+
 
     def test_run(self):
         surreal = Surreal(URL, credentials=('root', 'root'))

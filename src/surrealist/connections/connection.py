@@ -4,8 +4,7 @@ from logging import getLogger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.enums import Transport
-from surrealist.errors import (OperationOnClosedConnectionError,
-                               WrongParameterError)
+from surrealist.errors import OperationOnClosedConnectionError
 from surrealist.record_id import RecordId
 from surrealist.result import SurrealResult
 from surrealist.utils import (AC, DB, DEFAULT_TIMEOUT, NS, StrOrRecord,
@@ -397,7 +396,7 @@ class Connection(ABC):
         Refer to: https://surrealdb.com/docs/surrealql/statements/kill
         """
 
-    @connected
+    @abstractmethod
     def graphql(self, query: Dict, pretty: Optional[bool] = False) -> SurrealResult:
         """
         This method allows you to execute GraphQL queries against the database.
@@ -406,9 +405,8 @@ class Connection(ABC):
         - variables or vars (optional): An object containing variables for the query.
         - operationName or operation (optional): The name of the operation to execute.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#graphql
-
         Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+        Example: https://github.com/kotolex/surrealist/tree/master/examples/graph_ql.py
 
         Important Note: GraphQL validates all schemas for all tables in the database, so if there are some errors,
         you get an error back, even if the problem is not with your data
@@ -421,13 +419,6 @@ class Connection(ABC):
         :return: result of request
         :raise WrongParameterError: if query is not valid dictionary
         """
-        allowed_fields = ("query", "variables", "vars", "operationName", "operation")
-        if "query" not in query or any(field not in allowed_fields for field in query.keys()):
-            raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
-                                      "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
-        data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
-        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
-        return self._use_rpc(data)
 
     @connected
     def run(self, func_name: str, version: Optional[str] = None, args: Optional[List] = None) -> SurrealResult:

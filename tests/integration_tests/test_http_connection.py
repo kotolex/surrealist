@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from surrealist import Surreal, get_uuid
+from surrealist import RecordId, Surreal, get_uuid
 from tests.integration_tests.utils import URL, WS_URL, get_random_series
 
 
@@ -69,8 +69,8 @@ class TestHttpConnection(TestCase):
         connection = db.connect()
         connection.use("test", "test")
         res = connection.select("article", "not_exists")
-        self.assertTrue(res.result == [])
-        self.assertEqual(res.status, "OK")
+        self.assertTrue(res.is_error())
+        self.assertEqual(res.result, "The table 'article:u'not_exists'' does not exist")
 
     def test_select_error_non_existent_table(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -87,11 +87,11 @@ class TestHttpConnection(TestCase):
         res = connection.create("article", {"id": uid, "author": uid, "title": uid, "text": uid})
         self.assertIsNotNone(res.result)
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result["id"], f"article:`{uid}`")
-        res = connection.select("article", f"`{uid}`")
+        self.assertEqual(res.result["id"], f"article:u'{uid}'")
+        res = connection.select("article", RecordId(uid, table="article"))
         self.assertTrue(res.result != [], f"{uid} - {res}")
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result[0]["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result[0]["id"], f"article:u'{uid}'", res)
 
     def test_create_one_with_id(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -101,11 +101,11 @@ class TestHttpConnection(TestCase):
         res = connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result["id"], f"article:u'{uid}'", res)
         res = connection.select("article", f"`{uid}`")
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result[0]["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result[0]["id"], f"article:u'{uid}'", res)
 
     def test_create_one_no_id(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -115,7 +115,7 @@ class TestHttpConnection(TestCase):
         res = connection.create("article", {"author": uid, "title": uid, "text": uid})
         self.assertTrue(res.result != [])
         self.assertEqual(res.status, "OK")
-        self.assertTrue(res.result["id"] != f"article:`{uid}`", res)
+        self.assertTrue(res.result["id"] != f"article:u'{uid}'", res)
 
     def test_update_one(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -123,14 +123,14 @@ class TestHttpConnection(TestCase):
         connection.use("test", "test")
         uid = get_uuid()
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
-        res = connection.update(f"article:`{uid}`", {"author": "inserted"})
+        res = connection.update(f"article:u'{uid}'", {"author": "inserted"})
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result["id"], f"article:u'{uid}'", res)
         self.assertEqual(res.result["author"], "inserted", res)
         res = connection.select("article", f"`{uid}`")
         self.assertEqual(res.status, "OK")
         self.assertEqual(len(res.result[0]), 2, res)
-        self.assertEqual(res.result[0]["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result[0]["id"], f"article:u'{uid}'", res)
         self.assertEqual(res.result[0]["author"], "inserted", res)
 
     def test_upsert_one(self):
@@ -163,11 +163,11 @@ class TestHttpConnection(TestCase):
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
         res = connection.merge("article", {"new_field": "merge"}, record_id=f"`{uid}`")
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result["id"], f"article:u'{uid}'", res)
         self.assertEqual(res.result["new_field"], "merge", res)
-        res = connection.select(f"article:`{uid}`")
+        res = connection.select(f"article:u'{uid}'")
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result[0]["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result[0]["id"], f"article:u'{uid}'", res)
         self.assertEqual(res.result[0]["new_field"], "merge", res)
 
     def test_merge_z_all(self):
@@ -206,7 +206,7 @@ class TestHttpConnection(TestCase):
         connection.create("article", {"author": uid, "title": uid, "text": uid}, record_id=uid)
         res = connection.delete("article", record_id=f"`{uid}`")
         self.assertEqual(res.status, "OK")
-        self.assertEqual(res.result["id"], f"article:`{uid}`", res)
+        self.assertEqual(res.result["id"], f"article:u'{uid}'", res)
         res = connection.select("article", uid)
         self.assertEqual(res.status, "OK")
         self.assertTrue(len(res.result) == 0)
@@ -377,9 +377,9 @@ class TestHttpConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             uid = get_random_series(13)
-            res = connection.update(f"article:`{uid}`", {'field': 'old'})
+            res = connection.update(f"article:u'{uid}'", {'field': 'old'})
             self.assertFalse(res.is_error())
-            res = connection.select(f"article:`{uid}`")
+            res = connection.select(f"article:u'{uid}'")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
 
@@ -389,10 +389,11 @@ class TestHttpConnection(TestCase):
             connection.use("test", "test")
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
-            self.assertFalse(res.is_error())
+            self.assertTrue(res.is_error())
+            self.assertEqual(res.result, f"The table 'article:{uid} does not exist")
             res = connection.select(f"article:{uid}")
-            self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [])
+            self.assertTrue(res.is_error())
+            self.assertEqual(res.result, f"The table 'article:{uid} does not exist")
 
     def test_delete_unexisting(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -511,6 +512,13 @@ class TestHttpConnection(TestCase):
             connection.use("test", "test")
             res = connection.graphql({"query": "{ author { id } }"}, pretty=False)
             self.assertFalse(res.is_error(), res)
+
+    def test_graphql_error(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.graphql({"query": "{ autho }"}, pretty=False)
+            self.assertTrue(res.is_error(), res)
 
     def test_ping(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)

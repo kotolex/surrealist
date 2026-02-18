@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple, Union
@@ -6,9 +7,11 @@ from surrealist.clients.http_client import HttpClient
 from surrealist.connections.connection import Connection, connected
 from surrealist.enums import Transport
 from surrealist.errors import (CompatibilityError, HttpClientError,
-                               HttpConnectionError, SurrealConnectionError)
+                               HttpConnectionError, SurrealConnectionError,
+                               WrongParameterError)
 from surrealist.result import SurrealResult, to_result
-from surrealist.utils import AC, DB, DEFAULT_TIMEOUT, ENCODING, HTTP_OK, NS
+from surrealist.utils import (AC, DB, DEFAULT_TIMEOUT, ENCODING, ERR, HTTP_OK,
+                              NS, OK)
 
 logger = getLogger("surrealist.connections.http")
 
@@ -159,6 +162,44 @@ class HttpConnection(Connection):
         if database:
             self._db_params[DB] = database
         self._http_client.set_db_params(self._db_params)
+
+    @connected
+    def graphql(self, query: Dict, pretty: Optional[bool] = False) -> SurrealResult:
+        """
+        This method allows you to execute GraphQL queries against the database.
+        The query parameter is a dictionary with the following fields:
+        - query (required): The GraphQL query string.
+        - variables or vars (optional): An object containing variables for the query.
+        - operationName or operation (optional): The name of the operation to execute.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+        Example: https://github.com/kotolex/surrealist/tree/master/examples/graph_ql.py
+
+        Important Note: GraphQL validates all schemas for all tables in the database, so if there are some errors,
+        you get an error back, even if the problem is not with your data
+
+        Examples:
+        connection.graphql({"query": "{ author { id name } }"}, pretty=True)
+
+        :param query: dictionary with all parameters
+        :param pretty: optional boolean parameter, indicating whether the output should be pretty-printed.
+        :return: result of request
+        :raise WrongParameterError: if query is not valid dictionary
+        """
+        allowed_fields = ("query", "variables", "vars", "operationName", "operation")
+        if "query" not in query or any(field not in allowed_fields for field in query.keys()):
+            raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
+                                      "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
+        if pretty:
+            query["pretty"] = True
+        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
+        status, text = self._simple_request("POST", "graphql", query)
+        if status == HTTP_OK:
+            body = json.loads(text)
+            if "errors" in body:
+                return SurrealResult(result=body["errors"], code=status, query=query, status=ERR, full_body=body)
+            return SurrealResult(result=body, code=status, query=query, status=OK)
+        return SurrealResult(result=text, code=status, query=query, status=ERR)
 
     def reset(self):
         """

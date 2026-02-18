@@ -164,7 +164,7 @@ class Database:
         """
         Return result of the query
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
+        Refer to: https://surrealdb.com/docs/surrealql/statements/return
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -194,7 +194,7 @@ class Database:
         """
         Create a transaction object to generate a query or run
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/transactions
+        Refer to: https://surrealdb.com/docs/surrealql/transactions
 
         :param statements: list of appropriate statements (select, create, delete. etc.)
         :return: Transaction object
@@ -218,7 +218,7 @@ class Database:
         """
         Allow defining event on table
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/event
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -233,7 +233,7 @@ class Database:
         """
         Remove an event linked to table
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+        Refer to: https://surrealdb.com/docs/surrealql/statements/remove
 
         :param name: name of the event
         :param table_name: name of the table
@@ -245,7 +245,7 @@ class Database:
         """
         Allow defining user for a current database
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/user
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -267,7 +267,7 @@ class Database:
         """
         Represents DEFINE PARAM statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/param
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -290,7 +290,7 @@ class Database:
         """
         Represents DEFINE ANALYZER statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -312,7 +312,7 @@ class Database:
         """
         Represents DEFINE INDEX statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/indexes
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -399,7 +399,7 @@ class Database:
         """
         Represents RELATE statement, it should be able to use any statements from documentation
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/relate
+        Refer to: https://surrealdb.com/docs/surrealql/statements/relate
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_relate_examples.py
 
@@ -436,7 +436,7 @@ class Database:
         """
         Represents a KILL statement, for killing a live query by id
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
+        Refer to: https://surrealdb.com/docs/surrealql/statements/kill
 
         :param live_id: id of the query
         :return: result
@@ -447,7 +447,7 @@ class Database:
         """
         Represents DEFINE TABLE statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/table
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -460,7 +460,7 @@ class Database:
         """
         Represents DEFINE FIELD statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/field
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_field.py
 

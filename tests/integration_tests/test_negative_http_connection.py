@@ -1,7 +1,8 @@
 from unittest import TestCase, main
 
 from surrealist import (CompatibilityError, HttpConnectionError, Surreal,
-                        SurrealConnectionError, SurrealRecordIdError, get_uuid)
+                        SurrealConnectionError, SurrealRecordIdError,
+                        WrongParameterError, get_uuid)
 from tests.integration_tests.utils import URL
 
 PARAMS = (
@@ -206,7 +207,7 @@ class TestHttpConnectionNegative(TestCase):
         with surreal.connect() as connection:
             res = connection.insert("new_table:new_insert", {'new_field2': 'field2'})
             self.assertTrue(res.is_error())
-            self.assertEqual(-32000, res.code)
+            self.assertEqual(-32600, res.code)
 
     def test_root_info_failed(self):
         surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), use_http=True)
@@ -230,13 +231,12 @@ class TestHttpConnectionNegative(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The model 'ml::image_classifier<v2.1>' does not exist", res.result)
 
-    # TODO uncomment after bugfix
-    # def test_ml_import_failed_wrong_file(self):
-    #     db = Surreal(URL, credentials=('root', 'root'), use_http=True)
-    #     file_path = Path(__file__).parent / "import.srql"
-    #     with db.connect() as connection:
-    #     with self.assertRaises(HttpClientError):
-    #         connection.ml_import(file_path)
+    def test_graphql_invalid(self):
+        surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            with self.assertRaises(WrongParameterError):
+                connection.graphql({"wrong": "{ author { id } }"}, pretty=True)
 
 
 if __name__ == '__main__':

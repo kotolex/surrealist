@@ -262,6 +262,20 @@ class WebSocketConnection(Connection):
                        f"Refer to: https://docs.surrealdb.com/docs/cli/ml/import"
         raise CompatibilityError(full_message)
 
+    def graphql(self, query: Dict, pretty: Optional[bool] = False):
+        """
+        Websocket transport cannot use GraphQL, so you should use http transport for that
+
+        Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql/http
+
+        :raise CompatibilityError: on any use
+        """
+        message = "GraphQL is not allowed for websocket transport in the current SurrealDB version"
+        logger.error(message)
+        full_message = f"{message}\nYou can use http transport\n" \
+                       f"Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql/http"
+        raise CompatibilityError(full_message)
+
     def close(self):
         super().close()
         if self.is_connected():

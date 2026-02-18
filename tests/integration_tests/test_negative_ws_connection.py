@@ -30,7 +30,7 @@ class TestNegativeWebSocketConnection(TestCase):
     def test_live_failed_on_id(self):
         a_list = []
         function = lambda mess: a_list.append(mess)
-        surreal = Surreal(URL, "test", "test", credentials=('user_db', 'user_db'),)
+        surreal = Surreal(URL, "test", "test", credentials=('user_db', 'user_db'), )
         with surreal.connect() as connection:
             res = connection.live(f"ws_article:some_id", callback=function)
             self.assertTrue(res.is_error(), res)
@@ -38,7 +38,7 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertEqual(res.code, -32000)
 
     def test_kill(self):
-        surreal = Surreal(URL, "test", "test", credentials=('user_db', 'user_db'),)
+        surreal = Surreal(URL, "test", "test", credentials=('user_db', 'user_db'), )
         with surreal.connect() as connection:
             res = connection.kill("wrong")
             self.assertTrue(res.is_error(), res)
@@ -46,7 +46,8 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertEqual(res.code, -32000)
             res = connection.kill("0189d6e3-8eac-703a-9a48-d9faa78b44b9")
             self.assertTrue(res.is_error(), res)
-            self.assertEqual(res.result, "Cannot execute KILL statement using id: '0189d6e3-8eac-703a-9a48-d9faa78b44b9'")
+            self.assertEqual(res.result,
+                             "Cannot execute KILL statement using id: u'0189d6e3-8eac-703a-9a48-d9faa78b44b9'")
             self.assertEqual(res.code, -32000)
 
     def test_export_failed(self):
@@ -73,6 +74,12 @@ class TestNegativeWebSocketConnection(TestCase):
             with self.assertRaises(CompatibilityError):
                 connection.ml_import(None)
 
+    def test_graphql_failed(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            with self.assertRaises(CompatibilityError):
+                connection.graphql({"query": "{ author { id } }"})
+
     def test_db_info_failed_permissions(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
@@ -82,13 +89,13 @@ class TestNegativeWebSocketConnection(TestCase):
             self.assertEqual("Specify a namespace to use", res.result)
 
     def test_insert_failed_if_have_id(self):
-        surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'),)
+        surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), )
         with surreal.connect() as connection:
             res = connection.insert("new_table:new_insert", {'new_field2': 'field2'})
             self.assertTrue(res.is_error())
 
     def test_root_info_failed(self):
-        surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'),)
+        surreal = Surreal(URL, 'test', 'test', credentials=('user_db', 'user_db'), )
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertTrue(res.is_error())
@@ -108,13 +115,6 @@ class TestNegativeWebSocketConnection(TestCase):
             res = connection.run("ml::image_classifier", "v2.1", ["image_data_base64"])
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The model 'ml::image_classifier<v2.1>' does not exist", res.result)
-
-    def test_graphql_invalid(self):
-        surreal = Surreal(URL, credentials=('root', 'root'))
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            with self.assertRaises(WrongParameterError):
-                connection.graphql({"wrong": "{ author { id } }"}, pretty=True)
 
 
 if __name__ == '__main__':

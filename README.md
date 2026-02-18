@@ -22,7 +22,7 @@ Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including py
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (3.0.0), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (3.0.0), including [live queries](https://surrealdb.com/products/lq), [change feeds](https://surrealdb.com/products/cf) and [GraphQL](https://surrealdb.com/docs/surrealdb/querying/graphql)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -66,6 +66,7 @@ Each transport has functions it cannot use by itself (in a current SurrealDB ver
  - use LET or UNSET methods
 
 **Websocket-transport cannot:**
+ - use GraphQL
  - import or export data (you should use http connection or cli tools for that)
  - import or export ML files (you should use http connection or cli tools for that)
 
@@ -257,15 +258,15 @@ record_id = result.id  # person:34vepp6apg0np2sdstle
 print(ws_connection.select("person", record_id=RecordId(record_id)).result)  # [{'id': 'person:34vepp6apg0np2sdstle', 'name': 'John Doe'}]
 ```
 
-Simple record_id can have only A-Z, a-z letters and digits 0-9, for any other UTF-8 letters RecordId will generate valid representation with special braces:
+Simple record_id can have only A-Z, a-z letters and digits 0-9, for any other UTF-8 letters RecordId will generate valid representation with u-prefix:
 ```python
 from surrealist import get_uuid, RecordId
 uuid = get_uuid()  # 6e796db2-8322-4056-b63f-0f1812f6e075
 record_id = RecordId(uuid, table="person")
-print(record_id.to_valid_string())  # person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩
+print(record_id.to_valid_string())  # person:u'6e796db2-8322-4056-b63f-0f1812f6e075'
 create_result = ws_connection.create("person", {"name": "tobie", "age": 30}, record_id)
-print(create_result.result) # {'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}
-print(ws_connection.select("person", record_id=record_id).result) # [{'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}]
+print(create_result.result) # {"age": 30, "id": "person:u'6e796db2-8322-4056-b63f-0f1812f6e075'", "name": "tobie"}
+print(ws_connection.select("person", record_id=record_id).result) # [{"age": 30, 'id': "person:u'6e796db2-8322-4056-b63f-0f1812f6e075'", "name": "tobie"}]
 ```
 
 ## Surreal Datetime ##
