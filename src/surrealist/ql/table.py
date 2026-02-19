@@ -17,6 +17,7 @@ from surrealist.result import SurrealResult
 from surrealist.utils import StrOrRecord
 
 
+
 class Table:
     """
     Represents a table of the database including not (yet) existing one.
@@ -57,7 +58,12 @@ class Table:
 
         :return: number of records
         """
-        return self._connection.count(self._name).result
+        result = self._connection.count(self._name)
+        if result.is_error():
+            inner_result  = result.result
+            if isinstance(inner_result, str) and "does not exist" in inner_result:
+                return 0
+        return result.result
 
     def select(self, *args, alias: Optional[List[Tuple[str, Union[str, Statement]]]] = None,
                value: Optional[str] = None) -> Select:

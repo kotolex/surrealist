@@ -8,10 +8,10 @@ from tests.integration_tests.utils import URL, get_random_series
 class TestTable(TestCase):
     def test_count(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            author = db.author
+            author = db.author22
             count = author.count()
             author.create().content({"author": "author:john", "title": "1"}).return_none().run()
-            self.assertEqual(count+1, author.count())
+            self.assertEqual(count + 1, author.count())
 
     def test_select(self):
         uid = get_random_series(11)
