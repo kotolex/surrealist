@@ -2,9 +2,8 @@ import time
 from typing import List
 from unittest import TestCase, main
 
-from tests.integration_tests.utils import URL, get_random_series
 from surrealist import DatabaseConnectionsPool
-
+from tests.integration_tests.utils import URL, get_random_series
 
 text = f"DatabasePool(namespace=test, name=test, connected=True,connections_count=2, min_connections=2, " \
        f"max_connections=10)"
@@ -36,10 +35,10 @@ class TestDatabasePool(TestCase):
         func = lambda mess: a_list.append(mess)
         with DatabaseConnectionsPool(URL, 'test', 'test', credentials=('user_db', 'user_db'),) as db:
             uid = get_random_series(12)
-            result = db.live_query(table_name="ws_artile", callback=func).run()
-            self.assertFalse(result.is_error())
+            result = db.live_query(table_name="ws_article", callback=func).run()
+            self.assertFalse(result.is_error(), result)
             live_uid = result.result
-            db.ws_artile.create().content({"title": uid}).run()
+            db.ws_article.create().content({"title": uid}).run()
             time.sleep(0.1)
             self.assertFalse(a_list == [])
             result = db.kill_query(live_uid)

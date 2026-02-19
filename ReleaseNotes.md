@@ -1,5 +1,20 @@
 ## Release Notes ##
 
+**Version 2.0.0 (compatible with SurrealDB version 3.0.0):**
+
+- GraphQL now is not experimental, but works only for HTTP, add tests and examples
+- add ping and reset methods for rpc
+- remove SCOPE and TOKEN methods(DEFINE and REMOVE)
+- change SEARCH to FULLTEXT in analyzer
+- remove MTREE index
+- method to_uid_string_with_backticks in RecordId removed, cause braces ⟨⟩ are not valid anymore for recordId
+- now RecordId adds u-prefix for valid uuid
+- add info part to Result
+- fix docs, examples and test because now select/count/LQ returns error when table is not exists
+- fix documentation urls, and other README parts
+- add some tests and examples
+- add python 3.14 tests
+
 **Version 1.1.2 (compatible with SurrealDB version 2.2.2):**
 
 - minor fixes

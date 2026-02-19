@@ -31,12 +31,6 @@ class TestRemove(TestCase):
         self.assertEqual("REMOVE INDEX IF EXISTS salt ON TABLE person;",
                          Remove(None, "person", type_="INDEX", name="salt").if_exists().to_str())
 
-    def test_token(self):
-        self.assertEqual("REMOVE TOKEN token ON DATABASE;",
-                         Remove(None, "", type_="TOKEN", name="token").to_str())
-        self.assertEqual("REMOVE TOKEN IF EXISTS token ON DATABASE;",
-                         Remove(None, "", type_="TOKEN", name="token").if_exists().to_str())
-
     def test_user(self):
         self.assertEqual("REMOVE USER user ON DATABASE;",
                          Remove(None, "", type_="USER", name="user").to_str())
@@ -48,12 +42,6 @@ class TestRemove(TestCase):
                          Remove(None, "", type_="ANALYZER", name="name").to_str())
         self.assertEqual("REMOVE ANALYZER IF EXISTS name;",
                          Remove(None, "", type_="ANALYZER", name="name").if_exists().to_str())
-
-    def test_scope(self):
-        self.assertEqual("REMOVE SCOPE name;",
-                         Remove(None, "", type_="SCOPE", name="name").to_str())
-        self.assertEqual("REMOVE SCOPE IF EXISTS name;",
-                         Remove(None, "", type_="SCOPE", name="name").if_exists().to_str())
 
     def test_wrong_type_failed(self):
         with self.assertRaises(ValueError):

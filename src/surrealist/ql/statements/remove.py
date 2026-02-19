@@ -26,7 +26,7 @@ class Remove(Statement):
     | PARAM [ IF EXISTS ] $@name
     | TABLE [ IF EXISTS ] @name]
     """
-    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN", "ACCESS")
+    _variants = ("TABLE", "EVENT", "FIELD", "INDEX", "PARAM", "USER", "ANALYZER", "ACCESS")
 
     def __init__(self, connection: Connection, table_name: str, type_: str = "TABLE", name: Optional[str] = None):
         if type_ not in Remove._variants:
@@ -48,7 +48,7 @@ class Remove(Statement):
         Adds IF EXISTS to a final statement
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/remove#using-if-exists-clause-since-130
+        https://surrealdb.com/docs/surrealql/statements/remove#using-if-exists-clause-since-130
 
         :return: Remove object
         """
@@ -57,9 +57,9 @@ class Remove(Statement):
 
     def _clean_str(self):
         add = "" if not self._on_exists else " IF EXISTS"
-        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "SCOPE", "TOKEN", "ACCESS"):
+        if self._type in ("TABLE", "PARAM", "USER", "ANALYZER", "ACCESS"):
             what = f"{self._type}{add} {self._name}"
-            if self._type in ("USER", "TOKEN", "ACCESS"):
+            if self._type in ("USER", "ACCESS"):
                 what = f"{what} ON DATABASE"
             if self._type == "PARAM":
                 what = f"{self._type}{add} ${self._name}"

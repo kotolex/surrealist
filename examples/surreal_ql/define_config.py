@@ -1,4 +1,4 @@
-from surrealist import Database, AutoOrNone
+from surrealist import AutoOrNone, Database
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
     # DEFINE CONFIG GRAPHQL AUTO;

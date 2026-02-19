@@ -1,9 +1,9 @@
 import time
 from unittest import TestCase, main
 
-
+from surrealist import Database, Surreal, get_uuid
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import Surreal, get_uuid, Database
+
 
 class TestWebSocketConnection(TestCase):
     def test_connect(self):
@@ -24,7 +24,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             res = connection.use('test', 'test')
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(None, res.result)
+            self.assertEqual({'database': 'test', 'namespace': 'test'}, res.result)
 
     def test_let_unset(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -76,9 +76,9 @@ class TestWebSocketConnection(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             self.assertFalse(res.result == [])
-            res = connection.select(f"article:⟨{uid}⟩")
+            res = connection.select(f"article:u'{uid}'")
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(res.result, [{"id": f"article:⟨{uid}⟩", **data}])
+            self.assertEqual(res.result, [{"id": f"article:u'{uid}'", **data}])
 
     def test_create_one(self):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
@@ -226,6 +226,7 @@ class TestWebSocketConnection(TestCase):
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.live("ws_article", callback=function)
+            print(res)
             self.assertFalse(res.is_error(), res)
             self.assertIsNotNone(res.result)
             uid = get_random_series(27)
@@ -260,17 +261,21 @@ class TestWebSocketConnection(TestCase):
             time.sleep(0.1)
             a_dict = {**opts, "id": f"ws_article:{uid}"}
             self.assertEqual(a_list[0]['result']['action'], 'CREATE')
-            self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '/', 'value': a_dict}])
+            self.assertEqual(a_list[0]['result']['result'], [{'op': 'replace', 'path': '', 'value': a_dict}])
 
     def test_live_two_queries(self):
         a_list = []
         function = lambda mess: a_list.append(mess)
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
-            connection.live("ws_article", callback=function)
-            connection.live("ws_article2", callback=function)
             uid = get_random_series(27)
             opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.create("ws_article", opts)
+            connection.create("ws_article2", opts)
+            uid = get_random_series(27)
+            opts = {"id": uid, "author": uid, "title": uid, "text": uid}
+            connection.live("ws_article", callback=function)
+            connection.live("ws_article2", callback=function)
             connection.create("ws_article", opts)
             connection.create("ws_article2", opts)
             time.sleep(0.3)
@@ -284,8 +289,8 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("not_exists")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
+            self.assertEqual("The table 'not_exists' does not exist", res.result)
             self.assertEqual("SELECT count() FROM not_exists GROUP ALL;", res.query)
             count = connection.count("article").result
             uid = get_random_series(6)
@@ -293,13 +298,12 @@ class TestWebSocketConnection(TestCase):
             new_count = connection.count("article").result
             self.assertEqual(new_count, count + 1)
 
-    def test_count_is_zero_if_wrong(self):
+    def test_count_is_error_if_wrong(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.count("wrong")
-            self.assertFalse(res.is_error())
-            self.assertEqual(0, res.result)
+            self.assertTrue(res.is_error())
 
     def test_count_returns_fields(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
@@ -396,7 +400,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(13)
             res = connection.update(f"ws_article:{uid}", {'field': 'old'})
-            self.assertFalse(res.is_error())
+            self.assertTrue(res.is_error())
             res = connection.select(f"ws_article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
@@ -415,7 +419,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
-            self.assertFalse(res.is_error())
+            self.assertTrue(res.is_error())
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
@@ -425,21 +429,20 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.delete(f"ws_article:{uid}")
-            self.assertEqual(res.result, None)
-            self.assertFalse(res.is_error())
+            self.assertTrue(res.is_error())
             res = connection.delete(uid)
-            self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [])
+            self.assertTrue(res.is_error())
+            self.assertEqual(res.result, f"The table '{uid}' does not exist")
 
     def test_info_root(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
         with surreal.connect() as connection:
             res = connection.root_info()
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 5)
+            self.assertEqual(len(res.result), 7)
             res = connection.root_info(structured=True)
             self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(res.result), 5)
+            self.assertEqual(len(res.result), 7)
 
     def test_info_ns(self):
         surreal = Surreal(URL, 'test', credentials=('user_ns', 'user_ns'))
@@ -467,17 +470,18 @@ class TestWebSocketConnection(TestCase):
             self.assertTrue(connection.is_table_exists("person"))
             self.assertFalse(connection.is_table_exists("not_exists"))
 
-    def test_nesting_48(self):
+    def test_nesting_56(self):
         num = 0
         prev = {"name": "first", "age": num, "inner": []}
-        for _ in range(48):
+        for _ in range(56):
             num += 1
             prev = {"name": get_random_series(10), "level": num, "inner": [prev]}
 
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
             res = connection.create("ws_article", prev)
-            self.assertFalse(res.is_error())
+            self.assertFalse(res.is_error(), res)
+
 
     def test_run(self):
         surreal = Surreal(URL, credentials=('root', 'root'))
@@ -515,6 +519,20 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             res = connection.relate("person:tobie", "knows", "person:micha", {"since": "2024-09-15T12:34:56Z"})
+            self.assertFalse(res.is_error(), res)
+
+    def test_ping(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.ping()
+            self.assertFalse(res.is_error(), res)
+
+    def test_reset(self):
+        surreal = Surreal(URL, credentials=('root', 'root'))
+        with surreal.connect() as connection:
+            connection.use("test", "test")
+            res = connection.reset()
             self.assertFalse(res.is_error(), res)
 
 

@@ -1,4 +1,4 @@
-from surrealist import Database, Algorithm
+from surrealist import Algorithm, Database
 
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
     # on database object we can DEFINE ACCESS

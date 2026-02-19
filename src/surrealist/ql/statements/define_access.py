@@ -72,7 +72,7 @@ class DefineAccessBearer(Statement):
         Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/access/jwt#with-authenticate-clause
+        https://surrealdb.com/docs/surrealql/statements/define/access/jwt#with-authenticate-clause
 
         """
         self._auth = raw_expression
@@ -182,7 +182,7 @@ class DefineAccessJwt(Statement):
         Represents the AUTHENTICATE clause in a final statement. Expression will be inserted as is.
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/access/jwt#with-authenticate-clause
+        https://surrealdb.com/docs/surrealql/statements/define/access/jwt#with-authenticate-clause
 
         """
         self._auth = raw_expression

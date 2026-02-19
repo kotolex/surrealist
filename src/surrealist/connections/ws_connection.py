@@ -136,11 +136,12 @@ class WebSocketConnection(Connection):
     @connected
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
-        This method can be used to initiate live query - a real-time selection from a table
+        This method can be used to initiate live query - a real-time selection from a table. Since SDB version 3 this
+        method will return error if table is not exists.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#live
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -166,9 +167,9 @@ class WebSocketConnection(Connection):
     def custom_live(self, custom_query: str, callback: Callable[[Dict], Any]) -> SurrealResult:
         """
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
-        other features of Live Query
+        other features of Live Query. Since SDB version 3 this method will return error if table is not exists.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
@@ -259,6 +260,20 @@ class WebSocketConnection(Connection):
         logger.error(message)
         full_message = f"{message}\nYou can use http transport or abilities of SurrealDb itself\n" \
                        f"Refer to: https://docs.surrealdb.com/docs/cli/ml/import"
+        raise CompatibilityError(full_message)
+
+    def graphql(self, query: Dict, pretty: Optional[bool] = False):
+        """
+        Websocket transport cannot use GraphQL, so you should use http transport for that
+
+        Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql/http
+
+        :raise CompatibilityError: on any use
+        """
+        message = "GraphQL is not allowed for websocket transport in the current SurrealDB version"
+        logger.error(message)
+        full_message = f"{message}\nYou can use http transport\n" \
+                       f"Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql/http"
         raise CompatibilityError(full_message)
 
     def close(self):

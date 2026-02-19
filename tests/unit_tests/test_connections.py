@@ -8,7 +8,7 @@ sys.path.append(str(SRC))
 
 from surrealist import Surreal, SurrealConnectionError
 from surrealist.clients.http_client import mask_opts
-from surrealist.result import to_result, SurrealResult
+from surrealist.result import SurrealResult, to_result
 
 WRONG_URL = "http://127.0.0.1:9999/"
 URL = "http://127.0.0.1:8000"

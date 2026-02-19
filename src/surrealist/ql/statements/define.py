@@ -3,7 +3,6 @@ from abc import ABC
 from typing import Any, List, Optional, Tuple, Union
 
 from surrealist.connections import Connection
-from surrealist.enums import Algorithm
 from surrealist.ql.statements.define_index_statements import (
     CanUseConcurrently, CanUseIndexTypes)
 from surrealist.ql.statements.permissions import CanUsePermissions
@@ -59,7 +58,7 @@ class DefineEvent(Define):
     """
     Represents DEFINE EVENT statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/event
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -109,7 +108,7 @@ class DefineParam(Define):
     """
     Represents DEFINE PARAM statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/param
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -140,62 +139,17 @@ class DefineParam(Define):
         return f"DEFINE PARAM{self._exists()} ${self._name} VALUE {self._value}{self._comment()}"
 
 
-class DefineScope(Define):
-    """
-    Deprecated since SurrealDB 2.x, use define_access_record instead!
-
-    Represents DEFINE SCOPE statement
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-    DEFINE SCOPE [ OVERWRITE | IF NOT EXISTS ] @name SESSION @duration SIGNUP @expression SIGNIN @expression
-    [ COMMENT @string ]
-    """
-
-    def __init__(self, connection: Connection, name: str, duration: str, signup: Union[str, Statement],
-                 signin: Union[str, Statement]):
-        super().__init__(connection)
-        self._name = name
-        self._duration = duration
-        self._signup = signup if not isinstance(signup, Statement) else f"({signup._clean_str()})"
-        self._signin = signin if not isinstance(signin, Statement) else f"({signin._clean_str()})"
-
-    def if_not_exists(self) -> "DefineScope":
-        self._if_not_exists = True
-        return self
-
-    def overwrite(self) -> "DefineScope":
-        """
-        Adds OVERWRITE statement to the query
-        :return: self
-        """
-        self._if_not_exists = False
-        return self
-
-    def validate(self) -> List[str]:
-        if ' ' in self._duration:
-            return ["Wrong duration format, should be like 24h"]
-        return [OK]
-
-    def _clean_str(self):
-        return f"DEFINE SCOPE{self._exists()} {self._name} SESSION {self._duration} \nSIGNUP {self._signup} " \
-               f"\nSIGNIN {self._signin}{self._comment()}"
-
-
 class DefineIndex(Define, CanUseIndexTypes, CanUseConcurrently):
     """
     Represents DEFINE INDEX statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/indexes
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
     DEFINE INDEX [ OVERWRITE | IF NOT EXISTS ] @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields
     [ UNIQUE
-        | SEARCH ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
-        | MTREE DIMENSION @dimension [ TYPE @type ] [ DIST @distance ] [ CAPACITY @capacity]
+        | FULLTEXT ANALYZER @analyzer [ BM25 [(@k1, @b)] ] [ HIGHLIGHTS ]
         | HNSW DIMENSION @dimension [ TYPE @type ] [DIST @distance] [ EFC @efc ] [ M @m ]
     ]
     [ COMMENT @string ]
@@ -249,45 +203,11 @@ class DefineIndex(Define, CanUseIndexTypes, CanUseConcurrently):
         return f"DEFINE INDEX{self._exists()} {self._name} ON TABLE {self._table_name} {self._fields}{self._comment()}"
 
 
-class DefineToken(Define):
-    """
-    Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
-
-    Represents DEFINE TOKEN statement
-
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
-
-    Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-    DEFINE TOKEN [ OVERWRITE | IF NOT EXISTS ] @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
-    [ COMMENT @string ]
-    """
-
-    def __init__(self, connection: Connection, name: str, token_type: Algorithm, value: str):
-        super().__init__(connection)
-        self._name = name
-        self._type = token_type
-        self._value = value
-
-    def if_not_exists(self) -> "DefineToken":
-        self._if_not_exists = True
-        return self
-
-    def validate(self) -> List[str]:
-        if not isinstance(self._type, Algorithm):
-            return ["Invalid token type, you should use one of Algorithm enumerations"]
-        return [OK]
-
-    def _clean_str(self):
-        return f'DEFINE TOKEN{self._exists()} {self._name} ON DATABASE \nTYPE {self._type.name} \n' \
-               f'VALUE "{self._value}"{self._comment()}'
-
-
 class DefineTable(Define, CanUsePermissions):
     """
     Represents DEFINE TABLE statement
 
-    Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+    Refer to: https://surrealdb.com/docs/surrealql/statements/define/table
 
     Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
     
@@ -363,7 +283,7 @@ class DefineTable(Define, CanUsePermissions):
         Represents CHANGEFEED statement
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table#using-changefeed-clause
+        https://surrealdb.com/docs/surrealql/statements/define/table#using-changefeed-clause
 
         :param duration: valid string representation for duration, for example, "1s"
         :param include_original: if True, then add INCLUDE ORIGINAL statement
@@ -402,7 +322,7 @@ class DefineTable(Define, CanUsePermissions):
         Represents TYPE RELATE statement
 
         Refer to:
-        https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table#table-with-specialized-type-clause-since-140
+        https://surrealdb.com/docs/surrealql/statements/define/table#table-with-specialized-type-clause-since-140
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 

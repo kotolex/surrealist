@@ -24,6 +24,8 @@ class SurrealResult:
         time - execution time, only for http requests
         additional_info -all other fields
         """
+        if len(kwargs) == 2 and isinstance(kwargs.get('result', None), List) and len(kwargs["result"]) == 1:
+            kwargs.update(kwargs["result"][0])
         self.ws_id: Optional[Union[int, str]] = kwargs.pop("id", None)
         self.result: Optional[Union[str, int, Dict, List]] = kwargs.pop("result", None)
         self.code: Optional[int] = kwargs.pop("code", None)
@@ -212,5 +214,8 @@ def _is_result_inside(a_dict) -> bool:
     """
     Helper predicate for deep nested objects
     """
-    return len(a_dict) in (1, 2) and "result" in a_dict and isinstance(a_dict["result"], List) \
-        and len(a_dict["result"]) == 1 and set(a_dict["result"][0].keys()) == {"time", "status", "result"}
+    if len(a_dict) not in (1, 2) or "result" not in a_dict:
+        return False
+    if not isinstance(a_dict["result"], List) or len(a_dict["result"]) != 1:
+        return False
+    return {"time", "status", "result", "type"}.issubset(set(a_dict["result"][0].keys()))

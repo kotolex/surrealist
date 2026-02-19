@@ -24,7 +24,7 @@ class TestInsert(TestCase):
             'founded': RecordId("2021-09-10", "dates"),
         }
         insert = Insert(None, "person", data)
-        self.assertEqual('INSERT INTO person {"name": "SurrealDB", "founded": dates:⟨2021-09-10⟩};', insert.to_str())
+        self.assertEqual('INSERT INTO person {"name": "SurrealDB", "founded": dates:`2021-09-10`};', insert.to_str())
         self.assertTrue(insert.is_valid())
 
     def test_failed_no_args(self):
@@ -32,13 +32,13 @@ class TestInsert(TestCase):
             Insert(None, "person")
 
     def test_tuple_with_record_id_values(self):
-        text = 'INSERT INTO some (url, link) VALUES ("salesforce.com", vanse:⟨4ccfa3ce-fc31-4cd8-a239-384c26ec95c8⟩);'
+        text = """INSERT INTO some (url, link) VALUES ("salesforce.com", vanse:u'4ccfa3ce-fc31-4cd8-a239-384c26ec95c8');"""
         record_id = RecordId('4ccfa3ce-fc31-4cd8-a239-384c26ec95c8', table='vanse')
         record_id2 = RecordId('jhonny', table='vanse')
         insert = Insert(None, "some", ("url", "link"), ('salesforce.com', record_id))
         self.assertEqual(text, insert.to_str())
         self.assertTrue(insert.is_valid())
-        text = 'INSERT INTO some (url, link) VALUES ("salesforce.com", vanse:⟨4ccfa3ce-fc31-4cd8-a239-384c26ec95c8⟩), ("other.com", vanse:jhonny);'
+        text = """INSERT INTO some (url, link) VALUES ("salesforce.com", vanse:u'4ccfa3ce-fc31-4cd8-a239-384c26ec95c8'), ("other.com", vanse:jhonny);"""
         insert = Insert(None, "some", ("url", "link"), ('salesforce.com', record_id), ('other.com', record_id2))
         self.assertEqual(text, insert.to_str())
         self.assertTrue(insert.is_valid())

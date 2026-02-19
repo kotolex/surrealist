@@ -1,18 +1,19 @@
 import logging
-import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.connections.connection import Connection
-from surrealist.enums import Algorithm, AutoOrNone
+from surrealist.enums import AutoOrNone
 from surrealist.errors import SurrealConnectionError
-from surrealist.ql.statements.define_field import DefineField
-from surrealist.ql.statements.define_access import DefineAccessJwt, DefineAccessBearer, DefineAccessRecord
-from surrealist.ql.statements.define import (DefineEvent, DefineIndex, DefineParam, DefineScope, DefineTable,
-                                             DefineToken)
-from surrealist.ql.statements import Live, Remove, Select, Access
+from surrealist.ql.statements import Access, Live, Remove, Select
 from surrealist.ql.statements.alter import Alter
+from surrealist.ql.statements.define import (DefineEvent, DefineIndex,
+                                             DefineParam, DefineTable)
+from surrealist.ql.statements.define_access import (DefineAccessBearer,
+                                                    DefineAccessJwt,
+                                                    DefineAccessRecord)
 from surrealist.ql.statements.define_analyzer import DefineAnalyzer
 from surrealist.ql.statements.define_config import DefineConfig
+from surrealist.ql.statements.define_field import DefineField
 from surrealist.ql.statements.define_user import DefineUser
 from surrealist.ql.statements.rebuild_index import RebuildIndex
 from surrealist.ql.statements.relate import Relate
@@ -163,7 +164,7 @@ class Database:
         """
         Return result of the query
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/return
+        Refer to: https://surrealdb.com/docs/surrealql/statements/return
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -193,7 +194,7 @@ class Database:
         """
         Create a transaction object to generate a query or run
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/transactions
+        Refer to: https://surrealdb.com/docs/surrealql/transactions
 
         :param statements: list of appropriate statements (select, create, delete. etc.)
         :return: Transaction object
@@ -217,7 +218,7 @@ class Database:
         """
         Allow defining event on table
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/event
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/event
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -232,7 +233,7 @@ class Database:
         """
         Remove an event linked to table
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+        Refer to: https://surrealdb.com/docs/surrealql/statements/remove
 
         :param name: name of the event
         :param table_name: name of the table
@@ -244,7 +245,7 @@ class Database:
         """
         Allow defining user for a current database
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/user
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/user
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -266,7 +267,7 @@ class Database:
         """
         Represents DEFINE PARAM statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/param
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/param
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -289,7 +290,7 @@ class Database:
         """
         Represents DEFINE ANALYZER statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/analyzer
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/analyzer
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -307,49 +308,11 @@ class Database:
         """
         return Remove(self._connection, '', type_="ANALYZER", name=name)
 
-    def define_scope(self, name: str, duration: str, signup: Union[str, Statement],
-                     signin: Union[str, Statement]) -> DefineScope:
-        """
-        Deprecated since SurrealDB 2.x, use define_access_record instead!
-
-        Represents DEFINE SCOPE statement
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/scope
-
-        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-        :param name: name for the new scope
-        :param duration: session duration, like 24h
-        :param signup: Create statement with string or Statement representation
-        :param signin: Select statement with string or Statement representation
-        :return: DefineScope object
-        """
-        msg = "Deprecated since SurrealDB 2.x, use define_access_record instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return DefineScope(self._connection, name, duration, signup, signin)
-
-    def remove_scope(self, name: str) -> Remove:
-        """
-        Do not work since SurrealDB 2.x, use remove_access instead!
-
-        Remove the scope
-
-        :param name: name of the scope
-        :return: Remove object
-        """
-        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return Remove(self._connection, "", type_="SCOPE", name=name)
-
     def define_index(self, name: str, table_name: str) -> DefineIndex:
         """
         Represents DEFINE INDEX statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/indexes
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/indexes
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -363,7 +326,7 @@ class Database:
         """
         Represents REBUILD INDEX object, used to rebuild resources.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/rebuild
+        Refer to: https://surrealdb.com/docs/surrealql/statements/rebuild
 
         :param index_name: name of the index
         :param table_name: name of the table
@@ -382,42 +345,6 @@ class Database:
         """
         return Remove(self._connection, name=name, table_name=table_name, type_="INDEX")
 
-    def define_token(self, name: str, token_type: Algorithm, value: str) -> DefineToken:
-        """
-        Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead!
-
-        Represents DEFINE TOKEN statement
-
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/token
-
-        Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
-
-        :param name: name for the token
-        :param token_type: type of the token, for example, Algorithm.RS256
-        :param value: value of the token
-        :return: DefineToken object
-        """
-        msg = "Deprecated since SurrealDB 2.x, use define_access_jwt or define_access_record instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealql/statements/define/access"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return DefineToken(self._connection, name, token_type, value)
-
-    def remove_token(self, name: str) -> Remove:
-        """
-        Do not work since SurrealDB 2.x, use remove_access instead!
-
-        Remove token by name for the database
-
-        :param name: name of the token
-        :return: Remove object
-        """
-        msg = "Do not work since SurrealDB 2.x, use remove_access instead\n" \
-              "Read more here: https://surrealdb.com/docs/surrealql/statements/remove"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return Remove(self._connection, "", type_="TOKEN", name=name)
-
     def define_access_jwt(self, name: str) -> DefineAccessJwt:
         """
         Represents DEFINE ACCESS ... JWT statement.
@@ -435,7 +362,6 @@ class Database:
     def define_access_record(self, name: str) -> DefineAccessRecord:
         """
         Represents DEFINE ACCESS ... RECORD statement.
-        Use this method instead of define_token or define_scope
 
         Refer to: https://surrealdb.com/docs/surrealql/statements/define/access/record
 
@@ -473,7 +399,7 @@ class Database:
         """
         Represents RELATE statement, it should be able to use any statements from documentation
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/relate
+        Refer to: https://surrealdb.com/docs/surrealql/statements/relate
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_relate_examples.py
 
@@ -490,13 +416,13 @@ class Database:
         Example:
         db.live_query("person", func).alias("first_name", "NAME").where("age > 22").run()
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Refer to: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
         Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_live_examples.py
 
-        :param table_name: name od the table to live select
+        :param table_name: name of the table to live select
         :param callback: function to call on live query event, signature is `def callback(arg:Dict) -> None`
         :param select: raw query to insert between LIVE SELECT and FROM {table}, so the result will be
         LIVE SELECT {select} FROM {table_name}.
@@ -510,7 +436,7 @@ class Database:
         """
         Represents a KILL statement, for killing a live query by id
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
+        Refer to: https://surrealdb.com/docs/surrealql/statements/kill
 
         :param live_id: id of the query
         :return: result
@@ -521,7 +447,7 @@ class Database:
         """
         Represents DEFINE TABLE statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/table
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/table
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/database.py
 
@@ -534,7 +460,7 @@ class Database:
         """
         Represents DEFINE FIELD statement
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/define/field
+        Refer to: https://surrealdb.com/docs/surrealql/statements/define/field
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/define_field.py
 
@@ -593,7 +519,7 @@ class Database:
         """
         Represents ALTER TABLE statement
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/alter
+        Refer to: https://surrealdb.com/docs/surrealql/statements/alter
 
         Example: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_alter_examples.py
 

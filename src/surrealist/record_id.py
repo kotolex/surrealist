@@ -1,3 +1,4 @@
+import uuid
 from string import ascii_lowercase, digits
 from typing import Optional
 
@@ -31,9 +32,11 @@ class RecordId:
             table_part = id_.split(":")[0]
             raise SurrealRecordIdError(f"Table name is different from id, we expect {table}, but got {table_part}")
         id_ = id_.replace("`", "").replace("⟨", "").replace("⟩", "")
+        id_ = id_.replace("u'","").replace('u"','').replace("'", "").replace('"', "")
         self._naive_id = id_ if ":" in id_ else f"{table}:{id_}"
         self._table_part, self._id_part = self._naive_id.split(":")
-        self._uid = f"{self._table_part}:⟨{self._id_part}⟩"
+        self._uid = f"{self._table_part}:u'{self._id_part}'"
+        self._string = f"{self._table_part}:`{self._id_part}`"
 
     def __repr__(self):
         return f"RecordId('{self._naive_id}')"
@@ -61,10 +64,21 @@ class RecordId:
 
     def to_valid_string(self) -> str:
         """
-        Checks and adds special braces if id is not in simple form(a..zA..Z0-9), otherwise just returns naive_id
+        Returns valid record_id, with special braces or u-prefix if needed
+        If id is in simple form(a..zA..Z0-9) just returns naive_id
+        If id is valid uuid, returns with u prefix like table:u'id'
+        Adds backticks if id is not in simple form(a..zA..Z0-9), and not uuid
         """
         is_complicated_format = any(e not in ALPHABET for e in self._id_part.lower())
-        return self.to_uid_string() if is_complicated_format else self._naive_id
+        if not is_complicated_format:
+            return self._naive_id
+        if len(self._id_part) == 36 and "-" in self._id_part:
+            try:
+                uuid.UUID(self._id_part)
+                return self.to_uid_string()
+            except ValueError:
+                pass  # not uuid and we choose backticks
+        return self.to_string_with_backticks()
 
     def to_prefixed_string(self) -> str:
         """
@@ -72,14 +86,14 @@ class RecordId:
         """
         return f"r'{self._naive_id}'"
 
+    def to_string_with_backticks(self) -> str:
+        """
+        Return record id with backticks like ""table:`id`"
+        """
+        return self._string
+
     def to_uid_string(self) -> str:
         """
-        Return record id with special braces for id like article:⟨c332eb25-e408-4396-814f-83a85d556493⟩
+        Return record id with u-prefix like table:u'id'
         """
         return self._uid
-
-    def to_uid_string_with_backticks(self) -> str:
-        """
-        Return record id with backticks for id like article:`c332eb25-e408-4396-814f-83a85d556493`
-        """
-        return self._uid.replace("⟨", "`").replace("⟩", "`")

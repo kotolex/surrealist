@@ -1,7 +1,6 @@
 from unittest import TestCase, main
 
 from surrealist.ql.statements.alter import Alter
-from surrealist.ql.statements.select import Select
 
 
 class TestAlter(TestCase):

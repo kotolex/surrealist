@@ -11,7 +11,7 @@ class Alter(Statement, CanUsePermissions, CanUseComment):
     """
     Represents ALTER statement, it should be able to use any statements from documentation
 
-    Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/alter
+    Refer to: https://surrealdb.com/docs/surrealql/statements/alter
 
     Examples: https://github.com/kotolex/surrealist/blob/master/examples/surreal_ql/ql_alter_examples.py
 

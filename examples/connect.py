@@ -1,4 +1,4 @@
-from surrealist import Surreal, Database
+from surrealist import Database, Surreal
 
 # Below, you can see examples for connecting with different users (root/ namespace/ db)
 # Please, pay attention for differs for different user levels

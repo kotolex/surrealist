@@ -3,7 +3,7 @@ from surrealist import Database
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=('user_db', 'user_db'), use_http=True) as db:
 
     # on database object we can DEFINE TABLE
-    # https://surrealdb.com/docs/surrealdb/surrealql/statements/define/table
+    # https://surrealdb.com/docs/surrealql/statements/define/table
     print(db.define_table("reading"))  # DEFINE TABLE reading;
     print(db.define_table("reading").if_not_exists())  # DEFINE TABLE IF NOT EXISTS reading;
     print(db.define_table("reading").overwrite())  # DEFINE TABLE OVERWRITE reading;

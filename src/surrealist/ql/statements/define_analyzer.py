@@ -1,6 +1,7 @@
 from typing import List
 
-from ...utils import OK
+from surrealist.utils import OK
+
 from .define import Connection, Define
 
 ALLOWED_LANGUAGES = ('Arabic', 'Danish', 'Dutch', 'English', 'French', 'German', 'Greek', 'Hungarian',

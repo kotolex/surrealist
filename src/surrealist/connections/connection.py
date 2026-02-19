@@ -4,8 +4,7 @@ from logging import getLogger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from surrealist.enums import Transport
-from surrealist.errors import (OperationOnClosedConnectionError,
-                               WrongParameterError)
+from surrealist.errors import OperationOnClosedConnectionError
 from surrealist.record_id import RecordId
 from surrealist.result import SurrealResult
 from surrealist.utils import (AC, DB, DEFAULT_TIMEOUT, NS, StrOrRecord,
@@ -81,9 +80,9 @@ class Connection(ABC):
         Returns records count for given table. You should have permissions for this action.
         Actually converts to QL "SELECT count() FROM {table_name} GROUP ALL;" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/count
+        Refer to: https://surrealdb.com/docs/surrealql/functions/database/count
 
-        Note: returns zero if table does not exist, if you need to check table existence use **is_table_exists**
+        Note: returns error if table does not exist, if you need to check table existence use **is_table_exists**
 
         Note: if you specify table_name with recordID like "person:john" you will get count of fields in record
 
@@ -103,7 +102,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR TABLE table_name" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param table_name: name of the table
         :param structured: if True returns data in structured view (use STRUCTURE statement). Note: experimental!
@@ -118,7 +117,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR DB" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full database information
@@ -132,7 +131,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR NS" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: full namespace information
@@ -146,7 +145,7 @@ class Connection(ABC):
 
         Actually converts to QL "INFO FOR ROOT" to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/info
+        Refer to: https://surrealdb.com/docs/surrealql/statements/info
 
         :param structured: if True, return data in structured view (use STRUCTURE statement). Note: experimental!
         :return: information about root
@@ -166,7 +165,7 @@ class Connection(ABC):
 
         Actually converts to QL query to use in **query** method.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/functions/session
+        Refer to: https://surrealdb.com/docs/surrealql/functions/database/session
 
         :return: full session information
         """
@@ -185,8 +184,7 @@ class Connection(ABC):
         """
         logger.info("Query-Operation: INFO")
         data = {"method": "info"}
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def db_tables(self) -> SurrealResult:
@@ -221,7 +219,7 @@ class Connection(ABC):
 
         If if_exists parameter is False and the table does not exist - error will be returned at a result.
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/remove
+        Refer to: https://surrealdb.com/docs/surrealql/statements/remove
 
         Note: only name of the table allowed here, do not use record_id
 
@@ -293,7 +291,7 @@ class Connection(ABC):
         """
         This method specifies the namespace and optionally database for the current connection
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/use
+        Refer to: https://surrealdb.com/docs/surrealql/statements/use
         """
 
     @abstractmethod
@@ -312,7 +310,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#let
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/let
+        Refer to: https://surrealdb.com/docs/surrealql/statements/let
 
         :param name: name for the variable (without $ sign!)
         :param value: value for the variable
@@ -337,12 +335,39 @@ class Connection(ABC):
         logger.info("Operation: UNSET. Variable name: %s", name)
         return self._use_rpc(data)
 
+    @connected
+    def ping(self) -> SurrealResult:
+        """
+        This method pings backend
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#ping
+
+        :return: result of request
+        """
+        data = {"method": "ping"}
+        logger.info("Operation: PING")
+        return self._use_rpc(data)
+
+    @connected
+    def reset(self) -> SurrealResult:
+        """
+        This method will reset all attributes for the current connection. Works only for websockets.
+
+        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#reset
+
+        :return: result of request
+        """
+        data = {"method": "reset"}
+        logger.info("Operation: RESET")
+        return self._use_rpc(data)
+
     @abstractmethod
     def live(self, table_name: str, callback: Callable[[Dict], Any], return_diff: bool = False) -> SurrealResult:
         """
         This method can be used to initiate live query - a real-time selection from a table. Works only for websockets.
+        Since SDB version 3 this method will return error if table is not exists.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         About DIFF refer to: https://jsonpatch.com
 
@@ -354,8 +379,9 @@ class Connection(ABC):
         """
         This method can be used to initiate custom live query - a real-time selection from a table with filters and
         other features of Live Query. Works only for websockets.
+        Since SDB version 3 this method will return error if table is not exists.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+        Refer to: https://surrealdb.com/docs/surrealql/statements/live
 
         Please see surrealist documentation: https://github.com/kotolex/surrealist?tab=readme-ov-file#live-query
 
@@ -367,10 +393,10 @@ class Connection(ABC):
         """
         This method is used to terminate a running live query by id
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/kill
+        Refer to: https://surrealdb.com/docs/surrealql/statements/kill
         """
 
-    @connected
+    @abstractmethod
     def graphql(self, query: Dict, pretty: Optional[bool] = False) -> SurrealResult:
         """
         This method allows you to execute GraphQL queries against the database.
@@ -379,9 +405,8 @@ class Connection(ABC):
         - variables or vars (optional): An object containing variables for the query.
         - operationName or operation (optional): The name of the operation to execute.
 
-        Refer to: https://surrealdb.com/docs/surrealdb/integration/rpc#graphql
-
         Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+        Example: https://github.com/kotolex/surrealist/tree/master/examples/graph_ql.py
 
         Important Note: GraphQL validates all schemas for all tables in the database, so if there are some errors,
         you get an error back, even if the problem is not with your data
@@ -394,14 +419,6 @@ class Connection(ABC):
         :return: result of request
         :raise WrongParameterError: if query is not valid dictionary
         """
-        allowed_fields = ("query", "variables", "vars", "operationName", "operation")
-        if "query" not in query or any(field not in allowed_fields for field in query.keys()):
-            raise WrongParameterError("Query parameter should be a dictionary with 3 fields\n"
-                                      "Please see https://surrealdb.com/docs/surrealdb/integration/rpc#graphql")
-        data = {"method": "graphql", "params": [query, {"pretty": pretty}]}
-        logger.info("Operation: GRAPHQL. Query: %s, pretty: %s", query, pretty)
-        result = self._use_rpc(data)
-        return result
 
     @connected
     def run(self, func_name: str, version: Optional[str] = None, args: Optional[List] = None) -> SurrealResult:
@@ -429,8 +446,7 @@ class Connection(ABC):
                 data["params"].append(None)
             data["params"].append(args)
         logger.info("Operation: RUN. Function: %s, version: %s, args: %s", func_name, version, args)
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def version(self) -> SurrealResult:
@@ -446,17 +462,17 @@ class Connection(ABC):
         """
         data = {"method": "version"}
         logger.info("Operation: VERSION")
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def select(self, table_name: str, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
         """
-        This method selects either all records in a table or a single record
+        This method selects either all records in a table or a single record. Since SDB version 3 this method will
+        return error if table is not exists.
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#select
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/select
+        Refer to: https://surrealdb.com/docs/surrealql/statements/select
 
         Examples:
         connection.select("article") # select all records in article table
@@ -486,7 +502,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#create
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/create
+        Refer to: https://surrealdb.com/docs/surrealql/statements/create
 
         Examples:
         connection.create("person", {"name": "John Doe"}) # create one record in person table with random id
@@ -525,7 +541,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#update
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/update
+        Refer to: https://surrealdb.com/docs/surrealql/statements/update
 
         Example:
         connection.update("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
@@ -557,7 +573,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#upsert
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/upsert
+        Refer to: https://surrealdb.com/docs/surrealql/statements/upsert
 
         Example:
         connection.upsert("person:my_id", {"name": "Alex Doe"}) # record with specified id will be now
@@ -584,7 +600,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#insert
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/insert
+        Refer to: https://surrealdb.com/docs/surrealql/statements/insert
 
         Examples:
         connection.insert("person", {"name": "John Doe"}) # inserts one record with random id
@@ -622,8 +638,7 @@ class Connection(ABC):
         """
         data = {"method": "insert_relation", "params": [table_name, data]}
         logger.info("Operation: INSERT-RELATION. Table: %s, data: %s", table_name, data)
-        result = self._use_rpc(data)
-        return result
+        return self._use_rpc(data)
 
     @connected
     def merge(self, table_name: str, data: Dict, record_id: Optional[StrOrRecord] = None) -> SurrealResult:
@@ -658,7 +673,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#delete
 
-        Refer to: https://docs.surrealdb.com/docs/surrealql/statements/delete
+        Refer to: https://surrealdb.com/docs/surrealql/statements/delete
 
         Examples:
         connection.delete("person:my_id") # deletes one record in person table
@@ -715,7 +730,7 @@ class Connection(ABC):
 
         Refer to: https://docs.surrealdb.com/docs/integration/websocket#query
 
-        For SurrealQL refer to: https://docs.surrealdb.com/docs/surrealql/overview
+        For SurrealQL refer to: https://surrealdb.com/docs/surrealql/overview
 
         Example:
         connection.query("SELECT * FROM article;") # gets all records from article table
@@ -758,8 +773,7 @@ class Connection(ABC):
             full_data["params"].append(data)
         logger.info("Operation: RELATE. Relate_to: %s, relation_table: %s, relate_from: %s, data: %s", relate_to,
                     relation_table, relate_from, data)
-        result = self._use_rpc(full_data)
-        return result
+        return self._use_rpc(full_data)
 
     @abstractmethod
     def import_data(self, path) -> SurrealResult:

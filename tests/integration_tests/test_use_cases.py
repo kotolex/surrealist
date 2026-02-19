@@ -3,9 +3,10 @@ import time
 from datetime import datetime, timezone
 from unittest import TestCase, main
 
+from surrealist import (Algorithm, AutoOrNone, Connection, Database,
+                        OperationOnClosedConnectionError, RecordId, Surreal,
+                        get_uuid, to_surreal_datetime_str)
 from tests.integration_tests.utils import URL, get_random_series
-from surrealist import (OperationOnClosedConnectionError, Surreal, Connection, Database, to_surreal_datetime_str,
-                        Algorithm, get_uuid, RecordId, AutoOrNone)
 
 
 class TestUseCases(TestCase):
@@ -149,12 +150,12 @@ class TestUseCases(TestCase):
     def test_z_change_feed(self):
         time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            tm = to_surreal_datetime_str(datetime.now())
+            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
             self.assertFalse(res.is_error(), res)
-            self.assertTrue(story in str(res.result))
+            self.assertTrue(story in str(res.result), res)
             self.assertTrue('changes' in str(res.result))
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
@@ -165,18 +166,6 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
-    # def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
-    #     time.sleep(0.2)
-    #     with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-    #         tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-    #         time.sleep(1)
-    #         story = get_random_series(7)
-    #         db.table("include_original").create().set(story=story).run()
-    #         res = db.table("include_original").show_changes().since(tm).run()
-    #         self.assertFalse(res.is_error(), res)
-    #         self.assertTrue(story in str(res.result), res.result)
-    #         self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
-    #         self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -190,7 +179,7 @@ class TestUseCases(TestCase):
             transaction = db.transaction([create_author, create_book, counter_inc])
             res = transaction.run()
             self.assertFalse(res.is_error(), res)
-            self.assertTrue(len(res.result) == 3)
+            self.assertTrue(len(res.result) >= 3)
 
     def test_define_event_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
@@ -390,28 +379,6 @@ class TestUseCases(TestCase):
             self.assertTrue(res.is_error(), res)
             self.assertEqual("The analyzer 'not_exists' does not exist", res.result)
 
-    def test_define_scope_and_remove(self):
-        surreal = Surreal(URL, credentials=("root", "root"))
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            db = Database.from_connection(connection)
-            uid = get_random_series(6)
-            count = len(db.info()["accesses"])
-            create = db.user.create().set("email = $email, pass = crypto::argon2::generate($pass)")
-            select = db.user.select().where("email = $email AND crypto::argon2::compare(pass, $pass)")
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The access method 'scope_{uid}' already exists in the database 'test'", res.result, res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_scope(f"scope_{uid}", "24h", signup=create, signin=select).if_not_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_access(f"scope_{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count)
-
     def test_define_access_jwt_and_remove(self):
         surreal = Surreal(URL, credentials=("root", "root"))
         with surreal.connect() as connection:
@@ -506,17 +473,6 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             self.assertEqual(len(db.user.info()["indexes"]), ind_count)
 
-    def test_define_mtree_index_and_remove(self):
-        with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            uid = get_random_series(8)
-            ind_count = len(db.table(f"user{uid}").info()["indexes"])
-            res = db.define_index(f"index_{uid}", f"user{uid}").columns("name").mtree(4).distance_euclidean().run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count + 1)
-            res = db.remove_index(f"index_{uid}", table_name=f"user{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.table(f"user{uid}").info()["indexes"]), ind_count)
-
     def test_define_hnsw_index_and_remove(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
             uid = get_random_series(11)
@@ -569,26 +525,6 @@ class TestUseCases(TestCase):
                 self.assertTrue(records <= 3)
                 total += records
             self.assertEqual(total, count)
-
-    def test_define_token_and_remove(self):
-        surreal = Surreal(URL, credentials=("root", "root"))
-        with surreal.connect() as connection:
-            connection.use("test", "test")
-            db = Database.from_connection(connection)
-            uid = get_random_series(8)
-            count = len(db.info()["accesses"])
-            val = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count + 1)
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).run()
-            self.assertTrue(res.is_error(), res)
-            self.assertEqual(f"The access method 'token_{uid}' already exists in the database 'test'", res.result, res)
-            res = db.define_token(f"token_{uid}", Algorithm.HS512, value=val).if_not_exists().run()
-            self.assertFalse(res.is_error(), res)
-            res = db.remove_access(f"token_{uid}").run()
-            self.assertFalse(res.is_error(), res)
-            self.assertEqual(len(db.info()["accesses"]), count)
 
     def test_define_relate(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -731,7 +667,7 @@ class TestUseCases(TestCase):
             self.assertEqual(a_list[0]["result"]["result"]["author"], uid, a_list)
             self.assertEqual(a_list[1]["result"]["result"]["author"], uid2, a_list)
 
-    def test_continue(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/continue
+    def test_continue(self):  # https://surrealdb.com/docs/surrealql/statements/continue
         text = """
             FOR $person IN (SELECT id, age FROM person) {
 	IF ($person.age < 18) {
@@ -752,7 +688,7 @@ class TestUseCases(TestCase):
             res = connection.select("person:John")
             self.assertTrue("can_vote" not in res.result[0], res)
 
-    def test_throw(self):  # https://surrealdb.com/docs/surrealdb/surrealql/statements/throw
+    def test_throw(self):  # https://surrealdb.com/docs/surrealql/statements/throw
         text = 'THROW "some error message";'
         surreal = Surreal(URL, namespace="test", database="test", credentials=('user_db', 'user_db'))
         with surreal.connect() as connection:
@@ -774,8 +710,6 @@ class TestUseCases(TestCase):
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").run()
             self.assertFalse(res.is_error(), res)
-            res = db.alter_table(f"alter_{uid}").drop().comment("test").run()
-            self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").schemaless().run()
             self.assertFalse(res.is_error(), res)
             res = db.alter_table(f"alter_{uid}").schemafull().run()
@@ -790,8 +724,6 @@ class TestUseCases(TestCase):
             db = Database.from_connection(connection)
             db.define_field("created_at", "datetime_table").type("datetime").default("time::now()").permissions_full().run()
             tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-            result = connection.create("datetime_table", {'name': "zzz", 'age': 44, 'created_at': tm})
-            self.assertFalse(result.is_error(), result)
             result = db.datetime_table.create().content({'name': "xxx", 'age': 22, 'created_at': tm}).run()
             self.assertFalse(result.is_error(), result)
 

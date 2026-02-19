@@ -11,18 +11,18 @@
 	<a href="https://pypi.org/project/surrealist/"><img src="https://img.shields.io/github/last-commit/kotolex/surrealist/master?style=flat-square"></a>
 </p>
 
-Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 2.2.2)
+Surrealist is a Python tool to work with awesome [SurrealDB](https://docs.surrealdb.com/docs/intro) (support for latest version 3.0.0)
 
 It is **synchronous** and **unofficial**, so if you need async AND/OR official client, go [here](https://github.com/surrealdb/surrealdb.py)
 
-Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.13)
+Works and tested on Ubuntu, macOS, Windows 10, can use python 3.8+ (including python 3.14)
 
 #### Key features: ####
 
  * only one small dependency (websocket-client), no need to pull a lot of libraries to your project
  * fully documented
  * well tested (on the latest Ubuntu, macOS and Windows 10)
- * fully compatible with the latest version of SurrealDB (2.2.2), including [live queries](https://surrealdb.com/products/lq) and [change feeds](https://surrealdb.com/products/cf)
+ * fully compatible with the latest version of SurrealDB (3.0.0), including [live queries](https://surrealdb.com/products/lq), [change feeds](https://surrealdb.com/products/cf) and [GraphQL](https://surrealdb.com/docs/surrealdb/querying/graphql)
  * debug mode to see all that goes in and out if you need (using standard logging)
  * iterator to handle big select queries
  * QL-builder to explore, generate and use SurrealDB queries (explain, transaction etc.)
@@ -41,12 +41,15 @@ Via pip:
 Please make sure you install and start SurrealDB, you can read more [here](https://docs.surrealdb.com/docs/installation/overview)
 
 **Attention!** SurrealDB version 2.0.0 has some breaking changes, so we have to inherit some of them, and you cannot use surrealist version 1.0.0 to work with
-Surreal DB version 1.5.3 or earlier. Please consider table to choose a version:
+Surreal DB version 1.5.3 or earlier. 
+For the same reasons, you will not be able to use the Surrealist version 2.0.0+ with the SurrealDB version 2.0.0+ and below.
 
-|     SurrealDB version     |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
-|:-------------------------:|:--------:| :---: |----------|----------|----------|----------|
-|    Surrealist version     |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
-|      Python versions      | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
+Please consider table to choose a version:
+
+|     SurrealDB version     | 3.0.0+   |  2.0.0+  | 1.5.0+   | 1.4.0+   | 1.3.0+   | 1.2.0+   | 1.1.1+   |
+|:-------------------------:|----------|:--------:| :---: |----------|----------|----------|----------|
+|    Surrealist version     | 2.0.0+   |  1.0.0+  | 0.5.3   | 0.4.2+   | 0.3.1+   | 0.2.10+  | 0.2.3+   |
+|      Python versions      | 3.8-3.14 | 3.8-3.13 |     3.8-3.12    | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 | 3.8-3.12 |
 
 A good place to start is connect examples [here](https://github.com/kotolex/surrealist/tree/master/examples/connect.py)
 
@@ -63,6 +66,7 @@ Each transport has functions it cannot use by itself (in a current SurrealDB ver
  - use LET or UNSET methods
 
 **Websocket-transport cannot:**
+ - use GraphQL
  - import or export data (you should use http connection or cli tools for that)
  - import or export ML files (you should use http connection or cli tools for that)
 
@@ -93,7 +97,7 @@ Calls of **is_ready()**, **health()** or **version()** on Surreal objects are fo
 ### Parameters ###
 
 **url** - url of SurrealDB server, if you are sure you will use websocket connection - you can use url like ws://127.0.0.1:8000/rpc, but http will work fine too, even for websockets.
-So, you can simply use http://127.0.0.1:8000, it will be transform to ws://127.0.0.1:8000/rpc under the hood.
+So, you can simply use http://127.0.0.1:8000, it will be transformed to ws://127.0.0.1:8000/rpc under the hood.
 If your url is differed - specify url in ws(s) format
 
 But if you will use ws(s) format, a Surreal object will try to predict http url too; it is important for status and version checks.
@@ -153,7 +157,7 @@ ws_connection.close()  # explicitly close connection
 ```
 
 ## Methods and Query Language ##
-Before you go with surrealist, please [check](https://docs.surrealdb.com/docs/surrealql/overview)
+Before you go with surrealist, please [check](https://surrealdb.com/docs/surrealql/overview)
 
 You can find basic examples [here](https://github.com/kotolex/surrealist/tree/master/examples)
 
@@ -168,14 +172,13 @@ from surrealist import Database
 # connects to Database (it is not connection)
 with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "user_db")) as db: 
     table = db.table("person") # switch to table level, no problem if it is not exists
-    print(table.count()) # 0, table is empty or not exists
     # let's add record
     # real query CREATE person:john SET status = "ACTIVE" RETURN id;
     result = table.create("john").set(status="ACTIVE").returns("id").run() 
     # SurrealResult(id=9eb966a4-02fc-40ea-82ba-825d37254f43, status=OK, result=[{'id': 'person:john'}], 
     # query=CREATE person:john SET status = "ACTIVE" RETURN id;, code=None, time=110.3µs, additional_info={})
     print(result)
-    print(table.count()) # now one record
+    print(table.count()) # 1
 ```
 You can find QL examples [here](https://github.com/kotolex/surrealist/tree/master/examples/surreal_ql)
 
@@ -233,7 +236,7 @@ if result.is_error():
 
 Besides, a result object has helper methods **is_empty**, **id**, **ids**, **get**, **first**, **last** to work with response of SurrealDB.
 
-You need to read this on SurrealDB recordID: https://docs.surrealdb.com/docs/surrealql/datamodel/ids
+You need to read this on SurrealDB recordID: https://surrealdb.com/docs/surrealql/datamodel/ids
 
 ## Using RecordID ##
 Since version 2.0, SurrealDB never converts strings to record_id, so we have to manage it ourselves.
@@ -255,15 +258,15 @@ record_id = result.id  # person:34vepp6apg0np2sdstle
 print(ws_connection.select("person", record_id=RecordId(record_id)).result)  # [{'id': 'person:34vepp6apg0np2sdstle', 'name': 'John Doe'}]
 ```
 
-Simple record_id can have only A-Z, a-z letters and digits 0-9, for any other UTF-8 letters RecordId will generate valid representation with special braces:
+Simple record_id can have only A-Z, a-z letters and digits 0-9, for any other UTF-8 letters RecordId will generate valid representation with u-prefix:
 ```python
 from surrealist import get_uuid, RecordId
 uuid = get_uuid()  # 6e796db2-8322-4056-b63f-0f1812f6e075
 record_id = RecordId(uuid, table="person")
-print(record_id.to_valid_string())  # person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩
+print(record_id.to_valid_string())  # person:u'6e796db2-8322-4056-b63f-0f1812f6e075'
 create_result = ws_connection.create("person", {"name": "tobie", "age": 30}, record_id)
-print(create_result.result) # {'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}
-print(ws_connection.select("person", record_id=record_id).result) # [{'age': 30, 'id': 'person:⟨6e796db2-8322-4056-b63f-0f1812f6e075⟩', 'name': 'tobie'}]
+print(create_result.result) # {"age": 30, "id": "person:u'6e796db2-8322-4056-b63f-0f1812f6e075'", "name": "tobie"}
+print(ws_connection.select("person", record_id=record_id).result) # [{"age": 30, 'id': "person:u'6e796db2-8322-4056-b63f-0f1812f6e075'", "name": "tobie"}]
 ```
 
 ## Surreal Datetime ##
@@ -274,15 +277,18 @@ For example, if you have a datetime field in your table:
 
 you need to use datetime with prefix to add a new record with that field
 
+**Note**: Since version 3.0 datetime is not recognized by SurrealDB if it is value for json field, but works fine as part of the string query! So if you need datetime in SDB version 3.0+  - use QL (Database) or raw_query of the connection.
+
 ```python
 from datetime import datetime, timezone
-from surrealist import Surreal, to_surreal_datetime_str
+from surrealist import Database, Surreal, to_surreal_datetime_str
 
 surreal = Surreal("http://127.0.0.1:8000", credentials=("root", "root"))
 with surreal.connect() as ws_connection:
     ws_connection.use("test", "test")
+    db = Database.from_connection(ws_connection)
     tm = to_surreal_datetime_str(datetime.now(timezone.utc))  # get current time in surreal format d'2024-10-22T16:18:59.367084Z'
-    result = ws_connection.create("person", {'name': "zzz", 'age': 44, 'active': True, 'create_time': tm})
+    result = db.person.create().content({'name': "zzz", 'age': 44, 'active': True, 'create_time': tm}).run()
 ```
 
 but if you just use datetime string without d-prefix, you will get an error back
@@ -346,7 +352,7 @@ Live queries let you subscribe to events of desired table when changes happen—
 
 About live query: https://surrealdb.com/products/lq
 
-Using live select: https://surrealdb.com/docs/surrealdb/surrealql/statements/live
+Using live select: https://surrealdb.com/docs/surrealql/statements/live
 
 About DIFF (jsonpatch): https://jsonpatch.com
 
@@ -356,7 +362,7 @@ Callback should have signature `def any_name(param: Dict) -> None`, so it will b
 
 **Note 1:** if your connection was interrupted or closed, LQ will disappear, and you need to recreate it
 
-**Note 2:** LQ only produces events which happen after the creation of this LQ
+**Note 2:** LQ only produces events which happen after the creation of this LQ and table should exist
 
 **Note 3:** LQ is associated with connection, where it was created, if you have two or more connections, LQ will depend only on one, 
 and will disappear on connection close, even if other connections are still active
@@ -413,7 +419,7 @@ in console, you will get:
 
 If you do not need LQ anymore, call KILL method, with live_id
 
-You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealdb/surrealql/statements/live#filter-the-live-query)
+You can use a custom live query if you need, it lets you use filters and conditions, as refer [here](https://surrealdb.com/docs/surrealql/statements/live#filter-the-live-query)
 
 **Example 10**
 
@@ -484,7 +490,7 @@ Read here: https://surrealdb.com/blog/unlocking-streaming-data-magic-with-surrea
 
 Read here: https://surrealdb.com/products/cf
 
-Under the hood: https://docs.surrealdb.com/docs/surrealql/statements/show
+Under the hood: https://surrealdb.com/docs/surrealql/statements/show
 
 Changes Feed works both for http and websockets!
 

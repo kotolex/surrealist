@@ -1,6 +1,8 @@
+from .access import Access
 from .create import Create
-from .define import DefineParam, DefineEvent, DefineIndex, DefineScope, DefineTable, DefineToken
-from .define_access import DefineAccessBearer, DefineAccessJwt, DefineAccessRecord
+from .define import DefineEvent, DefineIndex, DefineParam, DefineTable
+from .define_access import (DefineAccessBearer, DefineAccessJwt,
+                            DefineAccessRecord)
 from .define_analyzer import DefineAnalyzer
 from .define_field import DefineField
 from .define_user import DefineUser
@@ -13,8 +15,7 @@ from .select import Select
 from .show import Show
 from .transaction import Transaction
 from .update import Update
-from .access import Access
 
 __all__ = ("Create", "Delete", "Insert", "Live", "Remove", "Select", "Show", "Update", "Transaction", "DefineParam",
            "DefineUser", "DefineEvent", "RebuildIndex", "DefineAnalyzer", "DefineAccessBearer", "DefineAccessJwt",
-           "DefineAccessRecord", "DefineField", "DefineScope", "DefineTable", "DefineToken", "DefineIndex", "Access")
+           "DefineAccessRecord", "DefineField", "DefineTable", "DefineIndex", "Access")
