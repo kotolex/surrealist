@@ -277,15 +277,18 @@ For example, if you have a datetime field in your table:
 
 you need to use datetime with prefix to add a new record with that field
 
+**Note**: Since version 3.0 datetime is not recognized by SurrealDB if it is value for json field, but works fine as part of the string query! So if you need datetime in SDB version 3.0+  - use QL (Database) or raw_query of the connection.
+
 ```python
 from datetime import datetime, timezone
-from surrealist import Surreal, to_surreal_datetime_str
+from surrealist import Database, Surreal, to_surreal_datetime_str
 
 surreal = Surreal("http://127.0.0.1:8000", credentials=("root", "root"))
 with surreal.connect() as ws_connection:
     ws_connection.use("test", "test")
+    db = Database.from_connection(ws_connection)
     tm = to_surreal_datetime_str(datetime.now(timezone.utc))  # get current time in surreal format d'2024-10-22T16:18:59.367084Z'
-    result = ws_connection.create("person", {'name': "zzz", 'age': 44, 'active': True, 'create_time': tm})
+    result = db.person.create().content({'name': "zzz", 'age': 44, 'active': True, 'create_time': tm}).run()
 ```
 
 but if you just use datetime string without d-prefix, you will get an error back

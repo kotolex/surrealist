@@ -1,3 +1,4 @@
+import uuid
 from string import ascii_lowercase, digits
 from typing import Optional
 
@@ -63,15 +64,20 @@ class RecordId:
 
     def to_valid_string(self) -> str:
         """
-        Returns valid record_id, with special braces if needed
-        Checks and adds backticks if id is not in simple form(a..zA..Z0-9), otherwise just returns naive_id
+        Returns valid record_id, with special braces or u-prefix if needed
+        If id is in simple form(a..zA..Z0-9) just returns naive_id
         If id is valid uuid, returns with u prefix like table:u'id'
+        Adds backticks if id is not in simple form(a..zA..Z0-9), and not uuid
         """
         is_complicated_format = any(e not in ALPHABET for e in self._id_part.lower())
         if not is_complicated_format:
             return self._naive_id
         if len(self._id_part) == 36 and "-" in self._id_part:
-            return self.to_uid_string()
+            try:
+                uuid.UUID(self._id_part)
+                return self.to_uid_string()
+            except ValueError:
+                pass  # not uuid and we choose backticks
         return self.to_string_with_backticks()
 
     def to_prefixed_string(self) -> str:

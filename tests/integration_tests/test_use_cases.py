@@ -150,7 +150,7 @@ class TestUseCases(TestCase):
     def test_z_change_feed(self):
         time.sleep(0.2)
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-            tm = to_surreal_datetime_str(datetime.now())
+            tm = to_surreal_datetime_str(datetime.now(timezone.utc))
             story = get_random_series(5)
             db.table("reading").create().set(story=story).run()
             res = db.table("reading").show_changes().since(tm).run()
@@ -166,18 +166,6 @@ class TestUseCases(TestCase):
             self.assertTrue('update' in str(res.result))
             self.assertTrue('reading' in str(res.result))
 
-    # def test_z_change_feed_include_original(self):  # TODO uncomment when SDB will fix INCLUDE ORIGINAL
-    #     time.sleep(0.2)
-    #     with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
-    #         tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-    #         time.sleep(1)
-    #         story = get_random_series(7)
-    #         db.table("include_original").create().set(story=story).run()
-    #         res = db.table("include_original").show_changes().since(tm).run()
-    #         self.assertFalse(res.is_error(), res)
-    #         self.assertTrue(story in str(res.result), res.result)
-    #         self.assertEqual(res.result[0]['changes'][0]['current']['story'], story)
-    #         self.assertEqual(res.result[0]['changes'][0]['update'], [{'op': 'replace', 'path': '/', 'value': None}])
 
     def test_use_transaction(self):
         with Database(URL, 'test', 'test', credentials=('user_db', 'user_db')) as db:
@@ -736,8 +724,6 @@ class TestUseCases(TestCase):
             db = Database.from_connection(connection)
             db.define_field("created_at", "datetime_table").type("datetime").default("time::now()").permissions_full().run()
             tm = to_surreal_datetime_str(datetime.now(timezone.utc))
-            result = connection.create("datetime_table", {'name': "zzz", 'age': 44, 'created_at': tm})
-            self.assertFalse(result.is_error(), result)
             result = db.datetime_table.create().content({'name': "xxx", 'age': 22, 'created_at': tm}).run()
             self.assertFalse(result.is_error(), result)
 

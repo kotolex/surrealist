@@ -69,8 +69,8 @@ class TestHttpConnection(TestCase):
         connection = db.connect()
         connection.use("test", "test")
         res = connection.select("article", "not_exists")
-        self.assertTrue(res.is_error())
-        self.assertEqual(res.result, "The table 'article:u'not_exists'' does not exist")
+        self.assertFalse(res.is_error(), res)
+        self.assertEqual(res.result, [])
 
     def test_select_error_non_existent_table(self):
         db = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -377,9 +377,9 @@ class TestHttpConnection(TestCase):
         with surreal.connect() as connection:
             connection.use("test", "test")
             uid = get_random_series(13)
-            res = connection.update(f"article:u'{uid}'", {'field': 'old'})
-            self.assertFalse(res.is_error())
-            res = connection.select(f"article:u'{uid}'")
+            res = connection.update(f"article:{uid}", {'field': 'old'})
+            self.assertTrue(res.is_error())
+            res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
 
@@ -390,10 +390,9 @@ class TestHttpConnection(TestCase):
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
             self.assertTrue(res.is_error())
-            self.assertEqual(res.result, f"The table 'article:{uid} does not exist")
             res = connection.select(f"article:{uid}")
-            self.assertTrue(res.is_error())
-            self.assertEqual(res.result, f"The table 'article:{uid} does not exist")
+            self.assertFalse(res.is_error(), res)
+            self.assertEqual(res.result, [])
 
     def test_delete_unexisting(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
@@ -401,12 +400,10 @@ class TestHttpConnection(TestCase):
             connection.use("test", "test")
             uid = get_random_series(14)
             res = connection.delete(f"article:{uid}")
-            print(res)
-            self.assertEqual(res.result, None)
-            self.assertFalse(res.is_error())
+            self.assertTrue(res.is_error())
             res = connection.delete(uid)
-            self.assertFalse(res.is_error())
-            self.assertEqual(res.result, [])
+            self.assertTrue(res.is_error())
+            self.assertEqual(res.result, f"The table '{uid}' does not exist")
 
     def test_info_root(self):
         surreal = Surreal(URL, credentials=('root', 'root'), use_http=True)
