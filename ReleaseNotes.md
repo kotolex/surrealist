@@ -1,5 +1,11 @@
 ## Release Notes ##
 
+**Version 2.0.1 (compatible with SurrealDB version 3.0.0):**
+
+- Table object still returns 0 if table is not exists
+- fix toml about python 3.14 support
+- fix GraphQL example and add Readme Chapter
+
 **Version 2.0.0 (compatible with SurrealDB version 3.0.0):**
 
 - GraphQL now is not experimental, but works only for HTTP, add tests and examples

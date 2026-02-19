@@ -539,6 +539,27 @@ with Database("http://127.0.0.1:8000", 'test', 'test', credentials=("user_db", "
     res = db.table("reading").show_changes().since(tm).run()
 ```
 
+## GraphQL ##
+
+Since SurrealDB version 3.0 you can use GraphQL, but pay attention, you should use http connection for that
+
+Refer to: https://surrealdb.com/docs/surrealdb/querying/graphql
+
+Example: https://github.com/kotolex/surrealist/tree/master/examples/graph_ql.py
+
+**Example 13**
+
+```python
+from surrealist import Surreal
+
+surreal = Surreal("http://127.0.0.1:8000", credentials=('root', 'root'), use_http=True) # http only!
+with surreal.connect() as connection:
+    connection.use("test", "test")
+    connection.create("author", {"age":31, "is_alive": False}, "john") # you need at least 1 table at database
+    connection.query("DEFINE CONFIG GRAPHQL AUTO;") # you need this for GraphQL to work
+    res = connection.graphql({"query": "{ author { id } }"})
+    print(res.result)  # {'data': {'author': [{'id': 'author:john'}]}}
+```
 
 ## Threads and thread-safety ##
 Remember, SurrealDB is "surreally" fast, so first make sure you need to use multiple threads to work with it, because in many situations
@@ -566,7 +587,7 @@ So any incoming request from your application will use the first non-busy connec
 Pay attention — new connections can be created, but old connections never be closed until the pool will be closed, so the number of connections can grow, 
 but never can shrink. It is because of Live Queries, as you remember: LQ always linked to connection, so if connection is closed, LQ stops working.
 
-**Example 13**
+**Example 14**
 
 ```python
 from surrealist import DatabaseConnectionsPool
