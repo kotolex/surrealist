@@ -1,5 +1,8 @@
 ## Release Notes ##
 
+**Version 2.0.2 (compatible with SurrealDB version 3.0.2):**
+- minor fixes
+
 **Version 2.0.1 (compatible with SurrealDB version 3.0.0):**
 
 - Table object still returns 0 if table is not exists

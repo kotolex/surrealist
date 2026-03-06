@@ -400,7 +400,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(13)
             res = connection.update(f"ws_article:{uid}", {'field': 'old'})
-            self.assertTrue(res.is_error())
+            self.assertFalse(res.is_error())
             res = connection.select(f"ws_article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
@@ -419,7 +419,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.merge(f"article:{uid}", {'field': 'old'})
-            self.assertTrue(res.is_error())
+            self.assertFalse(res.is_error())
             res = connection.select(f"article:{uid}")
             self.assertFalse(res.is_error())
             self.assertEqual(res.result, [])
@@ -429,7 +429,7 @@ class TestWebSocketConnection(TestCase):
         with surreal.connect() as connection:
             uid = get_random_series(14)
             res = connection.delete(f"ws_article:{uid}")
-            self.assertTrue(res.is_error())
+            self.assertFalse(res.is_error())
             res = connection.delete(uid)
             self.assertTrue(res.is_error())
             self.assertEqual(res.result, f"The table '{uid}' does not exist")
